@@ -50,7 +50,24 @@ button{
 </div>
 
 <div id="customerList"></div>
+  
+<!-- CUSTOMER DETAIL -->
+<div id="customerDetail" style="display:none">
 
+  <h2 id="cName"></h2>
+  <p>Balance: ₹ <span id="cBalance"></span></p>
+
+  <input id="amount" placeholder="Amount">
+  <button onclick="addEntry('given')">Udhaar Diya</button>
+  <button onclick="addEntry('paid')">Paise Mile</button>
+
+  <h3>History</h3>
+  <div id="historyList"></div>
+
+  <button onclick="closeCustomer()">⬅ Back</button>
+
+</div>
+  
 <script src="app.js"></script>
 
 </body>
