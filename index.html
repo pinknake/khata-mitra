@@ -122,6 +122,20 @@ input {
   border: none;
   border-radius: 10px;
 }
+  .card{
+  background:#fff;
+  padding:12px;
+  margin:8px;
+  border-radius:10px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+.card button{
+  background:red;
+  color:#fff;
+  border:none;
+  padding:6px 10px;
+  border-radius:6px;
+}
 </style>
 </head>
 
@@ -151,10 +165,10 @@ input {
 
     <!-- Manual Tab -->
     <div id="manual" class="tab active">
-      <input type="text" placeholder="Customer Name">
-      <input type="number" placeholder="Amount">
-      <button>Add Entry</button>
-    </div>
+  <input type="text" id="custName" placeholder="Customer Name">
+  <input type="number" id="custAmount" placeholder="Amount">
+  <button onclick="addEntry()">Add Entry</button>
+</div>
 
     <!-- Items Tab -->
     <div id="items" class="tab">
