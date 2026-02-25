@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Khata Mitra</title>
-
 <style>
 body{
   font-family:Poppins, sans-serif;
@@ -13,128 +12,132 @@ body{
   padding:15px;
 }
 
+/* TITLE */
 h1{
   text-align:center;
   color:#6a1b9a;
+  margin-bottom:15px;
 }
 
+/* CARD */
 .card{
   background:#fff;
   padding:12px;
   margin:10px 0;
-  border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
+  border-radius:12px;
+  box-shadow:0 3px 8px rgba(0,0,0,.12);
+  cursor:pointer;
+  transition:.2s;
+}
+.card:hover{
+  transform:scale(1.02);
 }
 
+/* BUTTON */
 button{
   background:#6a1b9a;
   color:#fff;
   border:none;
   padding:8px 12px;
   border-radius:8px;
+  cursor:pointer;
+  transition:.2s;
+}
+button:hover{
+  opacity:.9;
 }
 
+/* BALANCE */
 .balance-red{color:#e53935;font-weight:bold;}
 .balance-green{color:#2e7d32;font-weight:bold;}
 
-  /* Floating Button */
-.fab {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #0a84ff;
-  color: white;
-  font-size: 28px;
-  width: 55px;
-  height: 55px;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-  cursor: pointer;
+/* INPUT */
+input,select{
+  width:100%;
+  margin:6px 0;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  outline:none;
+}
+input:focus,select:focus{
+  border-color:#6a1b9a;
+  box-shadow:0 0 4px rgba(106,27,154,.3);
 }
 
-/* Bottom Sheet */
-.sheet {
-  position: fixed;
-  bottom: -100%;
-  left: 0;
-  width: 100%;
-  height: 70%;
-  background: white;
-  transition: 0.3s;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -4px 10px rgba(0,0,0,0.2);
+/* FLOATING BUTTON */
+.fab{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#0a84ff;
+  color:white;
+  font-size:28px;
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+  cursor:pointer;
+  z-index:99;
 }
 
-.sheet-content {
-  padding: 15px;
+/* BOTTOM SHEET */
+.sheet{
+  position:fixed;
+  bottom:-100%;
+  left:0;
+  width:100%;
+  height:70%;
+  background:white;
+  transition:.35s ease;
+  border-radius:20px 20px 0 0;
+  box-shadow:0 -4px 12px rgba(0,0,0,.25);
+  z-index:100;
+}
+.sheet.active{ bottom:0; }
+
+.sheet-content{ padding:15px; }
+
+/* TABS */
+.tabs{
+  display:flex;
+  gap:10px;
+}
+.tabs button{
+  flex:1;
+  background:#eee;
+  color:#333;
+}
+.tabs button.active{
+  background:#0a84ff;
+  color:white;
 }
 
-.sheet.active {
-  bottom: 0;
-}
+/* TAB CONTENT */
+.tab{ display:none; margin-top:15px; }
+.tab.active{ display:block; }
 
-/* Tabs */
-.tabs {
-  display: flex;
-  gap: 10px;
-}
-
-.tabs button {
-  flex: 1;
-  padding: 10px;
-  border: none;
-  background: #eee;
-  border-radius: 10px;
-}
-
-.tabs .active {
-  background: #0a84ff;
-  color: white;
-}
-
-/* Tab Content */
-.tab {
-  display: none;
-  margin-top: 15px;
-}
-
-.tab.active {
-  display: block;
-}
-
-input {
-  width: 100%;
-  margin: 6px 0;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-}
-
-.close {
-  width: 100%;
-  margin-top: 10px;
-  padding: 10px;
-  background: red;
-  color: white;
-  border: none;
-  border-radius: 10px;
-}
-  .card{
-  background:#fff;
-  padding:12px;
-  margin:8px;
+/* CLOSE BUTTON */
+.close{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  background:#e53935;
   border-radius:10px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.15);
 }
-.card button{
-  background:red;
-  color:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:6px;
+
+/* HISTORY CARD */
+#historyList .card{
+  cursor:default;
+}
+
+/* MOBILE FIX */
+@media(max-width:480px){
+  body{ padding:10px; }
+  .fab{ bottom:15px; right:15px; }
 }
 </style>
 </head>
