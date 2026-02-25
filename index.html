@@ -161,6 +161,7 @@ input:focus,select:focus{
 <div id="bottomSheet" class="sheet">
   <div class="sheet-content">
     
+    <!-- Tabs -->
     <div class="tabs">
       <button onclick="openTab('manual')" class="active">Manual</button>
       <button onclick="openTab('items')">Items</button>
@@ -178,27 +179,28 @@ input:focus,select:focus{
       <input type="text" id="custNote" placeholder="Note">
 
       <button onclick="addManualEntry()">Add Entry</button>
+    </div>
 
     <!-- Items -->
     <div id="items" class="tab">
-  <input type="text" id="itemName" placeholder="Item Name">
-  <input type="number" id="itemPrice" placeholder="Price">
-  <button onclick="addItem()">Add Item</button>
-</div>
+      <input type="text" id="itemName" placeholder="Item Name">
+      <input type="number" id="itemPrice" placeholder="Price">
+      <button onclick="addItem()">Add Item</button>
+    </div>
     
     <!-- Upload -->
-<div id="upload" class="tab">
-  <input type="file" id="photoInput" accept="image/*">
-  <button onclick="savePhoto()">Save Photo</button>
+    <div id="upload" class="tab">
+      <input type="file" id="photoInput" accept="image/*">
+      <button onclick="savePhoto()">Save Photo</button>
 
-  <div id="photoPreview"></div>
-</div>
-    
+      <div id="photoPreview"></div>
+    </div>
 
     <button class="close" onclick="closeSheet()">Close</button>
+
   </div>
 </div>
-
+  
 <!-- CUSTOMER DETAIL -->
 <div id="customerDetail" style="display:none">
   <h2 id="cName"></h2>
