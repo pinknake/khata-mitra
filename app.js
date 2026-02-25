@@ -117,7 +117,6 @@ function renderGallery(){
 
 /* ======= Save Photos ====== */ 
 window.savePhoto = ()=>{
-window.savePhoto = ()=>{
   if(currentIndex===null) return alert("Customer open karo");
 
   const file = $("photoInput").files[0];
