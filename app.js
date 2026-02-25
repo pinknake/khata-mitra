@@ -1,5 +1,5 @@
 const $ = id => document.getElementById(id);
-
+let selectedCustomer = "";
 let customers = JSON.parse(localStorage.getItem("customers")) || [];
 
 function save(){
@@ -66,6 +66,10 @@ window.closeCustomer = ()=>{
   $("customerDetail").style.display="none";
 }
 
+function openCustomer(name){
+  selectedCustomer = name;
+  document.getElementById("sheet").style.display="block";
+}
 /* RENDER CUSTOMER */
 function renderCustomer(){
   const c = customers[currentIndex];
@@ -79,8 +83,9 @@ $("autoReminder").onchange = (e)=>{
   save();
 }
   $("historyList").innerHTML = c.history.map(h=>`
-    <div class="card">
-      <b>${h.type==="given"?"Udhaar":"Paid"}</b> ₹ ${h.amount}
+    <div class="ca
+    rd">
+   <b>${h.type==="given"?"Udhaar":"Paid"}</b> ₹ ${h.amount}
       <br><small>${h.date}</small>
     </div>
   `).join("");
@@ -228,27 +233,36 @@ window.onload = function(){
 }
 
 function addEntry(){
-  let name = document.getElementById("custName").value;
-  let amount = document.getElementById("custAmount").value;
-
-  if(name=="" || amount==""){
-    alert("Fill all fields");
+  if(selectedCustomer==""){
+    alert("Select customer first");
     return;
   }
 
-  let entry = {name, amount, date:new Date().toLocaleDateString()};
+  let type = document.getElementById("entryType").value;
+  let amount = document.getElementById("custAmount").value;
+  let note = document.getElementById("custNote").value;
 
-  let data = JSON.parse(localStorage.getItem("khataData")) || [];
-  data.push(entry);
-  localStorage.setItem("khataData", JSON.stringify(data));
+  if(amount==""){
+    alert("Enter amount");
+    return;
+  }
 
-  loadEntries();
+  let db = JSON.parse(localStorage.getItem("khataDB")) || {};
+
+  if(!db[selectedCustomer]) db[selectedCustomer]=[];
+
+  db[selectedCustomer].push({
+    type,
+    amount,
+    note,
+    date:new Date().toLocaleDateString()
+  });
+
+  localStorage.setItem("khataDB", JSON.stringify(db));
+
+  alert("Entry Added");
   closeSheet();
-
-  document.getElementById("custName").value="";
-  document.getElementById("custAmount").value="";
 }
-
 function loadEntries(){
   let data = JSON.parse(localStorage.getItem("khataData")) || [];
   let list = document.getElementById("customerList");
