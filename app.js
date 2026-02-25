@@ -220,3 +220,55 @@ function openTab(tabId){
   document.getElementById(tabId).classList.add("active");
   event.target.classList.add("active");
 }
+
+
+// Load saved data on page load
+window.onload = function(){
+  loadEntries();
+}
+
+function addEntry(){
+  let name = document.getElementById("custName").value;
+  let amount = document.getElementById("custAmount").value;
+
+  if(name=="" || amount==""){
+    alert("Fill all fields");
+    return;
+  }
+
+  let entry = {name, amount, date:new Date().toLocaleDateString()};
+
+  let data = JSON.parse(localStorage.getItem("khataData")) || [];
+  data.push(entry);
+  localStorage.setItem("khataData", JSON.stringify(data));
+
+  loadEntries();
+  closeSheet();
+
+  document.getElementById("custName").value="";
+  document.getElementById("custAmount").value="";
+}
+
+function loadEntries(){
+  let data = JSON.parse(localStorage.getItem("khataData")) || [];
+  let list = document.getElementById("customerList");
+  list.innerHTML="";
+
+  data.reverse().forEach((e,index)=>{
+    list.innerHTML += `
+      <div class="card">
+        <b>${e.name}</b>
+        <p>₹ ${e.amount}</p>
+        <small>${e.date}</small>
+        <button onclick="deleteEntry(${data.length-1-index})">Delete</button>
+      </div>
+    `;
+  });
+}
+
+function deleteEntry(i){
+  let data = JSON.parse(localStorage.getItem("khataData")) || [];
+  data.splice(i,1);
+  localStorage.setItem("khataData", JSON.stringify(data));
+  loadEntries();
+}
