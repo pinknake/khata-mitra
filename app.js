@@ -154,18 +154,23 @@ window.savePhoto = ()=>{
   customers[currentIndex].photos.splice(i,1);
   save();
   renderPhotos();
+  renderGallery(); // ⭐ ye add kar
 }
+
   window.zoomPhoto = (img)=>{
   $("zoomImg").src = img;
   $("zoomModal").style.display="flex";
 }
 
-$("zoomModal").onclick = ()=>{
-  $("zoomModal").style.display="none";
-}
-  
+setTimeout(()=>{
+  if($("zoomModal")){
+    $("zoomModal").onclick = ()=> $("zoomModal").style.display="none";
+  }
+},500);
 
 window.addItem = ()=>{
+  if(currentIndex===null) return alert("Customer open karo");
+
   const name = $("itemName").value.trim();
   const price = Number($("itemPrice").value);
 
