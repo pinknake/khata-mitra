@@ -75,6 +75,76 @@ function renderCustomer(){
   `).join("");
 }
 
+function renderPhotos(){
+  const c = customers[currentIndex];
+  const box = document.getElementById("photoPreview");
+
+  if(!c.photos) return box.innerHTML="";
+
+  box.innerHTML = c.photos.map(p=>`
+    <div class="card">
+      <img src="${p.img}" style="width:100%;border-radius:10px">
+      <small>${p.date}</small>
+    </div>
+  `).join("");
+}
+
+/* ======= Save Photos ====== */ 
+window.savePhoto = ()=>{
+  if(currentIndex===null){
+    alert("Customer open karo pehle");
+    return;
+  }
+
+  const file = document.getElementById("photoInput").files[0];
+  if(!file) return alert("Photo select karo");
+
+  const reader = new FileReader();
+
+  reader.onload = function(e){
+    const c = customers[currentIndex];
+
+    if(!c.photos) c.photos = [];
+
+    c.photos.push({
+      img:e.target.result,
+      date:new Date().toLocaleString()
+    });
+
+    save();
+    renderPhotos();
+    closeSheet();
+  }
+
+  reader.readAsDataURL(file);
+}
+
+window.addItem = ()=>{
+  const name = $("itemName").value;
+  const price = Number($("itemPrice").value);
+
+  if(!name || !price) return alert("Item aur price likho");
+
+  const c = customers[currentIndex];
+
+  c.balance += price;
+
+  c.history.push({
+    type:"item",
+    item:name,
+    amount:price,
+    date:new Date().toLocaleString()
+  });
+
+  $("itemName").value="";
+  $("itemPrice").value="";
+
+  save();
+  renderCustomer();
+  render();
+  closeSheet();
+}
+
 /* ===== BOTTOM SHEET ===== */
 window.openSheet = ()=> $("bottomSheet").classList.add("active");
 window.closeSheet = ()=> $("bottomSheet").classList.remove("active");
@@ -88,31 +158,27 @@ window.openTab = (tabId)=>{
 }
 
 /* ADD ENTRY (MANUAL TAB) */
-window.addEntry = ()=>{
-  if(currentIndex===null) return alert("Open customer first");
-
+window.addManualEntry = ()=>{
   const type = $("entryType").value;
-  const amount = Number($("custAmount").value);
+  const amt = Number($("custAmount").value);
   const note = $("custNote").value;
 
-  if(!amount) return alert("Enter amount");
+  if(!amt) return alert("Amount likho");
 
   const c = customers[currentIndex];
 
-  if(type==="udhar") c.balance += amount;
-  else c.balance -= amount;
+  if(type==="udhar") c.balance += amt;
+  else c.balance -= amt;
 
   c.history.push({
     type,
-    amount,
+    amount:amt,
     note,
     date:new Date().toLocaleString()
   });
 
   $("custAmount").value="";
   $("custNote").value="";
-
-  if(c.autoReminder) sendReminder();
 
   save();
   renderCustomer();
