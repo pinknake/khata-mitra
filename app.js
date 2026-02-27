@@ -456,3 +456,4 @@ window.exportPDF = ()=>{
 
   doc.save(`${c.name}_ledger.pdf`);
 }
+render();
