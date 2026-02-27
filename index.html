@@ -13,6 +13,34 @@ body{
   padding:15px;
 }
 
+  #customerDetail{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#fff;
+  overflow:auto;
+  z-index:999;
+  padding:15px;
+}
+
+  .badge{
+  padding:4px 8px;
+  border-radius:8px;
+  font-size:12px;
+  color:#fff;
+  font-weight:bold;
+}
+
+.bUdhar{ background:#e53935; }
+.bJama{ background:#2e7d32; }
+.bPurchase{ background:#1976d2; }
+.bSales{ background:#8e24aa; }
+.bGst{ background:#fb8c00; }
+
+  
+
 /* HEADER */
 .header{
   display:flex;
@@ -551,6 +579,13 @@ input:focus,select:focus{
     <div id="items" class="tab">
       <input type="text" id="itemName" placeholder="Item Name">
       <input type="number" id="itemPrice" placeholder="Price">
+      <select id="itemType">
+  <option value="purchase">Item Purchase</option>
+  <option value="sales">Item Sales</option>
+</select>
+
+<input type="number" id="itemGST" placeholder="GST % (optional)">
+    
       <button onclick="addItem()">Add Item</button>
     </div>
     
