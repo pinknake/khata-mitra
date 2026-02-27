@@ -294,6 +294,7 @@ window.addItem = ()=>{
     type:"item",
     item:name,
     amount:price,
+    note:"Item purchase",
     date:new Date().toLocaleString()
   });
 
