@@ -103,7 +103,6 @@ function renderCustomer(){
     save();
   }
 
-$("historyList").innerHTML = c.history.map((h,i)=>`
 $("historyList").innerHTML = c.history.map((h,i)=>{
 
   let typeText = "";
