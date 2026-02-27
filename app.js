@@ -104,28 +104,44 @@ function renderCustomer(){
   }
 
 $("historyList").innerHTML = c.history.map((h,i)=>`
-  <tr>
-    <td>${
-      h.type==="udhar" ? "Udhar" :
-      h.type==="jama" ? "Jama" :
-      "Item"
-    }</td>
+$("historyList").innerHTML = c.history.map((h,i)=>{
 
-    <td style="color:${
-      h.type==="jama" ? "green" : "red"
-    }">
-      ₹ ${h.amount}
-    </td>
+  let typeText = "";
+  let amountColor = "red";
 
-    <td>${h.note || "-"}</td>
+  if(h.type==="udhar"){
+    typeText = "Udhar";
+    amountColor = "red";
+  }
+  else if(h.type==="jama"){
+    typeText = "Jama";
+    amountColor = "green";
+  }
+  else if(h.type==="item"){
+    typeText = "Item: " + (h.item || "-");
+    amountColor = "red";
+  }
 
-    <td>${h.date}</td>
+  return `
+    <tr>
+      <td>${typeText}</td>
 
-    <td>
-      <button class="deleteBtn" onclick="deleteEntry(${i})">Delete</button>
-    </td>
-  </tr>
-`).join("");
+      <td style="color:${amountColor}; font-weight:bold">
+        ₹ ${h.amount}
+      </td>
+
+      <td>${h.note || "-"}</td>
+
+      <td>${h.date}</td>
+
+      <td>
+        <button class="deleteBtn" onclick="deleteEntry(${i})">
+          Delete
+        </button>
+      </td>
+    </tr>
+  `;
+}).join("");
 }
 
 
