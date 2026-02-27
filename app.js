@@ -174,6 +174,30 @@ setTimeout(()=>{
   }
 },500);
 
+function updateDashboard(){
+
+  let totalUdhar = 0;
+  let totalJama = 0;
+  let totalItems = 0;
+
+  customers.forEach(c=>{
+    c.history.forEach(h=>{
+      if(h.type==="udhar") totalUdhar += h.amount;
+      if(h.type==="jama") totalJama += h.amount;
+      if(h.type==="item") totalItems += h.amount;
+    });
+  });
+
+  const net = totalUdhar + totalItems - totalJama;
+
+  $("dCustomers").textContent = customers.length;
+  $("dUdhar").textContent = "₹ " + totalUdhar;
+  $("dJama").textContent = "₹ " + totalJama;
+  $("dItems").textContent = "₹ " + totalItems;
+  $("dBalance").textContent = "₹ " + net;
+}
+
+
 window.addItem = ()=>{
   if(currentIndex===null) return alert("Customer open karo");
 
@@ -199,6 +223,7 @@ window.addItem = ()=>{
   save();
   renderCustomer();
   render();
+  updateDashboard();
   closeSheet();
 }
 
@@ -249,6 +274,7 @@ window.addManualEntry = ()=>{
   save();
   renderCustomer();
   render();
+  updateDashboard();
   closeSheet();
 }
 /* WHATSAPP REMINDER */
@@ -282,3 +308,4 @@ window.exportPDF = ()=>{
 
 /* INIT */
 render();
+updateDashboard();
