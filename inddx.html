@@ -98,6 +98,39 @@ th{background:#eee}
 }
 .dark .card,.dark .dCard{background:#1e1e1e}
 .dark th{background:#222}
+
+  #photoPreview, #galleryBox{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  max-height:250px;
+  overflow:auto;
+}
+  .thumb{
+  width:90px;
+  height:90px;
+  object-fit:cover;
+  border-radius:10px;
+}
+.photoBox,.gItem{
+  position:relative;
+}
+.delPhoto{
+  position:absolute;
+  top:2px;
+  right:2px;
+  background:red;
+  color:#fff;
+  border:none;
+  border-radius:50%;
+  width:20px;
+  height:20px;
+}
+.gCap{
+  font-size:11px;
+  text-align:center;
+}
+  
 </style>
 </head>
 
