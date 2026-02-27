@@ -77,12 +77,16 @@ function render(){
 /* OPEN CUSTOMER */
 window.openCustomer = (i)=>{
   currentIndex = i;
+
+  /* history state push */
   history.pushState({page:"customer"},"");
+
   $("customerList").style.display="none";
   $("customerDetail").style.display="block";
+
   renderCustomer();
-  renderPhotos(); // ⭐ ye missing tha
-renderGallery();
+  renderPhotos();
+  renderGallery();
 }
 
 /* CLOSE CUSTOMER */
