@@ -33,13 +33,13 @@ window.searchCustomer = ()=>{
 }
 
 window.toggleDark = ()=>{
-  document.documentElement.classList.toggle("dark");
+  document.body.classList.toggle("dark");
   localStorage.setItem("darkMode",
-    document.documentElement.classList.contains("dark"));
+    document.body.classList.contains("dark"));
 }
 
 if(localStorage.getItem("darkMode")==="true"){
-  document.documentElement.classList.add("dark");
+  document.body.classList.add("dark");
 }
 
 /* ADD CUSTOMER */
@@ -78,10 +78,10 @@ function render(){
 window.openCustomer = (i)=>{
   currentIndex = i;
 
-  /* history state push */
   history.pushState({page:"customer"},"");
 
-  $("customerList").style.display="none";
+  document.querySelectorAll(".mainTab").forEach(t=>t.style.display="none");
+
   $("customerDetail").style.display="block";
 
   renderCustomer();
@@ -89,12 +89,11 @@ window.openCustomer = (i)=>{
   renderGallery();
 }
 
-/* CLOSE CUSTOMER */
 window.closeCustomer = ()=>{
-  $("customerList").style.display="block";
+  document.querySelectorAll(".mainTab").forEach(t=>t.style.display="block");
+
   $("customerDetail").style.display="none";
 }
-
 /* RENDER CUSTOMER */
 function renderCustomer(){
   const c = customers[currentIndex];
@@ -108,9 +107,8 @@ function renderCustomer(){
     save();
   }
 
-const sorted = [...c.history].sort((a,b)=> new Date(b.date)-new Date(a.date));
-
-$("historyList").innerHTML = sorted.map((h,i)=>{
+$("historyList").innerHTML = sorted.map(h=>{
+  const realIndex = c.history.indexOf(h);
 
   let badge="";
 
@@ -129,7 +127,7 @@ $("historyList").innerHTML = sorted.map((h,i)=>{
       </td>
       <td>${h.note || "-"}</td>
       <td>${h.date}</td>
-      <td><button onclick="deleteEntry(${i})">Delete</button></td>
+      <td><button onclick="deleteEntry(${realIndex})">Delete</button></td>
     </tr>
   `;
 }).join("");
@@ -311,9 +309,10 @@ window.addItem = ()=>{
   $("itemGST").value="";
 
   save();
-  renderCustomer();
-  render();
-  closeSheet();
+renderCustomer();
+render();
+updateDashboard();
+closeSheet();
 }
 
 /* ===== BOTTOM SHEET ===== */
@@ -460,4 +459,6 @@ window.exportPDF = ()=>{
 
   doc.save(`${c.name}_ledger.pdf`);
 }
+
 render();
+updateDashboard();
