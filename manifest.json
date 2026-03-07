@@ -2,7 +2,7 @@
   "name": "Khata Mitra Pro",
   "short_name": "Khata Mitra",
   "description": "Professional Khatabook App for Indian Businesses",
-  "start_url": "/",
+  "start_url": "https://pinknake.github.io/khatamitra/index.html",
   "display": "standalone",
   "background_color": "#6a1b9a",
   "theme_color": "#6a1b9a",
