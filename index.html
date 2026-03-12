@@ -898,10 +898,6 @@
           <input type="tel" id="newCustomerPhone" class="form-control" placeholder="9876543210">
         </div>
         <div class="form-group">
-          <label data-hi= "जीएसटी" data-en="Gst">जीएसटी</label>
-          <textarea id="newCustomerGst" class="form-control" rows="3" placeholder="जीएसटी"></textarea>
-        </div>
-        <div class="form-group">
           <label data-hi="पता" data-en="Address">पता</label>
           <textarea id="newCustomerAddress" class="form-control" rows="2" placeholder="पता"></textarea>
         </div>
@@ -1106,9 +1102,9 @@
     // Demo data for testing
     function initDemoData() {
       appState.customers = [
-        { id: '1', name: 'राहुल कुमार', phone: '9876543210', address: 'दिल्ली', gst: 'जीएसटी', balance: 500 },
-        { id: '2', name: 'सीता शर्मा', phone: '8765432109', address: 'नोएडा', gst: 'जीएसटी', balance: -200 },
-        { id: '3', name: 'मोहन सिंह', phone: '7654321098', address: 'गुड़गांव', gst: 'जीएसटी', balance: 1000 }
+        { id: '1', name: 'राहुल कुमार', phone: '9876543210', address: 'दिल्ली', balance: 500 },
+        { id: '2', name: 'सीता शर्मा', phone: '8765432109', address: 'नोएडा', balance: -200 },
+        { id: '3', name: 'मोहन सिंह', phone: '7654321098', address: 'गुड़गांव', balance: 1000 }
       ];
       
       appState.transactions = [
@@ -1471,7 +1467,6 @@
       const name = document.getElementById('newCustomerName').value.trim();
       const phone = document.getElementById('newCustomerPhone').value.trim();
       const address = document.getElementById('newCustomerAddress').value.trim();
-       const address = document.getElementById('newCustomerGst').value.trim();
       
       if (!name) {
         showToast(currentLanguage === 'hi' ? 'नाम दर्ज करें' : 'Enter name', 'error');
@@ -1483,7 +1478,6 @@
         name,
         phone,
         address,
-        gst,
         balance: 0,
         createdAt: new Date().toISOString()
       };
@@ -1499,7 +1493,6 @@
       document.getElementById('newCustomerName').value = '';
       document.getElementById('newCustomerPhone').value = '';
       document.getElementById('newCustomerAddress').value = '';
-       document.getElementById('newCustomerGst').value = '';
     }
 
     async function saveTransaction() {
@@ -1672,7 +1665,7 @@
       doc.text(`Name: ${customer.name}`, 20, 65);
       doc.text(`Phone: ${customer.phone || 'N/A'}`, 20, 72);
       doc.text(`Address: ${customer.address || 'N/A'}`, 20, 79);
-      doc.text(`Gst: ${customer.gst || 'N/A'}`, 20, 79);
+      
       // Balance
       const balanceY = 95;
       doc.setFillColor(customer.balance >= 0 ? dangerColor[0] : successColor[0], 
@@ -1832,7 +1825,6 @@
               <h2>${customer.name}</h2>
               <p>Phone: ${customer.phone || 'N/A'}</p>
               <p>Address: ${customer.address || 'N/A'}</p>
-              <p>Gst: ${customer.gst || 'N/A'}</p>
             </div>
             
             <div class="balance" style="background: ${customer.balance >= 0 ? '#e53935' : '#2ec4b6'}">
@@ -1990,7 +1982,6 @@
       showToast(currentLanguage === 'hi' ? 'ऐप इंस्टॉल हो गया!' : 'App installed!');
     });
 
-    
 
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', () => {
@@ -2013,7 +2004,8 @@
         document.getElementById('darkModeToggle').classList.replace('fa-moon', 'fa-sun');
       }
       
-      
+      // Add APK generation button
+      addAPKButton();
       
       // Register service worker for PWA
       if ('serviceWorker' in navigator) {
