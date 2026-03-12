@@ -1106,9 +1106,9 @@
     // Demo data for testing
     function initDemoData() {
       appState.customers = [
-        { id: '1', name: 'राहुल कुमार', phone: '9876543210', address: 'दिल्ली', gst: 'GST545', balance: 500 },
-        { id: '2', name: 'सीता शर्मा', phone: '8765432109', address: 'नोएडा', gst: 'Gst646', balance: -200 },
-        { id: '3', name: 'मोहन सिंह', phone: '7654321098', address: 'गुड़गांव', gst: 'GSt6464', balance: 1000 }
+        { id: '1', name: 'राहुल कुमार', phone: '9876543210', address: 'दिल्ली', gst: 'जीएसटी', balance: 500 },
+        { id: '2', name: 'सीता शर्मा', phone: '8765432109', address: 'नोएडा', gst: 'जीएसटी', balance: -200 },
+        { id: '3', name: 'मोहन सिंह', phone: '7654321098', address: 'गुड़गांव', gst: 'जीएसटी', balance: 1000 }
       ];
       
       appState.transactions = [
@@ -1672,7 +1672,7 @@
       doc.text(`Name: ${customer.name}`, 20, 65);
       doc.text(`Phone: ${customer.phone || 'N/A'}`, 20, 72);
       doc.text(`Address: ${customer.address || 'N/A'}`, 20, 79);
-      doc.text(`GST: ${customer.gst || 'N/A'}`, 20, 79);
+      doc.text(`Gst: ${customer.gst || 'N/A'}`, 20, 79);
       // Balance
       const balanceY = 95;
       doc.setFillColor(customer.balance >= 0 ? dangerColor[0] : successColor[0], 
@@ -1832,7 +1832,7 @@
               <h2>${customer.name}</h2>
               <p>Phone: ${customer.phone || 'N/A'}</p>
               <p>Address: ${customer.address || 'N/A'}</p>
-              <p>GST no: ${customer.gst || 'N/A'}</p>
+              <p>Gst: ${customer.gst || 'N/A'}</p>
             </div>
             
             <div class="balance" style="background: ${customer.balance >= 0 ? '#e53935' : '#2ec4b6'}">
