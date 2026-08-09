@@ -1980,21 +1980,18 @@
 // ==================== BACKUP FUNCTIONS - APP CREATOR FIX ====================
 function exportBackup() {
   const dataStr = JSON.stringify(appState);
-  const blob = new Blob([dataStr], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
+  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
   const exportFileDefaultName = `KhataBackup_${new Date().toISOString().split('T')[0]}.khatamitra`;
 
-  // App Creator ke liye
   const linkElement = document.createElement('a');
-  linkElement.href = url;
-  linkElement.download = exportFileDefaultName;
-  linkElement.target = "_blank"; // ye line important hai App Creator ke liye
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', exportFileDefaultName);
   document.body.appendChild(linkElement);
   linkElement.click();
   document.body.removeChild(linkElement);
 
-  URL.revokeObjectURL(url);
-  showToast(currentLanguage === 'hi'? 'Backup download ho gaya. File Manager me check karo' : 'Backup downloaded. Check File Manager');
+  showToast(currentLanguage === 'hi'? 'Backup download ho gaya' : 'Backup downloaded');
 }
 
 function importBackup(event) {
