@@ -884,9 +884,10 @@
         
 <div class="chart-container" style="margin-top: 30px;">
   <h3>🔐 Google Cloud Backup</h3>
-  <button id="loginBtn" class="btn btn-primary" onclick="googleLogin()" style="width:100%;">
+  <button id="loginBtn" class="btn btn-primary" onclick="googleLogin()" style="width:100%; margin-bottom:10px;">
     <i class="fab fa-google"></i> Google se Login
   </button>
+  <p style="font-size:13px; color:var(--gray);">Login ke baad data auto save hoga</p>
 </div>
       
     <!-- FAB Button -->
@@ -2065,35 +2066,6 @@ function autoBackupToFile() {
   localStorage.setItem('lastAutoBackup', new Date().toISOString());
   showToast(currentLanguage === 'hi'? 'Auto backup ho gaya' : 'Auto backup done');
 }
-
-const provider = new firebase.auth.GoogleAuthProvider();
-let currentUser = null;
-
-firebase.auth().onAuthStateChanged(user => {
-  if(user) {
-    currentUser = user;
-    document.getElementById('loginBtn').innerText = user.displayName + " - Logout";
-    document.getElementById('loginBtn').onclick = googleLogout;
-    cloudRestore();
-  }
-});
-
-function googleLogin() { firebase.auth().signInWithPopup(provider); }
-function googleLogout() { firebase.auth().signOut().then(()=>location.reload()); }
-
-function cloudBackup() {
-  if(currentUser) firebase.database().ref('users/' + currentUser.uid).set(appState);
-}
-function cloudRestore() {
-  if(currentUser) firebase.database().ref('users/' + currentUser.uid).once('value').then(snap=>{
-    if(snap.exists()){ appState = snap.val(); saveData(); updateUI(); }
-  });
-}
-const oldSaveData = saveData;
-saveData = function(){ oldSaveData(); cloudBackup(); }
-
-    
-
     // ==================== INITIALIZATION ====================
     document.addEventListener('DOMContentLoaded', () => {
       loadData();
@@ -2138,6 +2110,78 @@ saveData = function(){ oldSaveData(); cloudBackup(); }
         console.log('Service worker registration failed');
       });
     }
+
+    // ===== FIREBASE LOGIN - APP CREATOR VERSION =====
+const provider = new firebase.auth.GoogleAuthProvider();
+let currentUser = null;
+
+// Page load hote hi check karega redirect se wapas aaya ya nahi
+firebase.auth().getRedirectResult().then((result) => {
+  if (result.user) {
+    currentUser = result.user;
+    showToast('Login ho gaya: ' + currentUser.displayName);
+    cloudRestore();
+    updateLoginButton();
+  }
+}).catch((error) => {
+  showToast('Login Error: ' + error.message, 'error');
+});
+
+firebase.auth().onAuthStateChanged(user => {
+  currentUser = user;
+  updateLoginButton();
+  if(user) cloudRestore(); // Login hai to data le aa
+});
+
+function updateLoginButton(){
+  const btn = document.getElementById('loginBtn');
+  if(currentUser){
+    btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${currentUser.displayName} - Logout`;
+    btn.onclick = googleLogout;
+    btn.className = "btn btn-outline";
+  } else {
+    btn.innerHTML = `<i class="fab fa-google"></i> Google se Login`;
+    btn.onclick = googleLogin;
+    btn.className = "btn btn-primary";
+  }
+}
+
+function googleLogin() { 
+  firebase.auth().signInWithRedirect(provider); // Yahi change hai
+}
+
+function googleLogout() { 
+  firebase.auth().signOut().then(()=>{ 
+    showToast('Logout ho gaya');
+    location.reload(); 
+  }); 
+}
+
+function cloudBackup() {
+  if(!currentUser) return showToast('Pehle login karo', 'error');
+  firebase.database().ref('users/' + currentUser.uid).set(appState);
+  showToast('Cloud backup ho gaya');
+}
+
+function cloudRestore() {
+  if(!currentUser) return;
+  firebase.database().ref('users/' + currentUser.uid).once('value').then(snapshot => {
+    if(snapshot.exists()) {
+      appState = snapshot.val();
+      saveData();
+      updateUI();
+      showToast('Data restore ho gaya');
+    }
+  });
+}
+
+// Har save ke baad auto backup
+const oldSaveData = saveData;
+saveData = function(){ 
+  oldSaveData(); 
+  if(currentUser && navigator.onLine) cloudBackup(); 
+}
+    
   </script>
 
 </body>
