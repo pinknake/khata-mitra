@@ -697,7 +697,14 @@
       }
     }
   </style>
-</head>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  </head>
 <body>
   <div class="app-container">
     <!-- Header -->
@@ -873,6 +880,15 @@
       </button>
     </div>
   </div>
+
+<div class="chart-container" style="margin-top: 30px;">
+  <h3>🔐 Google Cloud Backup</h3>
+  <button id="loginBtn" class="btn btn-primary" onclick="googleLogin()" style="width:100%;">
+    <i class="fab fa-google"></i> Google se Login
+  </button>
+</div>
+
+  
 </div>
         
 
@@ -1046,6 +1062,15 @@
   </div>
 
   <script>
+
+    // ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyBbSdkHFFpuWxl0DaXGLmTcAdD3tJv4cjc",
+  databaseURL: "https://khata-mitra-pro-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
+firebase.initializeApp(firebaseConfig);
+
+    
     // ==================== LANGUAGE SUPPORT ====================
     let currentLanguage = 'hi'; // Default Hindi
 
