@@ -2068,6 +2068,33 @@ function autoBackupToFile() {
   localStorage.setItem('lastAutoBackup', new Date().toISOString());
   showToast(currentLanguage === 'hi'? 'Auto backup ho gaya' : 'Auto backup done');
 }
+
+const provider = new firebase.auth.GoogleAuthProvider();
+let currentUser = null;
+
+firebase.auth().onAuthStateChanged(user => {
+  if(user) {
+    currentUser = user;
+    document.getElementById('loginBtn').innerText = user.displayName + " - Logout";
+    document.getElementById('loginBtn').onclick = googleLogout;
+    cloudRestore();
+  }
+});
+
+function googleLogin() { firebase.auth().signInWithPopup(provider); }
+function googleLogout() { firebase.auth().signOut().then(()=>location.reload()); }
+
+function cloudBackup() {
+  if(currentUser) firebase.database().ref('users/' + currentUser.uid).set(appState);
+}
+function cloudRestore() {
+  if(currentUser) firebase.database().ref('users/' + currentUser.uid).once('value').then(snap=>{
+    if(snap.exists()){ appState = snap.val(); saveData(); updateUI(); }
+  });
+}
+const oldSaveData = saveData;
+saveData = function(){ oldSaveData(); cloudBackup(); }
+
     
 
     // ==================== INITIALIZATION ====================
