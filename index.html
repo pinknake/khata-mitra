@@ -1976,22 +1976,24 @@
       document.querySelectorAll('.nav-tab')[3].click();
     }
 
-
-    // ==================== BACKUP FUNCTIONS ====================
+// ==================== BACKUP FUNCTIONS - APP CREATOR FIX ====================
 function exportBackup() {
   const dataStr = JSON.stringify(appState);
-  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-
+  const blob = new Blob([dataStr], {type: "application/json"});
+  const url = URL.createObjectURL(blob);
   const exportFileDefaultName = `KhataBackup_${new Date().toISOString().split('T')[0]}.khatamitra`;
 
+  // App Creator ke liye
   const linkElement = document.createElement('a');
-  linkElement.setAttribute('href', dataUri);
-  linkElement.setAttribute('download', exportFileDefaultName);
+  linkElement.href = url;
+  linkElement.download = exportFileDefaultName;
+  linkElement.target = "_blank"; // ye line important hai App Creator ke liye
   document.body.appendChild(linkElement);
   linkElement.click();
   document.body.removeChild(linkElement);
 
-  showToast(currentLanguage === 'hi'? 'Backup download ho gaya' : 'Backup downloaded');
+  URL.revokeObjectURL(url);
+  showToast(currentLanguage === 'hi'? 'Backup download ho gaya. File Manager me check karo' : 'Backup downloaded. Check File Manager');
 }
 
 function importBackup(event) {
