@@ -716,6 +716,14 @@
           <i class="fas fa-chart-pie" onclick="showAnalytics()"></i>
           <i class="fas fa-moon" onclick="toggleDarkMode()" id="darkModeToggle"></i>
         </div>
+        <button class="btn btn-primary" onclick="exportBackup()">
+  <i class="fas fa-download"></i> Backup Export
+</button>
+<input type="file" id="importFile" style="display:none" accept=".khatamitra" onchange="importBackup(event)">
+<button class="btn btn-outline" onclick="document.getElementById('importFile').click()">
+  <i class="fas fa-upload"></i> Backup Import
+</button>
+        
       </div>
       
       <!-- Stats -->
@@ -828,6 +836,7 @@
           <select id="reportYear" class="form-control" style="flex: 1;">
             <option value="2024">2024</option>
             <option value="2025">2025</option>
+            <option value="2026">2026</option>
           </select>
         </div>
         
@@ -1970,6 +1979,38 @@
         document.body.classList.add('dark-mode');
         document.getElementById('darkModeToggle').classList.replace('fa-moon', 'fa-sun');
       }
+
+      // Isko <script> ke andar daal de
+function exportBackup() {
+  const dataStr = JSON.stringify(appState);
+  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+  
+  const exportFileDefaultName = `KhataBackup_${new Date().toISOString().split('T')[0]}.khatamitra`;
+  
+  const linkElement = document.createElement('a');
+  linkElement.setAttribute('href', dataUri);
+  linkElement.setAttribute('download', exportFileDefaultName);
+  linkElement.click();
+  showToast(currentLanguage === 'hi' ? 'Backup download ho gaya' : 'Backup downloaded');
+}
+
+function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      appState = JSON.parse(e.target.result);
+      saveData();
+      updateUI();
+      showToast(currentLanguage === 'hi' ? 'Backup restore ho gaya' : 'Backup restored');
+    } catch(err) {
+      showToast(currentLanguage === 'hi' ? 'Galat file hai' : 'Invalid file', 'error');
+    }
+  }
+  reader.readAsText(file);
+}
       
       // Add APK generation button
       addAPKButton();
