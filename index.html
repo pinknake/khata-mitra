@@ -1980,18 +1980,32 @@
 // ==================== BACKUP FUNCTIONS - APP CREATOR FIX ====================
 function exportBackup() {
   const dataStr = JSON.stringify(appState);
-  const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+  const fileName = `KhataBackup_${new Date().toISOString().split('T')[0]}.khatamitra`;
 
-  const exportFileDefaultName = `KhataBackup_${new Date().toISOString().split('T')[0]}.khatamitra`;
+  // Tarika 1: Clipboard me copy - Sabse safe for App Creator
+  navigator.clipboard.writeText(dataStr).then(() => {
+    showToast(currentLanguage === 'hi'?
+      'Data copy ho gaya! Notes me paste karke.khatamitra file bana lo' :
+      'Data copied! Paste in Notes and save as.khatamitra file');
 
-  const linkElement = document.createElement('a');
-  linkElement.setAttribute('href', dataUri);
-  linkElement.setAttribute('download', exportFileDefaultName);
-  document.body.appendChild(linkElement);
-  linkElement.click();
-  document.body.removeChild(linkElement);
+    // Saath me share option bhi khol dete hain
+    if(navigator.share) {
+      navigator.share({
+        title: 'Khata Mitra Backup',
+        text: dataStr
+      });
+    } else {
+      // WhatsApp option
+      window.open(`https://wa.me/?text=${encodeURIComponent(dataStr.substring(0,1000))}...`, '_blank');
+    }
 
-  showToast(currentLanguage === 'hi'? 'Backup download ho gaya' : 'Backup downloaded');
+  }).catch(() => {
+    // Agar clipboard fail ho to direct download try
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    showToast(currentLanguage === 'hi'? 'Naye tab me file khul gayi. Waha se Save karo' : 'File opened in new tab. Save from there');
+  });
 }
 
 function importBackup(event) {
