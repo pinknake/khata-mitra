@@ -809,71 +809,72 @@
         </div>
       </div>
 
-      <!-- Reports Tab -->
-      <div class="tab-pane" id="reports">
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-          <select id="reportMonth" class="form-control" style="flex: 1;">
-            <option value="1" data-hi="जनवरी" data-en="January">जनवरी</option>
-            <option value="2" data-hi="फरवरी" data-en="February">फरवरी</option>
-            <option value="3" data-hi="मार्च" data-en="March">मार्च</option>
-            <option value="4" data-hi="अप्रैल" data-en="April">अप्रैल</option>
-            <option value="5" data-hi="मई" data-en="May">मई</option>
-            <option value="6" data-hi="जून" data-en="June">जून</option>
-            <option value="7" data-hi="जुलाई" data-en="July">जुलाई</option>
-            <option value="8" data-hi="अगस्त" data-en="August">अगस्त</option>
-            <option value="9" data-hi="सितंबर" data-en="September">सितंबर</option>
-            <option value="10" data-hi="अक्टूबर" data-en="October">अक्टूबर</option>
-            <option value="11" data-hi="नवंबर" data-en="November">नवंबर</option>
-            <option value="12" data-hi="दिसंबर" data-en="December">दिसंबर</option>
-          </select>
-          <select id="reportYear" class="form-control" style="flex: 1;">
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
-          </select>
-        </div>
+<!-- Reports Tab -->
+<div class="tab-pane" id="reports">
+  <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+    <select id="reportMonth" class="form-control" style="flex: 1;">
+      <option value="1" data-hi="जनवरी" data-en="January">जनवरी</option>
+      <option value="2" data-hi="फरवरी" data-en="February">फरवरी</option>
+      <option value="3" data-hi="मार्च" data-en="March">मार्च</option>
+      <option value="4" data-hi="अप्रैल" data-en="April">अप्रैल</option>
+      <option value="5" data-hi="मई" data-en="May">मई</option>
+      <option value="6" data-hi="जून" data-en="June">जून</option>
+      <option value="7" data-hi="जुलाई" data-en="July">जुलाई</option>
+      <option value="8" data-hi="अगस्त" data-en="August">अगस्त</option>
+      <option value="9" data-hi="सितंबर" data-en="September">सितंबर</option>
+      <option value="10" data-hi="अक्टूबर" data-en="October">अक्टूबर</option>
+      <option value="11" data-hi="नवंबर" data-en="November">नवंबर</option>
+      <option value="12" data-hi="दिसंबर" data-en="December">दिसंबर</option>
+    </select>
+    <select id="reportYear" class="form-control" style="flex: 1;">
+      <option value="2024">2024</option>
+      <option value="2025">2025</option>
+      <option value="2026">2026</option>
+    </select>
+  </div>
+  
+  <div class="chart-container">
+    <canvas id="monthlyChart"></canvas>
+  </div>
+  
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
+    <div class="stat-card" style="background: var(--primary-light); color: white;">
+      <div data-hi="महीने का उधार" data-en="Monthly Given">महीने का उधार</div>
+      <div style="font-size: 24px; font-weight: 700;" id="monthlyUdhar">₹0</div>
+    </div>
+    <div class="stat-card" style="background: var(--success); color: white;">
+      <div data-hi="महीने का जमा" data-en="Monthly Received">महीने का जमा</div>
+      <div style="font-size: 24px; font-weight: 700;" id="monthlyJama">₹0</div>
+    </div>
+  </div>
 
-        <!-- Reports Tab ke andar sabse last me -->
-<div class="chart-container" style="margin-top: 30px;">
-  <h3 style="margin-bottom: 15px;" data-hi="🔐 Data Backup" data-en="🔐 Data Backup">🔐 Data Backup</h3>
-  <p style="font-size: 13px; color: var(--gray); margin-bottom: 15px;"
-     data-hi="अपना data सुरक्षित रखने के लिए backup लें। App delete होने पर भी data वापस ला सकते हैं।"
-     data-en="Take backup to keep your data safe. You can restore even if app is deleted.">
-     अपना data सुरक्षित रखने के लिए backup लें।
-  </p>
+  <!-- ✅ DATA BACKUP SECTION - CHART KE NICHE -->
+  <div class="chart-container" style="margin-top: 30px;">
+    <h3 style="margin-bottom: 15px;" data-hi="🔐 Data Backup" data-en="🔐 Data Backup">🔐 Data Backup</h3>
+    <p style="font-size: 13px; color: var(--gray); margin-bottom: 15px;"
+       data-hi="अपना data सुरक्षित रखने के लिए backup लें। App delete होने पर भी data वापस ला सकते हैं।"
+       data-en="Take backup to keep your data safe. You can restore even if app is deleted.">
+       अपना data सुरक्षित रखने के लिए backup लें।
+    </p>
 
-  <div style="display: grid; gap: 10px;">
-    <button class="btn btn-primary" onclick="exportBackup()">
-      <i class="fas fa-download"></i> <span data-hi="Backup Export करें" data-en="Export Backup">Backup Export करें</span>
-    </button>
+    <div style="display: grid; gap: 10px;">
+      <button class="btn btn-primary" onclick="exportBackup()">
+        <i class="fas fa-download"></i> <span data-hi="Backup Export करें" data-en="Export Backup">Backup Export करें</span>
+      </button>
 
-    <input type="file" id="importFile" style="display:none" accept=".khatamitra" onchange="importBackup(event)">
-    <button class="btn btn-outline" onclick="document.getElementById('importFile').click()">
-      <i class="fas fa-upload"></i> <span data-hi="Backup Import करें" data-en="Import Backup">Backup Import करें</span>
-    </button>
+      <!-- App Creator Fix: label use kiya -->
+      <label class="btn btn-outline" for="importFile" style="cursor:pointer; text-align:center;">
+        <i class="fas fa-upload"></i> <span data-hi="Backup Import करें" data-en="Import Backup">Backup Import करें</span>
+      </label>
+      <input type="file" id="importFile" style="display:none" accept=".khatamitra,.json" onchange="importBackup(event)">
 
-    <button class="btn btn-outline" onclick="autoBackupToFile()">
-      <i class="fas fa-sync"></i> <span data-hi="Auto Backup On" data-en="Auto Backup On">Auto Backup On</span>
-    </button>
+      <button class="btn btn-outline" onclick="autoBackupToFile()">
+        <i class="fas fa-sync"></i> <span data-hi="Auto Backup On" data-en="Auto Backup On">Auto Backup On</span>
+      </button>
+    </div>
   </div>
 </div>
         
-        <div class="chart-container">
-          <canvas id="monthlyChart"></canvas>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0;">
-          <div class="stat-card" style="background: var(--primary-light); color: white;">
-            <div data-hi="महीने का उधार" data-en="Monthly Given">महीने का उधार</div>
-            <div style="font-size: 24px; font-weight: 700;" id="monthlyUdhar">₹0</div>
-          </div>
-          <div class="stat-card" style="background: var(--success); color: white;">
-            <div data-hi="महीने का जमा" data-en="Monthly Received">महीने का जमा</div>
-            <div style="font-size: 24px; font-weight: 700;" id="monthlyJama">₹0</div>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- FAB Button -->
     <div class="fab-button" onclick="openQuickMenu()">
