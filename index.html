@@ -766,30 +766,7 @@
     <span>Settings</span>
   </button>
     </div>
-    
-    <div class="tab-content" id="settings">
-    <h2>⚙️ Company Settings</h2>
-    <div class="form-group">
-        <label>Dukaan ka Naam</label>
-        <input type="text" id="companyName" placeholder="Khata Mitra Pro">
-    </div>
-    <div class="form-group">
-        <label>GST No</label>
-        <input type="text" id="companyGST" placeholder="22AAAAA0000A1Z5">
-    </div>
-    <div class="form-group">
-        <label>PAN No</label>
-        <input type="text" id="companyPAN" placeholder="AAAAA0000A">
-    </div>
-    <div class="form-group">
-        <label>Bank A/C + UPI ID</label>
-        <input type="text" id="companyBank" placeholder="1234567890 | upi@paytm">
-    </div>
-    <button class="btn btn-primary" onclick="saveCompanySettings()">
-        <i class="fas fa-save"></i> Save Settings
-    </button>
-</div>
-
+  
     <!-- Main Content -->
     <div class="main-content">
       <!-- Dashboard Tab -->
@@ -907,6 +884,29 @@
       </button>
     </div>
   </div>  
+</div>
+
+      <div class="tab-content" id="settings">
+    <h2>⚙️ Company Settings</h2>
+    <div class="form-group">
+        <label>Dukaan ka Naam</label>
+        <input type="text" id="companyName" placeholder="Khata Mitra Pro">
+    </div>
+    <div class="form-group">
+        <label>GST No</label>
+        <input type="text" id="companyGST" placeholder="22AAAAA0000A1Z5">
+    </div>
+    <div class="form-group">
+        <label>PAN No</label>
+        <input type="text" id="companyPAN" placeholder="AAAAA0000A">
+    </div>
+    <div class="form-group">
+        <label>Bank A/C + UPI ID</label>
+        <input type="text" id="companyBank" placeholder="1234567890 | upi@paytm">
+    </div>
+    <button class="btn btn-primary" onclick="saveCompanySettings()">
+        <i class="fas fa-save"></i> Save Settings
+    </button>
 </div>
         
 <div class="chart-container" style="margin-top: 30px;">
@@ -1165,6 +1165,28 @@
     function saveData() {
       localStorage.setItem('khataMitraPro', JSON.stringify(appState));
     }
+
+      function saveCompanySettings(){
+    appState.company = {
+        name: document.getElementById('companyName').value,
+        gst: document.getElementById('companyGST').value,
+        pan: document.getElementById('companyPAN').value,
+        bank: document.getElementById('companyBank').value
+    };
+    saveData(); // Firebase pe bhi chala jayega
+    showToast('Settings Save ho gayi');
+}
+
+function loadCompanySettings(){
+    if(appState.company){
+        document.getElementById('companyName').value = appState.company.name || '';
+        document.getElementById('companyGST').value = appState.company.gst || '';
+        document.getElementById('companyPAN').value = appState.company.pan || '';
+        document.getElementById('companyBank').value = appState.company.bank || '';
+    }
+}
+// updateUI() me last me ye call kar dena: loadCompanySettings();
+
 
     // Demo data for testing
     function initDemoData() {
@@ -2132,27 +2154,6 @@ function autoBackupToFile() {
         console.log('Service worker registration failed');
       });
     }
-
-    function saveCompanySettings(){
-    appState.company = {
-        name: document.getElementById('companyName').value,
-        gst: document.getElementById('companyGST').value,
-        pan: document.getElementById('companyPAN').value,
-        bank: document.getElementById('companyBank').value
-    };
-    saveData(); // Firebase pe bhi chala jayega
-    showToast('Settings Save ho gayi');
-}
-
-function loadCompanySettings(){
-    if(appState.company){
-        document.getElementById('companyName').value = appState.company.name || '';
-        document.getElementById('companyGST').value = appState.company.gst || '';
-        document.getElementById('companyPAN').value = appState.company.pan || '';
-        document.getElementById('companyBank').value = appState.company.bank || '';
-    }
-}
-// updateUI() me last me ye call kar dena: loadCompanySettings();
 
     // ===== FIREBASE LOGIN - APP CREATOR VERSION =====
 const provider = new firebase.auth.GoogleAuthProvider();
