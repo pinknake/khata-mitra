@@ -2277,10 +2277,11 @@ function openBillModal(){
         <h2 style="text-align:center;">TAX INVOICE</h2>
         <div style="display:flex; justify-content:space-between;">
             <div>
-                <b>${company.name}</b><br>
-                GST: ${company.gst}<br>
-                PAN: ${company.pan}
-            </div>
+    <b>${company.name}</b><br>
+    GST: ${company.gst || '-'}<br>
+    PAN: ${company.pan || '-'}<br>
+    Bank/UPI: ${company.bank || '-'}
+</div>
             <div>
                 Bill No: ${billNo}<br>
                 Date: ${today}
@@ -2302,7 +2303,6 @@ function openBillModal(){
             </tr>
         </table>
         <h3 style="text-align:right;">Total: ₹1000</h3>
-        <p><b>Bank/UPI:</b> ${company.bank}</p>
     </div>
     `;
     
