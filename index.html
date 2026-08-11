@@ -49,6 +49,15 @@
       color: #fff;
     }
 
+    .form-group { margin-bottom: 15px; }
+
+    .form-group label { font-weight: bold; display: block; margin-bottom: 5px; }
+
+    .form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
+
+    .tab-content h2 { margin-bottom: 20px; }
+
+    
     /* App Container */
     .app-container {
       max-width: 500px;
@@ -761,10 +770,12 @@
       <div class="nav-tab" onclick="switchTab('reports')">
         <i class="fas fa-chart-bar"></i> <span class="tab-label" data-hi="रिपोर्ट" data-en="Reports">रिपोर्ट</span>
       </div>
-      <button class="nav-btn" onclick="showTab('settings')">
-    <i class="fas fa-cog"></i>
-    <span>Settings</span>
-  </button>
+      
+      <div class="nav-tab" onclick="switchTab('settings')">
+    <i class="fas fa-cog"></i> 
+    <span class="tab-label" data-hi="सेटिंग" data-en="Settings">सेटिंग</span>
+</div>
+      
     </div>
   
     <!-- Main Content -->
@@ -791,12 +802,42 @@
           </div>
         </div>
 
+        <!-- Settings Tab -->
+<div class="tab-pane" id="settings">
+  <h3 data-hi="कंपनी सेटिंग" data-en="Company Settings">कंपनी सेटिंग</h3>
+  
+  <div class="form-group">
+    <label data-hi="दुकान का नाम" data-en="Shop Name">दुकान का नाम</label>
+    <input type="text" id="companyName" placeholder="Khata Mitra">
+  </div>
+  
+  <div class="form-group">
+    <label data-hi="GST नंबर" data-en="GST No">GST नंबर</label>
+    <input type="text" id="companyGST" placeholder="22AAAAA0000A1Z5">
+  </div>
+  
+  <div class="form-group">
+    <label data-hi="PAN नंबर" data-en="PAN No">PAN नंबर</label>
+    <input type="text" id="companyPAN" placeholder="AAAAA0000A">
+  </div>
+  
+  <div class="form-group">
+    <label data-hi="बैंक + UPI" data-en="Bank + UPI">बैंक + UPI</label>
+    <input type="text" id="companyBank" placeholder="1234567890 | upi@paytm">
+  </div>
+  
+  <button class="btn btn-primary" onclick="saveCompanySettings()">
+    <i class="fas fa-save"></i> <span data-hi="सेव करें" data-en="Save">सेव करें</span>
+  </button>
+</div>
+
         <!-- Recent Transactions -->
         <h3 style="margin: 20px 0 10px 0;" data-hi="हाल के लेन-देन" data-en="Recent Transactions">हाल के लेन-देन</h3>
         <div id="recentTransactions" class="transaction-list">
           <!-- Will be populated by JS -->
         </div>
       </div>
+      
 
       <!-- Customers Tab -->
       <div class="tab-pane" id="customers">
@@ -884,29 +925,6 @@
       </button>
     </div>
   </div>  
-</div>
-
-      <div class="tab-content" id="settings">
-    <h2>⚙️ Company Settings</h2>
-    <div class="form-group">
-        <label>Dukaan ka Naam</label>
-        <input type="text" id="companyName" placeholder="Khata Mitra Pro">
-    </div>
-    <div class="form-group">
-        <label>GST No</label>
-        <input type="text" id="companyGST" placeholder="22AAAAA0000A1Z5">
-    </div>
-    <div class="form-group">
-        <label>PAN No</label>
-        <input type="text" id="companyPAN" placeholder="AAAAA0000A">
-    </div>
-    <div class="form-group">
-        <label>Bank A/C + UPI ID</label>
-        <input type="text" id="companyBank" placeholder="1234567890 | upi@paytm">
-    </div>
-    <button class="btn btn-primary" onclick="saveCompanySettings()">
-        <i class="fas fa-save"></i> Save Settings
-    </button>
 </div>
         
 <div class="chart-container" style="margin-top: 30px;">
@@ -1165,27 +1183,6 @@
     function saveData() {
       localStorage.setItem('khataMitraPro', JSON.stringify(appState));
     }
-
-      function saveCompanySettings(){
-    appState.company = {
-        name: document.getElementById('companyName').value,
-        gst: document.getElementById('companyGST').value,
-        pan: document.getElementById('companyPAN').value,
-        bank: document.getElementById('companyBank').value
-    };
-    saveData(); // Firebase pe bhi chala jayega
-    showToast('Settings Save ho gayi');
-}
-
-function loadCompanySettings(){
-    if(appState.company){
-        document.getElementById('companyName').value = appState.company.name || '';
-        document.getElementById('companyGST').value = appState.company.gst || '';
-        document.getElementById('companyPAN').value = appState.company.pan || '';
-        document.getElementById('companyBank').value = appState.company.bank || '';
-    }
-}
-// updateUI() me last me ye call kar dena: loadCompanySettings();
 
 
     // Demo data for testing
@@ -1990,7 +1987,31 @@ function loadCompanySettings(){
       if (tabName === 'reports') {
         updateReports();
       }
+      
+      if(tabName === 'settings'){
+        loadCompanySettings();
     }
+    }
+
+      function saveCompanySettings(){
+    appState.company = {
+        name: document.getElementById('companyName').value,
+        gst: document.getElementById('companyGST').value,
+        pan: document.getElementById('companyPAN').value,
+        bank: document.getElementById('companyBank').value
+    };
+    saveData(); 
+    showToast('सेटिंग सेव हो गई');
+}
+
+function loadCompanySettings(){
+    if(appState.company){
+        document.getElementById('companyName').value = appState.company.name || '';
+        document.getElementById('companyGST').value = appState.company.gst || '';
+        document.getElementById('companyPAN').value = appState.company.pan || '';
+        document.getElementById('companyBank').value = appState.company.bank || '';
+    }
+}
 
     function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');
