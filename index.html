@@ -1210,7 +1210,6 @@
       updateRecentTransactions();
       updateAllTransactions();
       updateReports();
-    loadCompanySettings();
     }
 
     function updateDashboard() {
@@ -1992,28 +1991,9 @@
       if(tabName === 'settings'){
         loadCompanySettings();
     }
+      
     }
-
-      function saveCompanySettings(){
-    appState.company = {
-        name: document.getElementById('companyName').value,
-        gst: document.getElementById('companyGST').value,
-        pan: document.getElementById('companyPAN').value,
-        bank: document.getElementById('companyBank').value
-    };
-    saveData(); 
-    showToast('सेटिंग सेव हो गई');
-}
-
-function loadCompanySettings(){
-    if(appState.company){
-        document.getElementById('companyName').value = appState.company.name || '';
-        document.getElementById('companyGST').value = appState.company.gst || '';
-        document.getElementById('companyPAN').value = appState.company.pan || '';
-        document.getElementById('companyBank').value = appState.company.bank || '';
-    }
-}
-
+      
     function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');
       const icon = document.getElementById('darkModeToggle');
@@ -2246,6 +2226,26 @@ const oldSaveData = saveData;
 saveData = function(){ 
   oldSaveData(); 
   if(currentUser && navigator.onLine) cloudBackup(); 
+}
+  
+    function saveCompanySettings(){
+    appState.company = {
+        name: document.getElementById('companyName').value,
+        gst: document.getElementById('companyGST').value,
+        pan: document.getElementById('companyPAN').value,
+        bank: document.getElementById('companyBank').value
+    };
+    saveData(); 
+    showToast('सेटिंग सेव हो गई');
+}
+
+function loadCompanySettings(){
+    if(appState.company){
+        document.getElementById('companyName').value = appState.company.name || '';
+        document.getElementById('companyGST').value = appState.company.gst || '';
+        document.getElementById('companyPAN').value = appState.company.pan || '';
+        document.getElementById('companyBank').value = appState.company.bank || '';
+    }
 }
     
   </script>
