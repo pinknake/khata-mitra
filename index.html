@@ -697,6 +697,49 @@
         right: 20px;
       }
     }
+
+
+/* ========= MOBILE RESPONSIVE FIX ========= */
+@media (max-width: 768px) {
+
+  /* 1. Item add wale input ko 2 line me kar do */
+  #billModal div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr 1fr!important; /* 2 column */
+  }
+  #billModal input, #billModal button {
+    width: 100%!important;
+    font-size: 14px!important;
+    padding: 8px!important;
+  }
+  #billModal button {
+    grid-column: span 2; /* + button puri line le */
+  }
+
+  /* 2. Bill ka table scroll ho jaye */
+  #billContent {
+    overflow-x: auto!important;
+  }
+  #billContent table {
+    min-width: 600px!important; /* Table chota na ho */
+    font-size: 11px!important;
+  }
+
+  /* 3. Modal ko full screen kar do mobile me */
+  #billModal.modal-content {
+    max-width: 100%!important;
+    width: 100%!important;
+    margin: 0!important;
+    height: 100vh!important;
+    border-radius: 0!important;
+  }
+}
+
+/* Item list ko bhi mobile friendly */
+#billItemsList table td {
+    padding: 4px!important;
+    font-size: 12px!important;
+}
+
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -1353,6 +1396,12 @@ function generateBillPreview() {
                 <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>GRAND TOTAL:</b></td>
                 <td style="border:1px solid #000; padding:5px; text-align:right;"><b>₹${grandTotal.toFixed(2)}</b></td>
             </tr>
+            // GRAND TOTAL ke baad ye add kar
+<tr>
+    <td colspan="7" style="border:1px solid #000; padding:8px;">
+        <b>Amount in Words:</b> ${numberToWords(Math.round(grandTotal))} Rupees Only
+    </td>
+</tr>
         </table>
     </div>
     `;
@@ -1372,6 +1421,21 @@ function openBillModal() {
     generateBillPreview();
     customerSelect.onchange = generateBillPreview;
     modal.style.display = 'flex';
+}
+
+  function numberToWords(num) {
+  const a = ['','One ','Two ','Three ','Four ','Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
+  const b = ['','','Twenty ','Thirty ','Forty ','Fifty ','Sixty ','Seventy ','Eighty ','Ninety '];
+  if ((num = num.toString()).length > 9) return 'overflow';
+  let n = ('000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+  if (!n) return;
+  let str = '';
+  str += (n[1]!= 0)? (a[Number(n[1])] || b[n[1][0]] + a[n[1][1]]) + 'Crore ' : '';
+  str += (n[2]!= 0)? (a[Number(n[2])] || b[n[2][0]] + a[n[2][1]]) + 'Lakh ' : '';
+  str += (n[3]!= 0)? (a[Number(n[3])] || b[n[3][0]] + a[n[3][1]]) + 'Thousand ' : '';
+  str += (n[4]!= 0)? (a[Number(n[4])] || b[n[4][0]] + a[n[4][1]]) + 'Hundred ' : '';
+  str += (n[5]!= 0)? ((str!= '')? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + a[n[5][1]]) : '';
+  return str.trim();
 }
 
 // Load data from localStorage
