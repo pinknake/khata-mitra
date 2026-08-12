@@ -828,23 +828,23 @@
         </div>
         </div>
 
-<!-- Bill Modal -->
+      
+      <!-- Bill Modal -->
 <div class="modal" id="billModal">
   <div class="modal-content" style="max-width: 800px;">
     <div class="modal-header">
       <h3 data-hi="GST बिल" data-en="GST Bill">GST बिल</h3>
       <button class="close-btn" onclick="closeModal('billModal')">&times;</button>
     </div>
-    <div id="billPrintArea" style="padding: 20px; background: white; color: black;">
-      <!-- Yaha bill banega -->
+    <div id="billContent" style="padding: 20px; background: white; color: black;"> 
+      <!-- billPrintArea ki jagah billContent kar diya -->
     </div>
     <button class="btn btn-primary" onclick="printBill()">
         <i class="fas fa-print"></i> <span data-hi="Print / PDF" data-en="Print / PDF">Print / PDF</span>
     </button>
   </div>
 </div>
-      
-
+    
 <!-- Reports Tab -->
 <div class="tab-pane" id="reports">
   <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -2369,9 +2369,9 @@ function openBillModal() {
 }
 
 function printBill(){
-    let printContents = document.getElementById('billContent').innerHTML; // billPrintArea nahi
+    let printContents = document.getElementById('billContent').innerHTML; // <-- ye bhi billContent
     let w = window.open('', '', 'height=700,width=900');
-    w.document.write('<html><head><title>Bill</title><style>body{font-family:Arial}</style></head><body>');
+    w.document.write('<html><head><title>Bill</title><style>body{font-family:Arial} table{border-collapse:collapse; width:100%} td,th{border:1px solid #000; padding:5px}</style></head><body>');
     w.document.write(printContents);
     w.document.write('</body></html>');
     w.document.close();
