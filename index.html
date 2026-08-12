@@ -2284,25 +2284,28 @@ saveData = function(){
   if(currentUser && navigator.onLine) cloudBackup(); 
 }
   
-    function saveSettings() {
-    appState.company.name = document.getElementById('companyName').value;
-    appState.company.address = document.getElementById('companyAddress').value;
-    appState.company.gst = document.getElementById('companyGST').value.toUpperCase(); // Naya
-    appState.company.pan = document.getElementById('companyPAN').value.toUpperCase(); // Naya
-    appState.company.bank = document.getElementById('companyBank').value; // Naya
-    appState.company.upi = document.getElementById('companyUPI').value; // Naya
-    
-    saveData(); // localStorage me save
+    // SAVE
+function saveSettings() {
+    appState.company = {
+        name: document.getElementById('companyName').value,
+        address: document.getElementById('companyAddress').value,
+        gst: document.getElementById('companyGST').value.toUpperCase(),
+        pan: document.getElementById('companyPAN').value.toUpperCase(),
+        bank: document.getElementById('companyBank').value,
+        upi: document.getElementById('companyUPI').value
+    };
+    saveData();
     showToast(currentLanguage === 'hi' ? 'सेटिंग्स सेव हो गई' : 'Settings saved');
 }
 
+// LOAD - app start me call hona chahiye
 function loadSettings() {
     document.getElementById('companyName').value = appState.company.name || '';
     document.getElementById('companyAddress').value = appState.company.address || '';
-    document.getElementById('companyGST').value = appState.company.gst || ''; // Naya
-    document.getElementById('companyPAN').value = appState.company.pan || ''; // Naya
-    document.getElementById('companyBank').value = appState.company.bank || ''; // Naya
-    document.getElementById('companyUPI').value = appState.company.upi || ''; // Naya
+    document.getElementById('companyGST').value = appState.company.gst || '';
+    document.getElementById('companyPAN').value = appState.company.pan || '';
+    document.getElementById('companyBank').value = appState.company.bank || '';
+    document.getElementById('companyUPI').value = appState.company.upi || '';
 }
 
 function openBillModal() {
