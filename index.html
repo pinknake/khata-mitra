@@ -845,18 +845,20 @@
       </select>
     </div>
 
-    <!-- YE NAYA HISSA: ITEM ADD KARNE WALA -->
-    <div style="padding: 15px; background: #fff;">
-      <h4 data-hi="आइटम जोड़ें" data-en="Add Items">आइटम जोड़ें</h4>
-      <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr auto; gap:8px; margin-bottom:10px;">
-        <input type="text" id="itemName" placeholder="Item Name" class="form-control">
-        <input type="number" id="itemQty" placeholder="Qty" class="form-control" value="1">
-        <input type="number" id="itemRate" placeholder="Rate" class="form-control">
-        <input type="number" id="itemGST" placeholder="GST%" class="form-control" value="18">
-        <button class="btn btn-primary" onclick="addItemToBill()"><i class="fas fa-plus"></i></button>
-      </div>
-      <div id="billItemsList"></div> <!-- Yaha item list dikhegi -->
-    </div>
+    <!-- ITEM ADD KARNE WALA -->
+<div style="padding: 15px; background: #fff;">
+  <h4 data-hi="आइटम जोड़ें" data-en="Add Items">आइटम जोड़ें</h4>
+  <div style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap:8px; margin-bottom:10px;">
+    <input type="text" id="itemName" placeholder="Item Name" class="form-control">
+    <input type="text" id="itemHSN" placeholder="HSN" class="form-control">
+    <input type="number" id="itemBags" placeholder="Bags" class="form-control" value="1">
+    <input type="number" id="itemQty" placeholder="Qty/Kg" class="form-control" value="50">
+    <input type="number" id="itemRate" placeholder="Rate" class="form-control">
+    <input type="number" id="itemGST" placeholder="GST%" class="form-control" value="18">
+    <button class="btn btn-primary" onclick="addItemToBill()"><i class="fas fa-plus"></i></button>
+  </div>
+  <div id="billItemsList"></div>
+</div>
     
     <div id="billContent" style="padding: 20px; background: white; color: black;"> 
       <!-- billPrintArea ki jagah billContent kar diya -->
@@ -1204,11 +1206,14 @@ let appState = {
   settings: { darkMode: false, language: 'hi', autoReminder: false }
 };
 
-  let currentBillItems = []; // Isme bill ke item store honge
+  
+        let currentBillItems = []; 
 
-  // 1. ITEM ADD KARNE KE LIYE
+// 1. ITEM ADD
 function addItemToBill() {
     const name = document.getElementById('itemName').value;
+    const hsn = document.getElementById('itemHSN').value;
+    const bags = parseFloat(document.getElementById('itemBags').value) || 0;
     const qty = parseFloat(document.getElementById('itemQty').value) || 0;
     const rate = parseFloat(document.getElementById('itemRate').value) || 0;
     const gst = parseFloat(document.getElementById('itemGST').value) || 0;
@@ -1218,18 +1223,20 @@ function addItemToBill() {
         return;
     }
 
-    currentBillItems.push({ name, qty, rate, gst });
+    currentBillItems.push({ name, hsn, bags, qty, rate, gst });
     
-    // Input khali kar do
+    // Input khali
     document.getElementById('itemName').value = '';
-    document.getElementById('itemQty').value = '1';
+    document.getElementById('itemHSN').value = '';
+    document.getElementById('itemBags').value = '1';
+    document.getElementById('itemQty').value = '50';
     document.getElementById('itemRate').value = '';
     
-    renderBillItems(); // List update karo
-    generateBillPreview(); // Bill update karo
+    renderBillItems();
+    generateBillPreview();
 }
 
-// 2. ITEM LIST DIKHANE KE LIYE
+// 2. ITEM LIST RENDER
 function renderBillItems() {
     const listDiv = document.getElementById('billItemsList');
     if(currentBillItems.length === 0) {
@@ -1238,10 +1245,13 @@ function renderBillItems() {
     }
     let html = '<table style="width:100%; font-size:12px;">';
     currentBillItems.forEach((item, i) => {
+        let amount = item.qty * item.rate;
         html += `<tr>
             <td>${i+1}. ${item.name}</td>
-            <td>${item.qty} x ₹${item.rate}</td>
+            <td>${item.bags} Bags</td>
+            <td>${item.qty}Kg x ₹${item.rate}</td>
             <td>GST ${item.gst}%</td>
+            <td>₹${amount.toFixed(2)}</td>
             <td><button onclick="removeItem(${i})" style="color:red; border:none; background:none;">X</button></td>
         </tr>`;
     });
@@ -1255,19 +1265,16 @@ function removeItem(index) {
     generateBillPreview();
 }
 
-// 3. BILL PREVIEW UPDATE KARO - PURANE WALE KO REPLACE KAR
+// 3. BILL PREVIEW - PROPER GST FORMAT
 function generateBillPreview() {
     const billContent = document.getElementById('billContent');
     const customerId = document.getElementById('billCustomerSelect').value;
-
-    let customer = appState.customers.find(c => c.id === customerId) || {
-        name: 'Cash Customer', address: '', gst: '', pan: '', vehicle: '', phone: ''
-    };
+    let customer = appState.customers.find(c => c.id === customerId) || {name: 'Cash Customer', address: '', gst: '', pan: '', vehicle: '', phone: ''};
 
     let billNo = 'KM' + Date.now().toString().slice(-6);
     let today = new Date().toLocaleDateString('en-IN');
 
-    // Calculation
+    // Calculation FIX
     let subtotal = 0, totalGST = 0;
     let itemsHTML = '';
     currentBillItems.forEach((item, i) => {
@@ -1277,8 +1284,10 @@ function generateBillPreview() {
         totalGST += gstAmount;
         itemsHTML += `
         <tr>
-            <td style="border:1px solid #000; padding:5px;">${i+1}</td>
+            <td style="border:1px solid #000; padding:5px; text-align:center;">${i+1}</td>
             <td style="border:1px solid #000; padding:5px;">${item.name}</td>
+            <td style="border:1px solid #000; padding:5px; text-align:center;">${item.hsn || '-'}</td>
+            <td style="border:1px solid #000; padding:5px; text-align:center;">${item.bags}</td>
             <td style="border:1px solid #000; padding:5px; text-align:center;">${item.qty}</td>
             <td style="border:1px solid #000; padding:5px; text-align:right;">₹${item.rate}</td>
             <td style="border:1px solid #000; padding:5px; text-align:right;">₹${amount.toFixed(2)}</td>
@@ -1290,7 +1299,7 @@ function generateBillPreview() {
     let sgst = totalGST / 2;
 
     let billHTML = `
-    <div style="border: 2px solid #000; padding: 0; font-size:13px; font-family: Arial; background:#fff;">
+    <div style="border: 2px solid #000; padding: 0; font-size:12px; font-family: Arial; background:#fff;">
         <h2 style="text-align:center; margin:0; padding:8px; border-bottom:2px solid #000;">TAX INVOICE</h2>
         <div style="padding:8px; text-align:center; border-bottom:1px solid #000;">
             <h3 style="margin:0;">${appState.company.name || ''}</h3>
@@ -1312,11 +1321,13 @@ function generateBillPreview() {
           </tr>
         </table>
         
-        <!-- ITEM TABLE -->
+        <!-- ITEM TABLE WITH BAGS + HSN -->
         <table style="width:100%; border-collapse:collapse;">
             <tr style="background:#f0f0f0;">
                 <th style="border:1px solid #000; padding:5px;">#</th>
                 <th style="border:1px solid #000; padding:5px;">Description</th>
+                <th style="border:1px solid #000; padding:5px;">HSN</th>
+                <th style="border:1px solid #000; padding:5px;">Bags</th>
                 <th style="border:1px solid #000; padding:5px;">Qty</th>
                 <th style="border:1px solid #000; padding:5px;">Rate</th>
                 <th style="border:1px solid #000; padding:5px;">Amount</th>
@@ -1327,19 +1338,19 @@ function generateBillPreview() {
         <!-- TOTAL -->
         <table style="width:100%; border-collapse:collapse;">
             <tr>
-                <td style="border:1px solid #000; padding:5px; text-align:right;"><b>Subtotal:</b></td>
-                <td style="border:1px solid #000; padding:5px; width:100px; text-align:right;">₹${subtotal.toFixed(2)}</td>
+                <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>Subtotal:</b></td>
+                <td style="border:1px solid #000; padding:5px; text-align:right;">₹${subtotal.toFixed(2)}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #000; padding:5px; text-align:right;"><b>CGST 9%:</b></td>
+                <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>CGST ${cgst > 0 ? (currentBillItems[0]?.gst/2 || 9) : 0}%:</b></td>
                 <td style="border:1px solid #000; padding:5px; text-align:right;">₹${cgst.toFixed(2)}</td>
             </tr>
             <tr>
-                <td style="border:1px solid #000; padding:5px; text-align:right;"><b>SGST 9%:</b></td>
+                <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>SGST ${sgst > 0 ? (currentBillItems[0]?.gst/2 || 9) : 0}%:</b></td>
                 <td style="border:1px solid #000; padding:5px; text-align:right;">₹${sgst.toFixed(2)}</td>
             </tr>
             <tr style="background:#f0f0f0;">
-                <td style="border:1px solid #000; padding:5px; text-align:right;"><b>GRAND TOTAL:</b></td>
+                <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>GRAND TOTAL:</b></td>
                 <td style="border:1px solid #000; padding:5px; text-align:right;"><b>₹${grandTotal.toFixed(2)}</b></td>
             </tr>
         </table>
@@ -1348,17 +1359,15 @@ function generateBillPreview() {
     billContent.innerHTML = billHTML;
 }
 
-// BILL KHOLTE HI LIST KHALI KAR DO
+// BILL KHOLTE HI
 function openBillModal() {
-    currentBillItems = []; // Naya bill
+    currentBillItems = []; 
     const modal = document.getElementById('billModal');
     const customerSelect = document.getElementById('billCustomerSelect');
-
     customerSelect.innerHTML = '<option value="cash">Cash Customer</option>';
     appState.customers.forEach(c => {
         customerSelect.innerHTML += `<option value="${c.id}">${c.name} - ${c.phone}</option>`;
     });
-
     renderBillItems();
     generateBillPreview();
     customerSelect.onchange = generateBillPreview;
