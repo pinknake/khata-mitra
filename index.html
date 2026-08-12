@@ -1022,9 +1022,7 @@
   </div>
 </div>
 
-      
-
-    <!-- Add Transaction Modal -->
+       <!-- Add Transaction Modal -->
     <div class="modal" id="addTransactionModal">
       <div class="modal-content">
         <div class="modal-header">
@@ -2276,24 +2274,25 @@ saveData = function(){
   if(currentUser && navigator.onLine) cloudBackup(); 
 }
   
-    function saveCompanySettings(){
-    appState.company = {
-        name: document.getElementById('companyName').value,
-        gst: document.getElementById('companyGST').value,
-        pan: document.getElementById('companyPAN').value,
-        bank: document.getElementById('companyBank').value
-    };
-    saveData(); 
-    showToast('सेटिंग सेव हो गई');
+    function saveSettings() {
+    appState.company.name = document.getElementById('companyName').value;
+    appState.company.address = document.getElementById('companyAddress').value;
+    appState.company.gst = document.getElementById('companyGST').value.toUpperCase(); // Naya
+    appState.company.pan = document.getElementById('companyPAN').value.toUpperCase(); // Naya
+    appState.company.bank = document.getElementById('companyBank').value; // Naya
+    appState.company.upi = document.getElementById('companyUPI').value; // Naya
+    
+    saveData(); // localStorage me save
+    showToast(currentLanguage === 'hi' ? 'सेटिंग्स सेव हो गई' : 'Settings saved');
 }
 
-function loadCompanySettings(){
-    if(appState.company){
-        document.getElementById('companyName').value = appState.company.name || '';
-        document.getElementById('companyGST').value = appState.company.gst || '';
-        document.getElementById('companyPAN').value = appState.company.pan || '';
-        document.getElementById('companyBank').value = appState.company.bank || '';
-    }
+function loadSettings() {
+    document.getElementById('companyName').value = appState.company.name || '';
+    document.getElementById('companyAddress').value = appState.company.address || '';
+    document.getElementById('companyGST').value = appState.company.gst || ''; // Naya
+    document.getElementById('companyPAN').value = appState.company.pan || ''; // Naya
+    document.getElementById('companyBank').value = appState.company.bank || ''; // Naya
+    document.getElementById('companyUPI').value = appState.company.upi || ''; // Naya
 }
 
 function openBillModal() {
