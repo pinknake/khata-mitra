@@ -948,36 +948,46 @@
       </div>      
     </div>
 
-      
-        <!-- Settings Tab -->
+<!-- Settings Tab -->
 <div class="tab-pane" id="settings">
   <h3 data-hi="कंपनी सेटिंग" data-en="Company Settings">कंपनी सेटिंग</h3>
   
   <div class="form-group">
     <label data-hi="दुकान का नाम" data-en="Shop Name">दुकान का नाम</label>
-    <input type="text" id="companyName" placeholder="Khata Mitra">
+    <input type="text" id="companyName" class="form-control" placeholder="Khata Mitra">
+  </div>
+  
+  <div class="form-group">
+    <label data-hi="पता" data-en="Address">पता</label>
+    <textarea id="companyAddress" class="form-control" rows="2" placeholder="पूरा पता"></textarea>
   </div>
   
   <div class="form-group">
     <label data-hi="GST नंबर" data-en="GST No">GST नंबर</label>
-    <input type="text" id="companyGST" placeholder="22AAAAA0000A1Z5">
+    <input type="text" id="companyGST" class="form-control" placeholder="22AAAAA0000A1Z5" style="text-transform:uppercase;">
   </div>
   
   <div class="form-group">
     <label data-hi="PAN नंबर" data-en="PAN No">PAN नंबर</label>
-    <input type="text" id="companyPAN" placeholder="AAAAA0000A">
+    <input type="text" id="companyPAN" class="form-control" placeholder="AAAAA0000A" style="text-transform:uppercase;">
   </div>
   
   <div class="form-group">
-    <label data-hi="बैंक + UPI" data-en="Bank + UPI">बैंक + UPI</label>
-    <input type="text" id="companyBank" placeholder="1234567890 | upi@paytm">
+    <label data-hi="बैंक A/C" data-en="Bank A/C">बैंक A/C</label>
+    <input type="text" id="companyBank" class="form-control" placeholder="1234567890">
+  </div>
+
+  <div class="form-group">
+    <label>UPI ID</label>
+    <input type="text" id="companyUPI" class="form-control" placeholder="upi@paytm">
   </div>
   
-  <button class="btn btn-primary" onclick="saveCompanySettings()">
+  <button class="btn btn-primary" onclick="saveSettings()">
     <i class="fas fa-save"></i> <span data-hi="सेव करें" data-en="Save">सेव करें</span>
   </button>
 </div>
 
+      
       <!-- Add Customer Modal -->
 <div class="modal" id="addCustomerModal">
   <div class="modal-content" style="max-width:500px;">
