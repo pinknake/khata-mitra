@@ -1186,43 +1186,44 @@
           input.placeholder = placeholder;
         }
       });
-    }
-
+  
     // ==================== STATE MANAGEMENT ====================
-    let appState = {
-      customers: [],
-      transactions: [],
-      photos: [], // Store photos with transaction IDs
-      settings: {
-        darkMode: false,
-        language: 'hi',
-        autoReminder: false
-      }
-    };
+let appState = {
+  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '' }, // <-- YE NAYI LINE
+  customers: [],
+  transactions: [],
+  photos: [], 
+  settings: {
+    darkMode: false,
+    language: 'hi',
+    autoReminder: false
+  }
+};
 
     // Load data from localStorage
-    function loadData() {
-      const saved = localStorage.getItem('khataMitraPro');
-      if (saved) {
-        try {
-          appState = JSON.parse(saved);
-        } catch (e) {
-          console.error('Error loading data', e);
-        }
-      }
-      
-      // Initialize with demo data if empty
-      if (appState.customers.length === 0) {
-        initDemoData();
-      }
-      
-      // Set language
-      if (appState.settings.language) {
-        setLanguage(appState.settings.language);
-      }
-      
-      updateUI();
+function loadData() {
+  const saved = localStorage.getItem('khataMitraPro');
+  if (saved) {
+    try {
+      appState = JSON.parse(saved);
+    } catch (e) {
+      console.error('Error loading data', e);
     }
+  }
+  
+  // Initialize with demo data if empty
+  if (appState.customers.length === 0) {
+    initDemoData();
+  }
+  
+  // Set language
+  if (appState.settings.language) {
+    setLanguage(appState.settings.language);
+  }
+  
+  loadSettings(); // <-- YE NAYI LINE ADD KARO
+  updateUI();
+}
 
     // Save data to localStorage
     function saveData() {
@@ -2283,23 +2284,8 @@ saveData = function(){
   oldSaveData(); 
   if(currentUser && navigator.onLine) cloudBackup(); 
 }
-    }
-  
-    // SAVE
-function saveSettings() {
-    appState.company = {
-        name: document.getElementById('companyName').value,
-        address: document.getElementById('companyAddress').value,
-        gst: document.getElementById('companyGST').value.toUpperCase(),
-        pan: document.getElementById('companyPAN').value.toUpperCase(),
-        bank: document.getElementById('companyBank').value,
-        upi: document.getElementById('companyUPI').value
-    };
-    saveData();
-    showToast(currentLanguage === 'hi' ? 'सेटिंग्स सेव हो गई' : 'Settings saved');
-}
 
-// LOAD - app start me call hona chahiye
+    // SETTINGS LOAD
 function loadSettings() {
     document.getElementById('companyName').value = appState.company.name || '';
     document.getElementById('companyAddress').value = appState.company.address || '';
@@ -2307,6 +2293,19 @@ function loadSettings() {
     document.getElementById('companyPAN').value = appState.company.pan || '';
     document.getElementById('companyBank').value = appState.company.bank || '';
     document.getElementById('companyUPI').value = appState.company.upi || '';
+}
+
+// SETTINGS SAVE
+function saveSettings() {
+    appState.company.name = document.getElementById('companyName').value;
+    appState.company.address = document.getElementById('companyAddress').value;
+    appState.company.gst = document.getElementById('companyGST').value.toUpperCase();
+    appState.company.pan = document.getElementById('companyPAN').value.toUpperCase();
+    appState.company.bank = document.getElementById('companyBank').value;
+    appState.company.upi = document.getElementById('companyUPI').value;
+    
+    saveData();
+    alert(currentLanguage === 'hi' ? 'सेटिंग्स सेव हो गई' : 'Settings saved');
 }
 
 function openBillModal() {
