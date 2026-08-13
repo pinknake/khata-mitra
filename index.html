@@ -2679,29 +2679,34 @@ function openBillInBrowser() {
     let billHTML = document.getElementById('billContent').innerHTML;
     let companyName = appState.company.name || 'KhataMitra';
     
-    // Pura bill ko ek link me convert
-    let printWindow = window.open('about:blank', '_blank');
-    
-    printWindow.document.write(`
+    // Pura bill ko data: URL banaya
+    let fullHTML = `
     <html>
     <head>
         <title>${companyName} Bill</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             body{font-family:Arial; margin:10px; background:white;}
             table{width:100%; border-collapse:collapse;}
             th,td{border:1px solid #000; padding:6px; font-size:13px;}
             .mobile-only{display:none!important;}
-            @media print{.no-print{display:none;}}
         </style>
     </head>
     <body>
         ${billHTML}
-        <div class="no-print" style="text-align:center; margin:20px;">
+        <div style="text-align:center; margin:20px;">
             <button onclick="window.print()" style="padding:12px 24px; font-size:16px; background:green; color:white; border:none;">Print / Save PDF</button>
         </div>
     </body>
-    </html>`);
-    printWindow.document.close();
+    </html>`;
+    
+    // IMPORTANT: _system lagaya taaki bahar Chrome me khule
+    let newTab = window.open('');
+    newTab.document.write(fullHTML);
+    newTab.document.close();
+    
+    // Agar upar wala na chale to ye wala try karna
+    // window.open('data:text/html,' + encodeURIComponent(fullHTML), '_system');
 }
 
 // 2. DIRECT WHATSAPP PE BILL TEXT BHEJNA
