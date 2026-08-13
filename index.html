@@ -750,7 +750,15 @@
 }
 
       @media print {
-    .mobile-only { display: none!important; }
+  body * { visibility: hidden; } /* Sab hide */
+  #billContent, #billContent * { visibility: visible; } /* Sirf bill dikhe */
+  #billContent { 
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    width: 100%;
+  }
+  .mobile-only { display: none!important; } /* Mobile card print me mat dikhao */
 }
 
   </style>
@@ -2584,32 +2592,11 @@ function saveSettings() {
 }
     
 function printBill() {
-    const billContent = document.getElementById('billContent').innerHTML;
-    const companyName = appState.company.name || 'Khata Mitra Pro';
-    
-    const printWindow = window.open('', '', 'height=800,width=800');
-    printWindow.document.write(`
-    <html>
-    <head>
-        <title>${companyName} - Bill</title>
-        <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 10px; color: #000; background: #fff; }
-            table { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
-            th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
-            h2, h3 { text-align: center; margin: 5px 0; }
-            /* Mobile cards ko print me hide kar do */
-            .bill-card, .bill-total-card { display: none!important; }
-        </style>
-    </head>
-    <body>
-        ${billContent}
-        <script>
-            window.onload = function() { window.print(); window.close(); }
-        </script>
-    </body>
-    </html>
-    `);
-    printWindow.document.close();
+    if(currentBillItems.length === 0) {
+        alert('Pehle item add karo');
+        return;
+    }
+    window.print(); // Bas itna hi
 }
 
   </script>
