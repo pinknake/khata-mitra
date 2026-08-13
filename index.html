@@ -1189,6 +1189,15 @@
     <label>UPI ID</label>
     <input type="text" id="companyUPI" class="form-control" placeholder="upi@paytm">
   </div>
+
+  <div class="form-group">
+    <label>Company Mobile</label>
+    <input type="text" id="companyMobile" class="form-control" placeholder="9876543210">
+</div>
+<div class="form-group">
+    <label>Company Email</label>
+    <input type="email" id="companyEmail" class="form-control" placeholder="abc@gmail.com">
+</div>
   
   <button class="btn btn-primary" onclick="saveSettings()">
     <i class="fas fa-save"></i> <span data-hi="सेव करें" data-en="Save">सेव करें</span>
@@ -1383,7 +1392,7 @@ function setLanguage(lang) {
 
 // ==================== STATE MANAGEMENT ====================
 let appState = {
-  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '' },
+  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '', mobile: '', email: '' },
   customers: [],
   customers: [],
   transactions: [],
@@ -1545,6 +1554,20 @@ function initDemoData() {
   saveData();
 }
 
+function saveSettings() {
+    appState.company.name = document.getElementById('companyName').value;
+    appState.company.address = document.getElementById('companyAddress').value;
+    appState.company.gst = document.getElementById('companyGST').value.toUpperCase();
+    appState.company.pan = document.getElementById('companyPAN').value.toUpperCase();
+    appState.company.bank = document.getElementById('companyBank').value;
+    appState.company.upi = document.getElementById('companyUPI').value;
+    
+    
+    saveData();
+    alert('सेटिंग्स सेव हो गई');
+}
+
+  
 // ==================== SETTINGS FUNCTIONS ====================
 function loadSettings() {
     document.getElementById('companyName').value = appState.company.name || '';
@@ -1553,6 +1576,8 @@ function loadSettings() {
     document.getElementById('companyPAN').value = appState.company.pan || '';
     document.getElementById('companyBank').value = appState.company.bank || '';
     document.getElementById('companyUPI').value = appState.company.upi || '';
+  document.getElementById('companyMobile').value = appState.company.mobile || '';
+    document.getElementById('companyEmail').value = appState.company.email || '';
 }
 
 function saveSettings() {
@@ -1562,7 +1587,9 @@ function saveSettings() {
     appState.company.pan = document.getElementById('companyPAN').value.toUpperCase();
     appState.company.bank = document.getElementById('companyBank').value;
     appState.company.upi = document.getElementById('companyUPI').value;
-    saveData();
+    appState.company.mobile = document.getElementById('companyMobile').value;
+    appState.company.email = document.getElementById('companyEmail').value;
+      saveData();
     alert('सेटिंग्स सेव हो गई');
 }
 
