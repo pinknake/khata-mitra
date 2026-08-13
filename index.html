@@ -957,19 +957,30 @@
     </div>
     
     <!-- BILL PREVIEW -->
-    <div id="billContent" style="padding: 20px; background: white; color: black; max-height: 400px; overflow-y: auto;"> 
+    <div id="billContent" style="padding: 15px; background: white; color: black; max-height: 400px; overflow-y: auto; font-size:12px;"> 
     
-    <div style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 5px;">
-        <h2 style="margin:0;">TAX INVOICE</h2>
-        <h3 style="margin:5px 0;" id="companyName">Khata Mitra</h3>
-        <p style="margin:0;" id="companyAddress">Ratia Road Tehsil</p>
-        <p style="margin:0;"><b>GST:</b> <span id="companyGST">22AAGGHYY5</span> | <b>PAN:</b> <span id="companyPAN">AAABBBB2034</span></p>
-    </div>
-
-    <!-- BUYER + INVOICE DETAIL -->
-    <table style="width:100%; border-collapse:collapse; margin-top:5px; font-size:12px;">
+    <!-- HEADER TABLE -->
+    <table style="width:100%; border-collapse:collapse; border:2px solid #000;">
         <tr>
-            <td style="width:50%; border:1px solid #000; padding:5px; vertical-align:top;">
+            <td colspan="2" style="text-align:center; border-bottom:2px solid #000; padding:5px;">
+                <h2 style="margin:0;">TAX INVOICE</h2>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align:center; padding:5px;">
+                <h3 style="margin:0;" id="companyName"></h3>
+                <p style="margin:2px 0;" id="companyAddress"></p>
+                <p style="margin:2px 0;"><b>GST:</b> <span id="companyGST"></span> | <b>PAN:</b> <span id="companyPAN"></span></p>
+                <p style="margin:2px 0;"><b>Mobile:</b> <span id="companyMobile"></span> | <b>Email:</b> <span id="companyEmail"></span></p>
+                <p style="margin:2px 0;"><b>Bank:</b> <span id="companyBank"></span></p>
+            </td>
+        </tr>
+    </table>
+
+    <!-- BUYER + INVOICE TABLE -->
+    <table style="width:100%; border-collapse:collapse; margin-top:5px; border:1px solid #000;">
+        <tr>
+            <td style="width:50%; border-right:1px solid #000; padding:5px; vertical-align:top;">
                 <b>Buyer:</b> <span id="buyerName"></span><br>
                 <span id="buyerAddress"></span><br>
                 <b>Mobile:</b> <span id="buyerMobile"></span><br>
@@ -977,7 +988,7 @@
                 <b>PAN:</b> <span id="buyerPAN"></span><br>
                 <b>Bank:</b> <span id="buyerBank"></span>
             </td>
-            <td style="width:50%; border:1px solid #000; padding:5px; vertical-align:top;">
+            <td style="width:50%; padding:5px; vertical-align:top;">
                 <b>Invoice No.</b> <span id="invoiceNo"></span><br>
                 <b>Date:</b> <span id="invoiceDate"></span><br>
                 <b>Vehicle No.</b> <span id="vehicleNo"></span>
@@ -985,8 +996,8 @@
         </tr>
     </table>
 
-    <!-- ITEM TABLE -->
-    <table id="itemTable" style="width:100%; border-collapse:collapse; margin-top:5px; font-size:12px;">
+    <!-- ITEM TABLE - ye wala already thik hai -->
+    <table id="itemTable" style="width:100%; border-collapse:collapse; margin-top:5px; border:1px solid #000;">
         <thead>
             <tr style="background:#f0f0f0;">
                 <th style="border:1px solid #000; padding:4px;">#</th>
@@ -1002,12 +1013,12 @@
         <tbody id="itemTableBody"></tbody>
     </table>
 
-    <!-- TOTAL TABLE WITH CGST SGST -->
-    <table style="width:100%; border-collapse:collapse; margin-top:5px; font-size:12px;">
+    <!-- TOTAL TABLE -->
+    <table style="width:100%; border-collapse:collapse; margin-top:5px;">
         <tr>
-            <td style="width:60%;"></td>
+            <td style="width:60%; border:1px solid #000;"></td>
             <td style="width:40%;">
-                <table style="width:100%; border-collapse:collapse;">
+                <table style="width:100%; border-collapse:collapse; border:1px solid #000;">
                     <tr><td style="border:1px solid #000; padding:4px;"><b>Subtotal</b></td><td style="border:1px solid #000; padding:4px; text-align:right;" id="subTotal">₹0.00</td></tr>
                     <tr><td style="border:1px solid #000; padding:4px;"><b>CGST</b></td><td style="border:1px solid #000; padding:4px; text-align:right;" id="totalCGST">₹0.00</td></tr>
                     <tr><td style="border:1px solid #000; padding:4px;"><b>SGST</b></td><td style="border:1px solid #000; padding:4px; text-align:right;" id="totalSGST">₹0.00</td></tr>
@@ -1372,7 +1383,15 @@ function setLanguage(lang) {
 
 // ==================== STATE MANAGEMENT ====================
 let appState = {
-  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '' },
+  company: {
+    name: "Khata Mitra",
+    address: "Ratia Road Tehsil",
+    gst: "22AAGGHYY5",
+    pan: "AAABBBB2034",
+    mobile: "9876543210",
+    email: "abc@gmail.com",
+    bank: "SBI 123456789"
+}
   customers: [],
   transactions: [],
   photos: [], 
@@ -1416,17 +1435,29 @@ function deleteItem(i) {
     generateBillPreview();
 }
 
+
 function generateBillPreview() {
     let customer = appState.customers.find(c => c.id == document.getElementById('billCustomerSelect').value) || {};
+    let company = appState.company || {}; // SETTING SE DATA
     let total = 0, totalCGST = 0, totalSGST = 0;
     
-    // 1. BUYER DETAIL
+    // 0. COMPANY DETAIL BHARO - SETTING SE
+    document.getElementById('companyName').innerText = company.name || 'Khata Mitra';
+    document.getElementById('companyAddress').innerText = company.address || 'Ratia Road Tehsil';
+    document.getElementById('companyGST').innerText = company.gst || '22AAGGHYY5';
+    document.getElementById('companyPAN').innerText = company.pan || 'AAABBBB2034';
+    document.getElementById('companyMobile').innerText = company.mobile || '';
+    document.getElementById('companyEmail').innerText = company.email || '';
+    document.getElementById('companyBank').innerText = company.bank || '';
+    
+    // 1. BUYER DETAIL - BAKE SAB PAHLE JAISE HI RAHEGA
     document.getElementById('buyerName').innerText = customer.name || 'Cash Customer';
     document.getElementById('buyerAddress').innerText = customer.address || '';
     document.getElementById('buyerMobile').innerText = customer.mobile || '';
     document.getElementById('buyerGSTIN').innerText = customer.gstin || '';
     document.getElementById('buyerPAN').innerText = customer.pan || '';
     document.getElementById('buyerBank').innerText = customer.bank || '';
+    
     
     // 2. INVOICE DETAIL
     document.getElementById('invoiceNo').innerText = 'KM' + Date.now().toString().slice(-6);
