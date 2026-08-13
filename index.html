@@ -698,46 +698,53 @@
       }
     }
 
-
-/* ========= MOBILE RESPONSIVE FIX ========= */
+/* ========= MOBILE CARD VIEW FOR BILL ========= */
 @media (max-width: 768px) {
-
-  /* 1. Item add wale input ko 2 line me kar do */
+  
+  /* Item input 2x2 grid */
   #billModal div[style*="grid-template-columns"] {
-    grid-template-columns: 1fr 1fr!important; /* 2 column */
-  }
-  #billModal input, #billModal button {
-    width: 100%!important;
-    font-size: 14px!important;
-    padding: 8px!important;
+    grid-template-columns: 1fr 1fr!important;
   }
   #billModal button {
-    grid-column: span 2; /* + button puri line le */
+    grid-column: span 2;
   }
 
-  /* 2. Bill ka table scroll ho jaye */
-  #billContent {
-    overflow-x: auto!important;
-  }
+  /* Bill table ko hide karke card dikhao */
   #billContent table {
-    min-width: 600px!important; /* Table chota na ho */
-    font-size: 11px!important;
+    display: none!important; /* Bada table hide */
   }
 
-  /* 3. Modal ko full screen kar do mobile me */
-  #billModal.modal-content {
-    max-width: 100%!important;
-    width: 100%!important;
-    margin: 0!important;
-    height: 100vh!important;
-    border-radius: 0!important;
+  /* Naye card banenge */
+  .bill-card {
+    border: 1px solid #000;
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
   }
-}
-
-/* Item list ko bhi mobile friendly */
-#billItemsList table td {
-    padding: 4px!important;
-    font-size: 12px!important;
+  .bill-card-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 3px 0;
+  }
+  .bill-card-title {
+    font-weight: bold;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+  }
+  
+  /* Total wala hissa */
+  .bill-total-card {
+    border: 2px solid #000;
+    padding: 8px;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+  .bill-total-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+  }
 }
 
   </style>
@@ -1308,6 +1315,7 @@ function removeItem(index) {
     generateBillPreview();
 }
 
+
 // 3. BILL PREVIEW - PROPER GST FORMAT
 function generateBillPreview() {
     const billContent = document.getElementById('billContent');
@@ -1319,12 +1327,16 @@ function generateBillPreview() {
 
     // Calculation FIX
     let subtotal = 0, totalGST = 0;
-    let itemsHTML = '';
+    let itemsHTML = ''; // Desktop table ke liye
+    let itemsCardHTML = ''; // Mobile card ke liye
+  
     currentBillItems.forEach((item, i) => {
         let amount = item.qty * item.rate;
         let gstAmount = (amount * item.gst) / 100;
         subtotal += amount;
         totalGST += gstAmount;
+        itemsHTML += `
+        // 1. Desktop Table Row
         itemsHTML += `
         <tr>
             <td style="border:1px solid #000; padding:5px; text-align:center;">${i+1}</td>
@@ -1335,6 +1347,17 @@ function generateBillPreview() {
             <td style="border:1px solid #000; padding:5px; text-align:right;">₹${item.rate}</td>
             <td style="border:1px solid #000; padding:5px; text-align:right;">₹${amount.toFixed(2)}</td>
         </tr>`;
+
+        // 2. Mobile Card
+        itemsCardHTML += `
+        <div class="bill-card">
+            <div class="bill-card-title">${i+1}. ${item.name} <span style="float:right;">₹${amount.toFixed(2)}</span></div>
+            <div class="bill-card-row"><span>HSN:</span> <span>${item.hsn || '-'}</span></div>
+            <div class="bill-card-row"><span>Bags:</span> <span>${item.bags}</span></div>
+            <div class="bill-card-row"><span>Qty:</span> <span>${item.qty} Kg</span></div>
+            <div class="bill-card-row"><span>Rate:</span> <span>₹${item.rate}</span></div>
+            <div class="bill-card-row"><span>GST:</span> <span>${item.gst}%</span></div>
+        </div>`;
     });
 
     let grandTotal = subtotal + totalGST;
@@ -1364,7 +1387,8 @@ function generateBillPreview() {
           </tr>
         </table>
         
-        <!-- ITEM TABLE WITH BAGS + HSN -->
+        
+        <!-- DESKTOP TABLE -->
         <table style="width:100%; border-collapse:collapse;">
             <tr style="background:#f0f0f0;">
                 <th style="border:1px solid #000; padding:5px;">#</th>
@@ -1378,33 +1402,34 @@ function generateBillPreview() {
             ${itemsHTML}
         </table>
 
+        <!-- MOBILE CARDS -->
+        <div style="display:none;">${itemsCardHTML}</div>
+
         <!-- TOTAL -->
         <table style="width:100%; border-collapse:collapse;">
-            <tr>
-                <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>Subtotal:</b></td>
-                <td style="border:1px solid #000; padding:5px; text-align:right;">₹${subtotal.toFixed(2)}</td>
-            </tr>
-            <tr>
-                <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>CGST ${cgst > 0 ? (currentBillItems[0]?.gst/2 || 9) : 0}%:</b></td>
-                <td style="border:1px solid #000; padding:5px; text-align:right;">₹${cgst.toFixed(2)}</td>
-            </tr>
-            <tr>
-                <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>SGST ${sgst > 0 ? (currentBillItems[0]?.gst/2 || 9) : 0}%:</b></td>
-                <td style="border:1px solid #000; padding:5px; text-align:right;">₹${sgst.toFixed(2)}</td>
-            </tr>
-            <tr style="background:#f0f0f0;">
-                <td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>GRAND TOTAL:</b></td>
-                <td style="border:1px solid #000; padding:5px; text-align:right;"><b>₹${grandTotal.toFixed(2)}</b></td>
-            </tr>
-           <tr>
-               <td colspan="7" style="border:1px solid #000; padding:8px;">
-               <b>Amount in Words:</b> ${numberToWords(Math.round(grandTotal))} Rupees Only
-          </td>
-</tr>
+            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>Subtotal:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${subtotal.toFixed(2)}</td></tr>
+            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>CGST:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${cgst.toFixed(2)}</td></tr>
+            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>SGST:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${sgst.toFixed(2)}</td></tr>
+            <tr style="background:#f0f0f0;"><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>GRAND TOTAL:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;"><b>₹${grandTotal.toFixed(2)}</b></td></tr>
         </table>
+
+        <!-- MOBILE TOTAL CARD -->
+        <div class="bill-total-card" style="display:none;">
+            <div class="bill-total-row"><b>Subtotal:</b> <span>₹${subtotal.toFixed(2)}</span></div>
+            <div class="bill-total-row"><b>CGST:</b> <span>₹${cgst.toFixed(2)}</span></div>
+            <div class="bill-total-row"><b>SGST:</b> <span>₹${sgst.toFixed(2)}</span></div>
+            <div class="bill-total-row" style="border-top:1px solid #000; margin-top:4px;"><b>GRAND TOTAL:</b> <span><b>₹${grandTotal.toFixed(2)}</b></span></div>
+        </div>
     </div>
     `;
     billContent.innerHTML = billHTML;
+
+    // Mobile pe card show karo, table hide
+    if(window.innerWidth <= 768) {
+        billContent.querySelector('table').style.display = 'none'; // Pehla table hide
+        billContent.querySelector('div[style*="display:none"]').style.display = 'block'; // Card show
+        billContent.querySelector('.bill-total-card').style.display = 'block'; // Total card show
+    }
 }
 
 // BILL KHOLTE HI
