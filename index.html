@@ -2596,7 +2596,37 @@ function printBill() {
         alert('Pehle item add karo');
         return;
     }
-    window.print(); // Bas itna hi
+    
+    const billContent = document.getElementById('billContent').innerHTML;
+    const companyName = appState.company.name || 'Khata Mitra Pro';
+    
+    const printWindow = window.open('', '_blank', 'width=800,height=800');
+    
+    printWindow.document.write(`
+    <html>
+    <head>
+        <title>${companyName} - Bill</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body { font-family: Arial, sans-serif; margin: 10px; color: #000; background: #fff; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+            h2, h3 { text-align: center; margin: 5px 0; }
+        </style>
+    </head>
+    <body>
+        ${billContent}
+    </body>
+    </html>
+    `);
+    printWindow.document.close();
+    
+    // Mobile ke liye 500ms ka delay dena padta hai
+    setTimeout(() => {
+        printWindow.focus();
+        printWindow.print();
+        printWindow.close();
+    }, 500);
 }
 
   </script>
