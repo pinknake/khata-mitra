@@ -2701,12 +2701,12 @@ function openBillInBrowser() {
     </html>`;
     
     // IMPORTANT: _system lagaya taaki bahar Chrome me khule
-    let newTab = window.open('');
-    newTab.document.write(fullHTML);
-    newTab.document.close();
+   // let newTab = window.open('');
+   // newTab.document.write(fullHTML);
+   // newTab.document.close();
     
     // Agar upar wala na chale to ye wala try karna
-    // window.open('data:text/html,' + encodeURIComponent(fullHTML), '_system');
+    window.open('data:text/html,' + encodeURIComponent(fullHTML), '_system');
 }
 
 // 2. DIRECT WHATSAPP PE BILL TEXT BHEJNA
