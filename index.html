@@ -699,49 +699,6 @@
     }
 
 
-/* ========= MOBILE RESPONSIVE FIX ========= */
-@media (max-width: 768px) {
-
-  /* 1. Item add wale input ko 2 line me kar do */
-  #billModal div[style*="grid-template-columns"] {
-    grid-template-columns: 1fr 1fr!important; /* 2 column */
-  }
-  #billModal input, #billModal button {
-    width: 100%!important;
-    font-size: 14px!important;
-    padding: 8px!important;
-  }
-  #billModal button {
-    grid-column: span 2; /* + button puri line le */
-  }
-
-  /* 2. Bill ka table scroll ho jaye */
-  #billContent {
-    overflow-x: auto!important;
-  }
-  #billContent table {
-    min-width: 600px!important; /* Table chota na ho */
-    font-size: 11px!important;
-  }
-
-  /* 3. Modal ko full screen kar do mobile me */
-  #billModal.modal-content {
-    max-width: 100%!important;
-    width: 100%!important;
-    margin: 0!important;
-    height: 100vh!important;
-    border-radius: 0!important;
-  }
-}
-
-/* Item list ko bhi mobile friendly */
-#billItemsList table td {
-    padding: 4px!important;
-    font-size: 12px!important;
-}
-
-  
-
 /* ========= MOBILE CARD VIEW FOR BILL ========= */
 @media (max-width: 768px) {
   
@@ -789,6 +746,11 @@
     justify-content: space-between;
     padding: 3px 0;
   }
+
+  @media print {
+    .mobile-only { display: none!important; }
+}
+  
 }
 
   </style>
@@ -2621,16 +2583,35 @@ function saveSettings() {
     alert(currentLanguage === 'hi' ? 'सेटिंग्स सेव हो गई' : 'Settings saved');
 }
     
-function printBill(){
-    let printContents = document.getElementById('billContent').innerHTML; // <-- ye bhi billContent
-    let w = window.open('', '', 'height=700,width=900');
-    w.document.write('<html><head><title>Bill</title><style>body{font-family:Arial} table{border-collapse:collapse; width:100%} td,th{border:1px solid #000; padding:5px}</style></head><body>');
-    w.document.write(printContents);
-    w.document.write('</body></html>');
-    w.document.close();
-    w.print();
-}
+function printBill() {
+    const billContent = document.getElementById('billContent').innerHTML;
+    const companyName = appState.company.name || 'Khata Mitra Pro';
     
+    const printWindow = window.open('', '', 'height=800,width=800');
+    printWindow.document.write(`
+    <html>
+    <head>
+        <title>${companyName} - Bill</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 10px; color: #000; background: #fff; }
+            table { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
+            th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
+            h2, h3 { text-align: center; margin: 5px 0; }
+            /* Mobile cards ko print me hide kar do */
+            .bill-card, .bill-total-card { display: none!important; }
+        </style>
+    </head>
+    <body>
+        ${billContent}
+        <script>
+            window.onload = function() { window.print(); window.close(); }
+        </script>
+    </body>
+    </html>
+    `);
+    printWindow.document.close();
+}
+
   </script>
 
 </body>
