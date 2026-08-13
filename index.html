@@ -1493,6 +1493,21 @@ function generateBillPreview() {
     document.getElementById('totalSGST').innerText = '₹' + totalSGST.toFixed(2);
     document.getElementById('grandTotal').innerText = '₹' + (total + totalCGST + totalSGST).toFixed(2);
 }
+
+  // BILL KHOLTE HI
+function openBillModal() {
+    currentBillItems = []; 
+    const modal = document.getElementById('billModal');
+    const customerSelect = document.getElementById('billCustomerSelect');
+    customerSelect.innerHTML = '<option value="cash">Cash Customer</option>';
+    appState.customers.forEach(c => {
+        customerSelect.innerHTML += `<option value="${c.id}">${c.name} - ${c.phone}</option>`;
+    });
+    renderBillItems();
+    generateBillPreview();
+    customerSelect.onchange = generateBillPreview;
+    modal.style.display = 'flex';
+}
   
 // Load data from localStorage
 function loadData() {
