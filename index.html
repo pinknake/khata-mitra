@@ -2688,26 +2688,25 @@ function openBillInBrowser() {
             body{font-family:Arial; margin:10px; background:white;}
             table{width:100%; border-collapse:collapse;}
             th,td{border:1px solid #000; padding:6px; font-size:13px;}
-            .mobile-only{display:none!important;}
         </style>
     </head>
     <body>
         ${billHTML}
         <div style="text-align:center; margin:20px;">
-            <button onclick="window.print()" style="padding:12px 24px; font-size:16px; background:green; color:white; border:none;">Print / Save PDF</button>
+            <button onclick="window.print()" style="padding:12px 24px; font-size:16px; background:green; color:white; border:none; border-radius:8px;">Print / Save PDF</button>
         </div>
+        <script>window.onload = function(){ setTimeout(function(){window.print()}, 500); }<\/script>
     </body>
     </html>`;
     
-    // IMPORTANT: _system lagaya taaki bahar Chrome me khule
-    // let newTab = window.open('');
-    // newTab.document.write(fullHTML);
-    // newTab.document.close();
+    // BLOB BANAYA - ye sabse safe tarika hai
+    let blob = new Blob([fullHTML], {type: 'text/html'});
+    let url = URL.createObjectURL(blob);
     
-    // Agar upar wala na chale to ye wala try karna
-    window.open('data:text/html,' + encodeURIComponent(fullHTML), '_system');
+    // Bahar Chrome me kholega
+    window.open(url, '_system');
 }
-
+    
 // 2. DIRECT WHATSAPP PE BILL TEXT BHEJNA
 function shareBillOnWhatsApp() {
     if(currentBillItems.length === 0) {
