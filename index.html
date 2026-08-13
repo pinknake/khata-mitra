@@ -1397,6 +1397,9 @@ function addItemToBill() {
     // input khali kar do
     document.getElementById('itemName').value = '';
     document.getElementById('itemRate').value = '';
+
+  renderBillItems();
+    generateBillPreview();
 }
 
   function renderBill() {
