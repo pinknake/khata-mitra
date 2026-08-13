@@ -965,7 +965,15 @@
     <div style="padding: 15px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; gap: 10px;">
         <button class="btn btn-primary" onclick="downloadBillAsImage()">
     <i class="fas fa-download"></i> <span>Bill Save Kare</span>
+        </button>
+      <button class="btn btn-success" onclick="openBillInBrowser()">
+    <i class="fas fa-external-link-alt"></i> <span>Browser me Print kare</span>
 </button>
+
+<button class="btn btn-whatsapp" onclick="shareBillOnWhatsApp()">
+    <i class="fab fa-whatsapp"></i> <span>WhatsApp pe Bheje</span>
+</button>
+      
         <button class="btn btn-secondary" onclick="closeModal('billModal')" style="flex:1;">
             <span data-hi="बंद करें" data-en="Close">बंद करें</span>
         </button>
@@ -2659,6 +2667,64 @@ function downloadBillAsImage() {
         
         alert('Bill Gallery me Save ho gaya!');
     });
+}
+
+    // 1. BROWSER ME KHOL KE PRINT/PDF
+function openBillInBrowser() {
+    if(currentBillItems.length === 0) {
+        alert('Pehle item add karo');
+        return;
+    }
+    
+    let billHTML = document.getElementById('billContent').innerHTML;
+    let companyName = appState.company.name || 'KhataMitra';
+    
+    // Pura bill ko ek link me convert
+    let printWindow = window.open('about:blank', '_blank');
+    
+    printWindow.document.write(`
+    <html>
+    <head>
+        <title>${companyName} Bill</title>
+        <style>
+            body{font-family:Arial; margin:10px; background:white;}
+            table{width:100%; border-collapse:collapse;}
+            th,td{border:1px solid #000; padding:6px; font-size:13px;}
+            .mobile-only{display:none!important;}
+            @media print{.no-print{display:none;}}
+        </style>
+    </head>
+    <body>
+        ${billHTML}
+        <div class="no-print" style="text-align:center; margin:20px;">
+            <button onclick="window.print()" style="padding:12px 24px; font-size:16px; background:green; color:white; border:none;">Print / Save PDF</button>
+        </div>
+    </body>
+    </html>`);
+    printWindow.document.close();
+}
+
+// 2. DIRECT WHATSAPP PE BILL TEXT BHEJNA
+function shareBillOnWhatsApp() {
+    if(currentBillItems.length === 0) {
+        alert('Pehle item add karo');
+        return;
+    }
+    
+    let customer = appState.customers.find(c => c.id === document.getElementById('billCustomerSelect').value) || {name: 'Cash Customer'};
+    let total = currentBillItems.reduce((sum, item) => sum + (item.qty * item.rate), 0);
+    
+    let message = `*${appState.company.name}*\n`;
+    message += `Bill: KM${Date.now().toString().slice(-6)}\n`;
+    message += `Customer: ${customer.name}\n\n`;
+    message += `*Items:*\n`;
+    currentBillItems.forEach((item, i) => {
+        message += `${i+1}. ${item.name} - ${item.qty}Kg x ₹${item.rate} = ₹${(item.qty * item.rate).toFixed(2)}\n`;
+    });
+    message += `\n*Total: ₹${total.toFixed(2)}*`;
+    
+    let whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
 
   </script>
