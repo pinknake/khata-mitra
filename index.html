@@ -922,7 +922,7 @@
           <!-- Will be populated by JS -->
         </div>
         </div>
-
+      
 <!-- Bill Modal -->
 <div class="modal" id="billModal">
   <div class="modal-content" style="max-width: 800px; width: 100%;">
@@ -1299,22 +1299,23 @@ function setLanguage(lang) {
   saveData();
 }
 
+
+// BILL KHOLTE HI
 // ==================== STATE MANAGEMENT ====================
 let appState = {
-  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '' }, // NAYA
+  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '' },
   customers: [],
   transactions: [],
   photos: [], 
   settings: { darkMode: false, language: 'hi', autoReminder: false }
 };
 
-  
-        let currentBillItems = []; 
+let currentBillItems = []; 
 
 // 1. ITEM ADD
 function addItemToBill() {
-    const name = document.getElementById('itemName').value;
-    const hsn = document.getElementById('itemHSN').value;
+    const name = document.getElementById('itemName').value.trim();
+    const hsn = document.getElementById('itemHSN').value.trim();
     const bags = parseFloat(document.getElementById('itemBags').value) || 0;
     const qty = parseFloat(document.getElementById('itemQty').value) || 0;
     const rate = parseFloat(document.getElementById('itemRate').value) || 0;
@@ -1333,6 +1334,7 @@ function addItemToBill() {
     document.getElementById('itemBags').value = '1';
     document.getElementById('itemQty').value = '50';
     document.getElementById('itemRate').value = '';
+    document.getElementById('itemName').focus();
     
     renderBillItems();
     generateBillPreview();
@@ -1353,8 +1355,8 @@ function renderBillItems() {
             <td>${item.bags} Bags</td>
             <td>${item.qty}Kg x ₹${item.rate}</td>
             <td>GST ${item.gst}%</td>
-            <td>₹${amount.toFixed(2)}</td>
-            <td><button onclick="removeItem(${i})" style="color:red; border:none; background:none;">X</button></td>
+            <td><b>₹${amount.toFixed(2)}</b></td>
+            <td><button onclick="removeItem(${i})" style="color:red; border:none; background:none; cursor:pointer;">X</button></td>
         </tr>`;
     });
     html += '</table>';
@@ -1366,7 +1368,6 @@ function removeItem(index) {
     renderBillItems();
     generateBillPreview();
 }
-
 
 // 3. BILL PREVIEW - PROPER GST FORMAT
 function generateBillPreview() {
@@ -1381,12 +1382,14 @@ function generateBillPreview() {
     let subtotal = 0, totalGST = 0;
     let itemsHTML = ''; // Desktop table ke liye
     let itemsCardHTML = ''; // Mobile card ke liye
+    let gstRates = new Set(); // Alag alag GST % ke liye
     
     currentBillItems.forEach((item, i) => {
         let amount = item.qty * item.rate;
         let gstAmount = (amount * item.gst) / 100;
         subtotal += amount;
         totalGST += gstAmount;
+        gstRates.add(item.gst);
         
         // 1. Desktop Table Row
         itemsHTML += `
@@ -1415,16 +1418,17 @@ function generateBillPreview() {
     let grandTotal = subtotal + totalGST;
     let cgst = totalGST / 2;
     let sgst = totalGST / 2;
+    let gstPercent = Array.from(gstRates).join(', '); // "18, 5" jaisa
 
     let billHTML = `
-    <div style="border: 2px solid #000; padding: 0; font-size:12px; font-family: Arial; background:#fff;">
+    <div id="printArea" style="border: 2px solid #000; padding: 0; font-size:12px; font-family: Arial; background:#fff;">
         <h2 style="text-align:center; margin:0; padding:8px; border-bottom:2px solid #000;">TAX INVOICE</h2>
         <div style="padding:8px; text-align:center; border-bottom:1px solid #000;">
             <h3 style="margin:0;">${appState.company.name || ''}</h3>
             ${appState.company.address || ''}<br>
             GST: ${appState.company.gst || '-'} | PAN: ${appState.company.pan || '-'}
         </div>
-        <table style="width:100%; border-collapse:collapse;">
+        <table id="buyerTable" style="width:100%; border-collapse:collapse;">
           <tr>
             <td style="width:60%; border-right:1px solid #000; border-bottom:1px solid #000; padding:8px;">
                 <b>Buyer:</b> ${customer.name}<br>
@@ -1439,7 +1443,7 @@ function generateBillPreview() {
         </table>
         
         <!-- DESKTOP TABLE -->
-        <table style="width:100%; border-collapse:collapse;">
+        <table id="itemTable" style="width:100%; border-collapse:collapse;">
             <tr style="background:#f0f0f0;">
                 <th style="border:1px solid #000; padding:5px;">#</th>
                 <th style="border:1px solid #000; padding:5px;">Description</th>
@@ -1456,10 +1460,10 @@ function generateBillPreview() {
         <div class="mobile-only" style="display:none;">${itemsCardHTML}</div>
 
         <!-- TOTAL -->
-        <table style="width:100%; border-collapse:collapse;">
+        <table id="totalTable" style="width:100%; border-collapse:collapse;">
             <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>Subtotal:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${subtotal.toFixed(2)}</td></tr>
-            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>CGST ${(currentBillItems[0]?.gst/2 || 0)}%:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${cgst.toFixed(2)}</td></tr>
-            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>SGST ${(currentBillItems[0]?.gst/2 || 0)}%:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${sgst.toFixed(2)}</td></tr>    
+            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>CGST ${gstPercent ? gstPercent/2 : 0}%:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${cgst.toFixed(2)}</td></tr>
+            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>SGST ${gstPercent ? gstPercent/2 : 0}%:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${sgst.toFixed(2)}</td></tr>    
            <tr style="background:#f0f0f0;"><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>GRAND TOTAL:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;"><b>₹${grandTotal.toFixed(2)}</b></td></tr>
         </table>
 
@@ -1474,10 +1478,10 @@ function generateBillPreview() {
     `;
     billContent.innerHTML = billHTML;
 
-    // Mobile pe card show karo, table hide
+    // Mobile pe card show karo, sirf item table hide
     if(window.innerWidth <= 768) {
-        billContent.querySelector('table').style.display = 'none'; // Pehla table hide
-        billContent.querySelector('div[style*="display:none"]').style.display = 'block'; // Card show
+        document.getElementById('itemTable').style.display = 'none'; // FIX: Sirf item table hide
+        billContent.querySelector('.mobile-only').style.display = 'block'; // Card show
         billContent.querySelector('.bill-total-card').style.display = 'block'; // Total card show
     }
 }
@@ -1496,6 +1500,8 @@ function openBillModal() {
     customerSelect.onchange = generateBillPreview;
     modal.style.display = 'flex';
 }
+
+
 
   function numberToWords(num) {
   const a = ['','One ','Two ','Three ','Four ','Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
@@ -2647,25 +2653,27 @@ function printBill() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             body { font-family: Arial, sans-serif; margin: 10px; color: #000; background: #fff; }
-            table { width: 100%; border-collapse: collapse; }
+            table { width: 100%; border-collapse: collapse; page-break-inside: avoid; }
             th, td { border: 1px solid #000; padding: 6px; font-size: 12px; }
             h2, h3 { text-align: center; margin: 5px 0; }
+            /* PRINT ME CARD HIDE */
+            .mobile-only, .bill-card, .bill-total-card { display: none!important; }
         </style>
     </head>
     <body>
         ${billContent}
-    </body>
-    </html>
-    `);
+        <script>
+            window.onload = function() { 
+                setTimeout(() => { window.print(); window.close(); }, 300); 
+            }
+        </sript>
+        </body>
+        </html>
+
+
     printWindow.document.close();
-    
-    // Mobile ke liye 500ms ka delay dena padta hai
-    setTimeout(() => {
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-    }, 500);
-}
+} 
+
 
   </script>
 
