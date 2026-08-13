@@ -958,8 +958,69 @@
     
     <!-- BILL PREVIEW -->
     <div id="billContent" style="padding: 20px; background: white; color: black; max-height: 400px; overflow-y: auto;"> 
-      <!-- Yaha bill banega -->
+    
+    <div style="text-align:center; border-bottom: 2px solid #000; padding-bottom: 5px;">
+        <h2 style="margin:0;">TAX INVOICE</h2>
+        <h3 style="margin:5px 0;" id="companyName">Khata Mitra</h3>
+        <p style="margin:0;" id="companyAddress">Ratia Road Tehsil</p>
+        <p style="margin:0;"><b>GST:</b> <span id="companyGST">22AAGGHYY5</span> | <b>PAN:</b> <span id="companyPAN">AAABBBB2034</span></p>
     </div>
+
+    <!-- BUYER + INVOICE DETAIL -->
+    <table style="width:100%; border-collapse:collapse; margin-top:5px; font-size:12px;">
+        <tr>
+            <td style="width:50%; border:1px solid #000; padding:5px; vertical-align:top;">
+                <b>Buyer:</b> <span id="buyerName"></span><br>
+                <span id="buyerAddress"></span><br>
+                <b>Mobile:</b> <span id="buyerMobile"></span><br>
+                <b>GSTIN:</b> <span id="buyerGSTIN"></span><br>
+                <b>PAN:</b> <span id="buyerPAN"></span><br>
+                <b>Bank:</b> <span id="buyerBank"></span>
+            </td>
+            <td style="width:50%; border:1px solid #000; padding:5px; vertical-align:top;">
+                <b>Invoice No.</b> <span id="invoiceNo"></span><br>
+                <b>Date:</b> <span id="invoiceDate"></span><br>
+                <b>Vehicle No.</b> <span id="vehicleNo"></span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- ITEM TABLE -->
+    <table id="itemTable" style="width:100%; border-collapse:collapse; margin-top:5px; font-size:12px;">
+        <thead>
+            <tr style="background:#f0f0f0;">
+                <th style="border:1px solid #000; padding:4px;">#</th>
+                <th style="border:1px solid #000; padding:4px;">Item</th>
+                <th style="border:1px solid #000; padding:4px;">HSN</th>
+                <th style="border:1px solid #000; padding:4px;">Bags</th>
+                <th style="border:1px solid #000; padding:4px;">Qty</th>
+                <th style="border:1px solid #000; padding:4px;">Rate</th>
+                <th style="border:1px solid #000; padding:4px;">GST%</th>
+                <th style="border:1px solid #000; padding:4px;">Amount</th>
+            </tr>
+        </thead>
+        <tbody id="itemTableBody"></tbody>
+    </table>
+
+    <!-- TOTAL TABLE WITH CGST SGST -->
+    <table style="width:100%; border-collapse:collapse; margin-top:5px; font-size:12px;">
+        <tr>
+            <td style="width:60%;"></td>
+            <td style="width:40%;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <tr><td style="border:1px solid #000; padding:4px;"><b>Subtotal</b></td><td style="border:1px solid #000; padding:4px; text-align:right;" id="subTotal">₹0.00</td></tr>
+                    <tr><td style="border:1px solid #000; padding:4px;"><b>CGST</b></td><td style="border:1px solid #000; padding:4px; text-align:right;" id="totalCGST">₹0.00</td></tr>
+                    <tr><td style="border:1px solid #000; padding:4px;"><b>SGST</b></td><td style="border:1px solid #000; padding:4px; text-align:right;" id="totalSGST">₹0.00</td></tr>
+                    <tr style="background:#f0f0f0;"><td style="border:1px solid #000; padding:4px;"><b>GRAND TOTAL</b></td><td style="border:1px solid #000; padding:4px; text-align:right;" id="grandTotal">₹0.00</td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</div>
+
+<style>@media print {.no-print{display:none !important;}}</style>
+    
 
     <!-- BUTTONS -->
     <div style="padding: 15px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; gap: 10px;">
@@ -1309,8 +1370,6 @@ function setLanguage(lang) {
   saveData();
 }
 
-
-// BILL KHOLTE HI
 // ==================== STATE MANAGEMENT ====================
 let appState = {
   company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '' },
@@ -1320,214 +1379,75 @@ let appState = {
   settings: { darkMode: false, language: 'hi', autoReminder: false }
 };
 
-let currentBillItems = []; 
+let currentBillItems = []; // upar global me dalna
 
-// 1. ITEM ADD
 function addItemToBill() {
-    const name = document.getElementById('itemName').value.trim();
-    const hsn = document.getElementById('itemHSN').value.trim();
-    const bags = parseFloat(document.getElementById('itemBags').value) || 0;
-    const qty = parseFloat(document.getElementById('itemQty').value) || 0;
-    const rate = parseFloat(document.getElementById('itemRate').value) || 0;
-    const gst = parseFloat(document.getElementById('itemGST').value) || 0;
-
-    if(!name || qty <= 0 || rate <= 0) {
-        alert('Item Name, Qty aur Rate bharo');
-        return;
-    }
-
-    currentBillItems.push({ name, hsn, bags, qty, rate, gst });
+    let item = {
+        name: document.getElementById('itemName').value,
+        hsn: document.getElementById('itemHSN').value,
+        bags: document.getElementById('itemBags').value,
+        qty: parseFloat(document.getElementById('itemQty').value),
+        rate: parseFloat(document.getElementById('itemRate').value),
+        gst: parseFloat(document.getElementById('itemGST').value)
+    };
+    if(!item.name || !item.rate) { alert('Item name aur rate dalo'); return; }
+    currentBillItems.push(item);
+    generateBillPreview();
     
-    // Input khali
+    // input khali kar do
     document.getElementById('itemName').value = '';
-    document.getElementById('itemHSN').value = '';
-    document.getElementById('itemBags').value = '1';
-    document.getElementById('itemQty').value = '50';
     document.getElementById('itemRate').value = '';
-    document.getElementById('itemName').focus();
-    
-    renderBillItems();
-    generateBillPreview();
 }
 
-// 2. ITEM LIST RENDER
-function renderBillItems() {
-    const listDiv = document.getElementById('billItemsList');
-    if(currentBillItems.length === 0) {
-        listDiv.innerHTML = '<p style="color:gray;">कोई आइटम नहीं जोड़ा</p>';
-        return;
-    }
-    let html = '<table style="width:100%; font-size:12px;">';
-    currentBillItems.forEach((item, i) => {
-        let amount = item.qty * item.rate;
-        html += `<tr>
-            <td>${i+1}. ${item.name}</td>
-            <td>${item.bags} Bags</td>
-            <td>${item.qty}Kg x ₹${item.rate}</td>
-            <td>GST ${item.gst}%</td>
-            <td><b>₹${amount.toFixed(2)}</b></td>
-            <td><button onclick="removeItem(${i})" style="color:red; border:none; background:none; cursor:pointer;">X</button></td>
-        </tr>`;
-    });
-    html += '</table>';
-    listDiv.innerHTML = html;
-}
 
-function removeItem(index) {
-    currentBillItems.splice(index, 1);
-    renderBillItems();
-    generateBillPreview();
-}
-
-// 3. BILL PREVIEW - PROPER GST FORMAT
 function generateBillPreview() {
-    const billContent = document.getElementById('billContent');
-    const customerId = document.getElementById('billCustomerSelect').value;
-    let customer = appState.customers.find(c => c.id === customerId) || {name: 'Cash Customer', address: '', gst: '', pan: '', vehicle: '', phone: ''};
-
-    let billNo = 'KM' + Date.now().toString().slice(-6);
-    let today = new Date().toLocaleDateString('en-IN');
-
-    // Calculation
-    let subtotal = 0, totalGST = 0;
-    let itemsHTML = ''; // Desktop table ke liye
-    let itemsCardHTML = ''; // Mobile card ke liye
-    let gstRates = new Set(); // Alag alag GST % ke liye
+    let customer = appState.customers.find(c => c.id == document.getElementById('billCustomerSelect').value) || {};
+    let total = 0, totalCGST = 0, totalSGST = 0;
     
+    // 1. BUYER DETAIL
+    document.getElementById('buyerName').innerText = customer.name || 'Cash Customer';
+    document.getElementById('buyerAddress').innerText = customer.address || '';
+    document.getElementById('buyerMobile').innerText = customer.mobile || '';
+    document.getElementById('buyerGSTIN').innerText = customer.gstin || '';
+    document.getElementById('buyerPAN').innerText = customer.pan || '';
+    document.getElementById('buyerBank').innerText = customer.bank || '';
+    
+    // 2. INVOICE DETAIL
+    document.getElementById('invoiceNo').innerText = 'KM' + Date.now().toString().slice(-6);
+    document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('en-IN');
+    
+    // 3. ITEM TABLE
+    let tbody = document.getElementById('itemTableBody');
+    tbody.innerHTML = '';
     currentBillItems.forEach((item, i) => {
         let amount = item.qty * item.rate;
-        let gstAmount = (amount * item.gst) / 100;
-        subtotal += amount;
-        totalGST += gstAmount;
-        gstRates.add(item.gst);
+        let gstRate = item.gst || 0;
+        let cgst = (amount * gstRate/2) / 100;
+        let sgst = (amount * gstRate/2) / 100;
         
-        // 1. Desktop Table Row
-        itemsHTML += `
-        <tr>
-            <td style="border:1px solid #000; padding:5px; text-align:center;">${i+1}</td>
-            <td style="border:1px solid #000; padding:5px;">${item.name}</td>
-            <td style="border:1px solid #000; padding:5px; text-align:center;">${item.hsn || '-'}</td>
-            <td style="border:1px solid #000; padding:5px; text-align:center;">${item.bags}</td>
-            <td style="border:1px solid #000; padding:5px; text-align:center;">${item.qty}</td>
-            <td style="border:1px solid #000; padding:5px; text-align:right;">₹${item.rate}</td>
-            <td style="border:1px solid #000; padding:5px; text-align:right;">₹${amount.toFixed(2)}</td>
+        total += amount;
+        totalCGST += cgst;
+        totalSGST += sgst;
+        
+        tbody.innerHTML += `<tr>
+            <td style="border:1px solid #000; padding:4px;">${i+1}</td>
+            <td style="border:1px solid #000; padding:4px;">${item.name}</td>
+            <td style="border:1px solid #000; padding:4px;">${item.hsn}</td>
+            <td style="border:1px solid #000; padding:4px;">${item.bags}</td>
+            <td style="border:1px solid #000; padding:4px;">${item.qty} Kg</td>
+            <td style="border:1px solid #000; padding:4px;">₹${item.rate}</td>
+            <td style="border:1px solid #000; padding:4px;">${gstRate}%</td>
+            <td style="border:1px solid #000; padding:4px;">₹${amount.toFixed(2)}</td>
         </tr>`;
-
-        // 2. Mobile Card
-        itemsCardHTML += `
-        <div class="bill-card">
-            <div class="bill-card-title">${i+1}. ${item.name} <span style="float:right;">₹${amount.toFixed(2)}</span></div>
-            <div class="bill-card-row"><span>HSN:</span> <span>${item.hsn || '-'}</span></div>
-            <div class="bill-card-row"><span>Bags:</span> <span>${item.bags}</span></div>
-            <div class="bill-card-row"><span>Qty:</span> <span>${item.qty} Kg</span></div>
-            <div class="bill-card-row"><span>Rate:</span> <span>₹${item.rate}</span></div>
-            <div class="bill-card-row"><span>GST:</span> <span>${item.gst}%</span></div>
-        </div>`;
     });
-
-    let grandTotal = subtotal + totalGST;
-    let cgst = totalGST / 2;
-    let sgst = totalGST / 2;
-    let gstPercent = Array.from(gstRates).join(', '); // "18, 5" jaisa
-
-    let billHTML = `
-    <div id="printArea" style="border: 2px solid #000; padding: 0; font-size:12px; font-family: Arial; background:#fff;">
-        <h2 style="text-align:center; margin:0; padding:8px; border-bottom:2px solid #000;">TAX INVOICE</h2>
-        <div style="padding:8px; text-align:center; border-bottom:1px solid #000;">
-            <h3 style="margin:0;">${appState.company.name || ''}</h3>
-            ${appState.company.address || ''}<br>
-            GST: ${appState.company.gst || '-'} | PAN: ${appState.company.pan || '-'}
-        </div>
-        <table id="buyerTable" style="width:100%; border-collapse:collapse;">
-          <tr>
-            <td style="width:60%; border-right:1px solid #000; border-bottom:1px solid #000; padding:8px;">
-                <b>Buyer:</b> ${customer.name}<br>
-                ${customer.address || ''}<br>Mobile: ${customer.phone || '-'}<br>
-                GSTIN: ${customer.gst || '-'}
-            </td>
-            <td style="width:40%; border-bottom:1px solid #000; padding:8px;">
-                <b>Invoice No.</b> ${billNo}<br><b>Date</b> ${today}<br>
-                <b>Vehicle No.</b> ${customer.vehicle || '-'}
-            </td>
-          </tr>
-        </table>
-        
-        <!-- DESKTOP TABLE -->
-        <table id="itemTable" style="width:100%; border-collapse:collapse;">
-            <tr style="background:#f0f0f0;">
-                <th style="border:1px solid #000; padding:5px;">#</th>
-                <th style="border:1px solid #000; padding:5px;">Description</th>
-                <th style="border:1px solid #000; padding:5px;">HSN</th>
-                <th style="border:1px solid #000; padding:5px;">Bags</th>
-                <th style="border:1px solid #000; padding:5px;">Qty</th>
-                <th style="border:1px solid #000; padding:5px;">Rate</th>
-                <th style="border:1px solid #000; padding:5px;">Amount</th>
-            </tr>
-            ${itemsHTML}
-        </table>
-
-        <!-- MOBILE CARDS -->
-        <div class="mobile-only" style="display:none;">${itemsCardHTML}</div>
-
-        <!-- TOTAL -->
-        <table id="totalTable" style="width:100%; border-collapse:collapse;">
-            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>Subtotal:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${subtotal.toFixed(2)}</td></tr>
-            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>CGST ${gstPercent ? gstPercent/2 : 0}%:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${cgst.toFixed(2)}</td></tr>
-            <tr><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>SGST ${gstPercent ? gstPercent/2 : 0}%:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;">₹${sgst.toFixed(2)}</td></tr>    
-           <tr style="background:#f0f0f0;"><td colspan="6" style="border:1px solid #000; padding:5px; text-align:right;"><b>GRAND TOTAL:</b></td><td style="border:1px solid #000; padding:5px; text-align:right;"><b>₹${grandTotal.toFixed(2)}</b></td></tr>
-        </table>
-
-        <!-- MOBILE TOTAL CARD -->
-        <div class="bill-total-card" style="display:none;">
-            <div class="bill-total-row"><b>Subtotal:</b> <span>₹${subtotal.toFixed(2)}</span></div>
-            <div class="bill-total-row"><b>CGST:</b> <span>₹${cgst.toFixed(2)}</span></div>
-            <div class="bill-total-row"><b>SGST:</b> <span>₹${sgst.toFixed(2)}</span></div>
-            <div class="bill-total-row" style="border-top:1px solid #000; margin-top:4px;"><b>GRAND TOTAL:</b> <span><b>₹${grandTotal.toFixed(2)}</b></span></div>
-        </div>
-    </div>
-    `;
-    billContent.innerHTML = billHTML;
-
-    // Mobile pe card show karo, sirf item table hide
-    if(window.innerWidth <= 768) {
-        document.getElementById('itemTable').style.display = 'none'; // FIX: Sirf item table hide
-        billContent.querySelector('.mobile-only').style.display = 'block'; // Card show
-        billContent.querySelector('.bill-total-card').style.display = 'block'; // Total card show
-    }
+    
+    // 4. TOTAL
+    document.getElementById('subTotal').innerText = '₹' + total.toFixed(2);
+    document.getElementById('totalCGST').innerText = '₹' + totalCGST.toFixed(2);
+    document.getElementById('totalSGST').innerText = '₹' + totalSGST.toFixed(2);
+    document.getElementById('grandTotal').innerText = '₹' + (total + totalCGST + totalSGST).toFixed(2);
 }
-
-// BILL KHOLTE HI
-function openBillModal() {
-    currentBillItems = []; 
-    const modal = document.getElementById('billModal');
-    const customerSelect = document.getElementById('billCustomerSelect');
-    customerSelect.innerHTML = '<option value="cash">Cash Customer</option>';
-    appState.customers.forEach(c => {
-        customerSelect.innerHTML += `<option value="${c.id}">${c.name} - ${c.phone}</option>`;
-    });
-    renderBillItems();
-    generateBillPreview();
-    customerSelect.onchange = generateBillPreview;
-    modal.style.display = 'flex';
-}
-
-
-
-  function numberToWords(num) {
-  const a = ['','One ','Two ','Three ','Four ','Five ','Six ','Seven ','Eight ','Nine ','Ten ','Eleven ','Twelve ','Thirteen ','Fourteen ','Fifteen ','Sixteen ','Seventeen ','Eighteen ','Nineteen '];
-  const b = ['','','Twenty ','Thirty ','Forty ','Fifty ','Sixty ','Seventy ','Eighty ','Ninety '];
-  if ((num = num.toString()).length > 9) return 'overflow';
-  let n = ('000' + num).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-  if (!n) return;
-  let str = '';
-  str += (n[1]!= 0)? (a[Number(n[1])] || b[n[1][0]] + a[n[1][1]]) + 'Crore ' : '';
-  str += (n[2]!= 0)? (a[Number(n[2])] || b[n[2][0]] + a[n[2][1]]) + 'Lakh ' : '';
-  str += (n[3]!= 0)? (a[Number(n[3])] || b[n[3][0]] + a[n[3][1]]) + 'Thousand ' : '';
-  str += (n[4]!= 0)? (a[Number(n[4])] || b[n[4][0]] + a[n[4][1]]) + 'Hundred ' : '';
-  str += (n[5]!= 0)? ((str!= '')? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + a[n[5][1]]) : '';
-  return str.trim();
-}
-
+  
 // Load data from localStorage
 function loadData() {
   const saved = localStorage.getItem('khataMitraPro'); // PURANA WALA HI RAKHA
