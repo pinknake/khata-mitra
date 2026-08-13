@@ -2679,7 +2679,6 @@ function openBillInBrowser() {
     let billHTML = document.getElementById('billContent').innerHTML;
     let companyName = appState.company.name || 'KhataMitra';
     
-    // Pura bill ko data: URL banaya
     let fullHTML = `
     <html>
     <head>
@@ -2701,9 +2700,9 @@ function openBillInBrowser() {
     </html>`;
     
     // IMPORTANT: _system lagaya taaki bahar Chrome me khule
-   // let newTab = window.open('');
-   // newTab.document.write(fullHTML);
-   // newTab.document.close();
+    // let newTab = window.open('');
+    // newTab.document.write(fullHTML);
+    // newTab.document.close();
     
     // Agar upar wala na chale to ye wala try karna
     window.open('data:text/html,' + encodeURIComponent(fullHTML), '_system');
