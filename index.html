@@ -1510,16 +1510,7 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
     document.getElementById('totalSGST').innerText = '₹' + totalSGST.toFixed(2);
     document.getElementById('grandTotal').innerText = '₹' + (total + totalCGST + totalSGST).toFixed(2);
 
-  // Bill banne ke baad history me save
-appState.transactions.push({
-    id: 'BILL_' + Date.now(),
-    type: 'bill',
-    customerId: document.getElementById('billCustomerSelect').value,
-    amount: parseFloat(document.getElementById('grandTotal').innerText.replace('₹','')),
-    note: 'GST Bill - ' + currentBillItems.map(i => i.name).join(', '),
-    date: new Date().toISOString().split('T')[0]
-});
-saveData();
+  
     saveBillToHistory();
   }
 
@@ -1551,9 +1542,10 @@ function openBillModal() {
 
   function saveBillToHistory() {
     const customerId = document.getElementById('billCustomerSelect').value;
-    if(!customerId) return; // Cash customer skip
+    if(!customerId || customerId === 'cash') return; // Cash skip
 
     const customer = appState.customers.find(c => c.id === customerId);
+    if(!customer) return;
 
     const billTransaction = {
         id: 'BILL_' + Date.now(),
@@ -1568,10 +1560,10 @@ function openBillModal() {
     appState.transactions.push(billTransaction);
 
     // Customer ka balance bhi badha do
-    customer.balance += billTransaction.amount;
+    customer.balance = (customer.balance || 0) + billTransaction.amount;
 
     saveData();
-    updateUI(); // Dashboard ke stats update
+    updateUI();
 }
   
 // Load data from localStorage
