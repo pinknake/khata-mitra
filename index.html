@@ -1307,6 +1307,7 @@
     </div>
 
     <!-- Customer Detail Modal -->
+    <!-- Customer Detail Modal -->
     <div class="modal" id="customerDetailModal">
       <div class="modal-content" style="max-width: 500px;">
         <div class="modal-header">
@@ -1345,17 +1346,16 @@
           <!-- Will be populated by JS -->
         </div>
 
-
-<!-- YE 3 BUTTON YAHI DAAL DE EK BAAR -->
-<div id="ledgerFilterBtns" style="display:flex; gap:5px; margin-bottom:15px;">
-    <button onclick="filterCustomerTx('all')" class="btn btn-outline btn-sm">All</button>
-    <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
-    <button onclick="filterCustomerTx('bill')" class="btn btn-outline btn-sm">Bill</button>
-</div>
-        
-<h4 style="margin-bottom: 15px;" data-hi="लेन-देन इतिहास" data-en="Transaction History">लेन-देन इतिहास</h4
-<div id="customerTransactions" class="transaction-list" style="max-height: 300px; overflow-y: auto;">
-  <!-- Will be populated by JS -->
+        <!-- YE 3 BUTTON EK BAAR -->
+        <div id="ledgerFilterBtns" style="display:flex; gap:5px; margin-bottom:15px;">
+            <button onclick="filterCustomerTx('all')" class="btn btn-outline btn-sm">All</button>
+            <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
+            <button onclick="filterCustomerTx('bill')" class="btn btn-outline btn-sm">Bill</button>
+        </div>
+                
+        <h4 style="margin-bottom: 15px;" data-hi="लेन-देन इतिहास" data-en="Transaction History">लेन-देन इतिहास</h4>
+        <div id="customerTransactions" class="transaction-list" style="max-height: 300px; overflow-y: auto;">
+          <!-- Will be populated by JS -->
         </div>
       </div>
     </div>
