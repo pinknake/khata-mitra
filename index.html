@@ -1510,7 +1510,16 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
     document.getElementById('totalSGST').innerText = '₹' + totalSGST.toFixed(2);
     document.getElementById('grandTotal').innerText = '₹' + (total + totalCGST + totalSGST).toFixed(2);
 
-    // LAST ME YE ADD KAR DE
+  // Bill banne ke baad history me save
+appState.transactions.push({
+    id: 'BILL_' + Date.now(),
+    type: 'bill',
+    customerId: document.getElementById('billCustomerSelect').value,
+    amount: parseFloat(document.getElementById('grandTotal').innerText.replace('₹','')),
+    note: 'GST Bill - ' + currentBillItems.map(i => i.name).join(', '),
+    date: new Date().toISOString().split('T')[0]
+});
+saveData();
     saveBillToHistory();
   }
 
@@ -2083,75 +2092,117 @@ document.addEventListener('DOMContentLoaded', loadData);
 
     // ==================== CUSTOMER DETAILS ====================
     function viewCustomer(customerId) {
-      const customer = appState.customers.find(c => c.id === customerId);
-      if (!customer) return;
-      
-      document.getElementById('detailCustomerName').textContent = customer.name;
-      document.getElementById('detailBalance').textContent = '₹' + Math.abs(customer.balance);
-      document.getElementById('detailPhone').textContent = customer.phone || '-';
-      
-      // Show customer photos
-      const photos = getCustomerPhotos(customerId);
-      const photosContainer = document.getElementById('customerPhotos');
-      
-      if (photos.length > 0) {
-        photosContainer.innerHTML = photos.map(photo => `
-          <div class="gallery-item">
-            <img src="${photo.data}" onclick="openZoom('${photo.data}', '${photo.caption}')">
-            <div class="caption">${photo.caption || ''}</div>
-            <div class="delete-photo" onclick="event.stopPropagation(); deletePhoto('${photo.id}')">
-              <i class="fas fa-times"></i>
-            </div>
+    const customer = appState.customers.find(c => c.id === customerId);
+    if (!customer) return;
+
+    // Store for filter
+    window.currentCustomerId = customerId;
+
+    document.getElementById('detailCustomerName').textContent = customer.name;
+    document.getElementById('detailBalance').textContent = '₹' + Math.abs(customer.balance);
+    document.getElementById('detailPhone').textContent = customer.phone || '-';
+
+    // Show customer photos - ye wala same rehne de
+    const photos = getCustomerPhotos(customerId);
+    const photosContainer = document.getElementById('customerPhotos');
+    if (photos.length > 0) {
+      photosContainer.innerHTML = photos.map(photo => `
+        <div class="gallery-item">
+          <img src="${photo.data}" onclick="openZoom('${photo.data}', '${photo.caption}')">
+          <div class="caption">${photo.caption || ''}</div>
+          <div class="delete-photo" onclick="event.stopPropagation(); deletePhoto('${photo.id}')">
+            <i class="fas fa-times"></i>
           </div>
-        `).join('');
-      } else {
-        photosContainer.innerHTML = `<p style="color: var(--gray); text-align: center; grid-column: span 3;" data-hi="कोई फोटो नहीं" data-en="No photos">कोई फोटो नहीं</p>`;
-      }
-      
-      // Show transactions
-      const transactions = appState.transactions
-        .filter(t => t.customerId === customerId)
-        .reverse();
-      
-      const container = document.getElementById('customerTransactions');
-      
-      if (transactions.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-exchange-alt"></i>
-            <p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p>
-          </div>
-        `;
-      } else {
-        container.innerHTML = transactions.map(t => {
-          const hasPhoto = getTransactionPhotos(t.id).length > 0;
-          return `
-            <div class="transaction-item">
+        </div>
+      `).join('');
+    } else {
+      photosContainer.innerHTML = `<p style="color: var(--gray); text-align: center; grid-column: span 3;" data-hi="कोई फोटो नहीं" data-en="No photos">कोई फोटो नहीं</p>`;
+    }
+
+    // YE NAYI LINE ADD KAR: FILTER BUTTONS
+    const txHeader = document.querySelector('#customerTransactions').parentElement.querySelector('h4');
+    txHeader.insertAdjacentHTML('beforebegin', `
+        <div style="display:flex; gap:5px; margin-bottom:15px;">
+            <button onclick="filterCustomerTx('all')" class="btn btn-outline btn-sm">All</button>
+            <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
+            <button onclick="filterCustomerTx('bill')" class="btn btn-outline btn-sm">Bill</button>
+        </div>
+    `);
+
+    renderCustomerTransactions('all'); // Pehli baar all dikhao
+
+    // Store customer ID for actions
+    document.getElementById('customerDetailModal').setAttribute('data-customer-id', customerId);
+    document.getElementById('customerDetailModal').classList.add('active');
+}
+
+
+// 1. FILTER KE LIYE
+function filterCustomerTx(type) {
+    renderCustomerTransactions(type);
+}
+
+// 2. RENDER KE LIYE - BILL + UDHAR DONO
+function renderCustomerTransactions(filter = 'all') {
+    let transactions = appState.transactions.filter(t => t.customerId === window.currentCustomerId);
+
+    if(filter === 'payment') transactions = transactions.filter(t => t.type === 'udhar' || t.type === 'jama');
+    if(filter === 'bill') transactions = transactions.filter(t => t.type === 'bill');
+
+    transactions.reverse(); // Naya upar
+
+    const container = document.getElementById('customerTransactions');
+
+    if (transactions.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-exchange-alt"></i><p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p></div>`;
+        return;
+    }
+
+    container.innerHTML = transactions.map(t => {
+        const hasPhoto = getTransactionPhotos(t.id).length > 0;
+
+        // AGAR BILL HAI TO ALAG CARD
+        if(t.type === 'bill') {
+            return `
+            <div class="transaction-item" style="border-left: 4px solid #2196F3;">
               <div class="transaction-info">
-                <div class="transaction-icon ${t.type === 'udhar' ? 'icon-udhar' : 'icon-jama'}">
-                  <i class="fas ${t.type === 'udhar' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                <div class="transaction-icon" style="background: #E3F2FD; color: #2196F3;">
+                  <i class="fas fa-file-invoice"></i>
                 </div>
                 <div class="transaction-details">
-                  <h4>${t.type === 'udhar' 
-                    ? (currentLanguage === 'hi' ? 'उधार दिया' : 'Gave') 
-                    : (currentLanguage === 'hi' ? 'जमा लिया' : 'Received')} 
-                    ${hasPhoto ? ' 📸' : ''}</h4>
+                  <h4>🧾 GST Bill ${hasPhoto? ' 📸' : ''}</h4>
                   <p>${t.note || ''} • ${formatDate(t.date)}</p>
                 </div>
               </div>
-              <div class="transaction-amount ${t.type === 'udhar' ? 'balance-negative' : 'balance-positive'}">
-                ${t.type === 'udhar' ? '-' : '+'} ₹${t.amount}
+              <div class="transaction-amount balance-negative">
+                ₹${t.amount}
               </div>
             </div>
           `;
-        }).join('');
-      }
-      
-      // Store customer ID for actions
-      document.getElementById('customerDetailModal').setAttribute('data-customer-id', customerId);
-      document.getElementById('customerDetailModal').classList.add('active');
-    }
+        }
 
+        // VARNA UDHAR/JAMA WALA PURANA CARD
+        return `
+            <div class="transaction-item">
+              <div class="transaction-info">
+                <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
+                  <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                </div>
+                <div class="transaction-details">
+                  <h4>${t.type === 'udhar'
+                   ? (currentLanguage === 'hi'? 'उधार दिया' : 'Gave')
+                    : (currentLanguage === 'hi'? 'जमा लिया' : 'Received')}
+                    ${hasPhoto? ' 📸' : ''}</h4>
+                  <p>${t.note || ''} • ${formatDate(t.date)}</p>
+                </div>
+              </div>
+              <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
+                ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
+              </div>
+            </div>
+          `;
+    }).join('');
+}
     // ==================== PDF EXPORT ====================
     function exportCustomerPDF() {
       const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
