@@ -1399,7 +1399,9 @@
 <script>
 
 // ==================== LANGUAGE SUPPORT ====================
-let currentLanguage = 'hi'; 
+window.onerror = function(msg) { alert("ERROR: " + msg); }
+  
+  let currentLanguage = 'hi'; 
 
 function setLanguage(lang) {
   currentLanguage = lang;
