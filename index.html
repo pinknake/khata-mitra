@@ -1441,14 +1441,22 @@ function addItemToBill() {
         gst: parseFloat(document.getElementById('itemGST').value)
     };
     if(!item.name || !item.rate) { alert('Item name aur rate dalo'); return; }
+    
+    // YE 2 LINE NAYI ADD KAR
+    const base = item.qty * item.rate;
+    const gstAmount = base * (item.gst/100);
+    item.total = base + gstAmount; // total save ho jayega
+    
     currentBillItems.push(item);
     generateBillPreview();
     
     // input khali kar do
     document.getElementById('itemName').value = '';
+    document.getElementById('itemHSN').value = '';
+    document.getElementById('itemBags').value = '';
+    document.getElementById('itemQty').value = '';
     document.getElementById('itemRate').value = '';
-
-  
+    document.getElementById('itemGST').value = '5'; // default 5%
 }
 
   function renderBillItems() {
@@ -1651,50 +1659,37 @@ function showBillDetail(billId) {
     if(!bill) return;
 
     // Bill ka HTML banayenge
-    let itemsHtml = bill.items.map((item, i) => {
-        const itemTotal = (item.qty * item.rate) + ((item.qty * item.rate) * (item.gst/100)); // GST jod ke
-        return `
+    let itemsHtml = bill.items.map((item, i) => `
         <tr>
-            <td style="padding:4px; border-bottom:1px solid #eee;">${i+1}</td>
-            <td style="padding:4px; border-bottom:1px solid #eee;">${item.name}</td>
-            <td style="padding:4px; border-bottom:1px solid #eee;">${item.hsn || '-'}</td>
-            <td style="padding:4px; border-bottom:1px solid #eee; text-align:center;">${item.bags || '-'}</td>
-            <td style="padding:4px; border-bottom:1px solid #eee; text-align:right;">${item.qty}</td>
-            <td style="padding:4px; border-bottom:1px solid #eee; text-align:right;">₹${item.rate}</td>
-            <td style="padding:4px; border-bottom:1px solid #eee; text-align:center;">${item.gst}%</td>
-            <td style="padding:4px; border-bottom:1px solid #eee; text-align:right;"><b>₹${itemTotal.toFixed(2)}</b></td>
+            <td>${i+1}</td>
+            <td>${item.name}</td>
+            <td>${item.hsn || '-'}</td>
+            <td>${item.bags || '-'}</td>
+            <td>${item.qty}</td>
+            <td>₹${item.rate}</td>
+            <td>${item.gst}%</td>
+            <td>₹${item.total}</td>
         </tr>
-    `}).join('');
+    `).join('');
 
     const html = `
-        <div style="padding:15px; max-height:80vh; overflow-y:auto; font-size:13px;">
-            <h3 style="text-align:center; margin-bottom:5px;">${appState.company.name}</h3>
-            <p style="text-align:center; font-size:12px; margin-bottom:10px;">GST: ${appState.company.gst} | PAN: ${appState.company.pan}</p>
-            <hr style="margin:10px 0;">
+        <div style="padding:15px; max-height:80vh; overflow-y:auto;">
+            <h3 style="text-align:center; margin-bottom:10px;">${appState.company.name}</h3>
+            <p style="text-align:center; font-size:12px;">GST: ${appState.company.gst} | PAN: ${appState.company.pan}</p>
+            <hr>
             <p><b>Bill No:</b> ${bill.invoiceNo || bill.id} 
                <b style="float:right;">Date:</b> ${formatDate(bill.date)}</p>
             <p><b>Customer:</b> ${appState.customers.find(c=>c.id===bill.customerId)?.name}</p>
             <p><b>Vehicle No:</b> ${bill.vehicleNo || '-'} 
                <b style="float:right;">Payment:</b> ${bill.paymentMode || 'Cash'}</p>
-            <hr style="margin:10px 0;">
+            <hr>
             <table style="width:100%; font-size:12px; border-collapse:collapse;">
-                <thead style="background:#f2f2f2;">
-                    <tr>
-                        <th style="padding:6px;">#</th>
-                        <th style="padding:6px; text-align:left;">Item</th>
-                        <th style="padding:6px;">HSN</th>
-                        <th style="padding:6px;">Bags</th>
-                        <th style="padding:6px; text-align:right;">Qty</th>
-                        <th style="padding:6px; text-align:right;">Rate</th>
-                        <th style="padding:6px;">GST</th>
-                        <th style="padding:6px; text-align:right;">Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${itemsHtml}
-                </tbody>
+                <tr style="background:#f2f2f2;">
+                    <th>#</th><th>Item</th><th>HSN</th><th>Bags</th><th>Qty</th><th>Rate</th><th>GST</th><th>Total</th>
+                </tr>
+                ${itemsHtml}
             </table>
-            <hr style="margin:10px 0;">
+            <hr>
             <h4 style="text-align:right;">Grand Total: ₹${bill.amount.toFixed(2)}</h4>
             <button onclick="closeModal('billViewModal')" class="btn btn-primary" style="width:100%; margin-top:10px;">बंद करें</button>
         </div>
