@@ -1575,7 +1575,7 @@ function openBillModal() {
         invoiceNo: document.getElementById('invoiceNo').innerText,
         vehicleNo: document.getElementById('vehicleNo').innerText,
         paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash', // agar dropdown hai to
-        items: JSON.parse(JSON.stringify(currentBillItems)) // copy karke save karo
+        items: currentBillItems // copy karke save karo
         company: appState.company // company gst, pan bhi
     };
 
