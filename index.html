@@ -1360,6 +1360,20 @@
       </div>
     </div>
 
+      <!-- BILL VIEW MODAL -->
+<div class="modal" id="billViewModal">
+  <div class="modal-content" style="max-width: 700px;">
+    <div class="modal-header">
+      <h3 data-hi="बिल विवरण" data-en="Bill Details">बिल विवरण</h3>
+      <button class="close-btn" onclick="closeModal('billViewModal')">&times;</button>
+    </div>
+    <div id="billViewContent">
+      <!-- JS se bhar jayega -->
+    </div>
+  </div>
+</div>
+
+      
     <!-- Zoom Modal -->
     <div id="zoomModal">
       <img id="zoomImage" src="" alt="">
@@ -1630,6 +1644,54 @@ function saveSettings() {
       saveData();
     alert('सेटिंग्स सेव हो गई');
 }
+
+
+
+function showBillDetail(billId) {
+    const bill = appState.transactions.find(t => t.id === billId);
+    if(!bill) return;
+
+    // Bill ka HTML banayenge
+    let itemsHtml = bill.items.map((item, i) => `
+        <tr>
+            <td>${i+1}</td>
+            <td>${item.name}</td>
+            <td>${item.hsn || '-'}</td>
+            <td>${item.bags || '-'}</td>
+            <td>${item.qty}</td>
+            <td>₹${item.rate}</td>
+            <td>${item.gst}%</td>
+            <td>₹${item.total}</td>
+        </tr>
+    `).join('');
+
+    const html = `
+        <div style="padding:15px; max-height:80vh; overflow-y:auto;">
+            <h3 style="text-align:center; margin-bottom:10px;">${appState.company.name}</h3>
+            <p style="text-align:center; font-size:12px;">GST: ${appState.company.gst} | PAN: ${appState.company.pan}</p>
+            <hr>
+            <p><b>Bill No:</b> ${bill.invoiceNo || bill.id} 
+               <b style="float:right;">Date:</b> ${formatDate(bill.date)}</p>
+            <p><b>Customer:</b> ${appState.customers.find(c=>c.id===bill.customerId)?.name}</p>
+            <p><b>Vehicle No:</b> ${bill.vehicleNo || '-'} 
+               <b style="float:right;">Payment:</b> ${bill.paymentMode || 'Cash'}</p>
+            <hr>
+            <table style="width:100%; font-size:12px; border-collapse:collapse;">
+                <tr style="background:#f2f2f2;">
+                    <th>#</th><th>Item</th><th>HSN</th><th>Bags</th><th>Qty</th><th>Rate</th><th>GST</th><th>Total</th>
+                </tr>
+                ${itemsHtml}
+            </table>
+            <hr>
+            <h4 style="text-align:right;">Grand Total: ₹${bill.amount.toFixed(2)}</h4>
+            <button onclick="closeModal('billViewModal')" class="btn btn-primary" style="width:100%; margin-top:10px;">बंद करें</button>
+        </div>
+    `;
+
+    document.getElementById('billViewContent').innerHTML = html;
+    document.getElementById('billViewModal').classList.add('active');
+}
+
   
 // ==================== UI UPDATE FUNCTIONS ====================
 function updateUI() {
