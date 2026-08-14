@@ -1516,50 +1516,53 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
     saveBillToHistory();
   }
 
-  // BILL KHOLTE HI
+  // BILL KHOLTE HAI
 function openBillModal() {
-    currentBillItems = []; 
+    currentBillItems = []; // SABSE PEHLE KHALI KARO
+    renderBillItems(); // Table bhi khali karo
+    
     const modal = document.getElementById('billModal');
     const customerSelect = document.getElementById('billCustomerSelect');
 
-    document.getElementById('billVehicleNo').value = ''; // NAYA
-    document.getElementById('billBuyerBank').value = ''; // NAYA
+    document.getElementById('billVehicleNo').value = '';
+    document.getElementById('billBuyerBank').value = '';
     
-    // 1. Customer list safe tarike se load karo
+    // Customer list
     customerSelect.innerHTML = '<option value="cash">Cash Customer</option>';
-    
     if(appState && appState.customers && appState.customers.length > 0) {
         appState.customers.forEach(c => {
             customerSelect.innerHTML += `<option value="${c.id}">${c.name} - ${c.phone}</option>`;
         });
     }
     
-    // 2. Bill khali karo
-    renderBillItems(); // agar ye function hai to
-    generateBillPreview();
-    
-    // 3. Modal kholo
+    generateBillPreview(); // 0 ka bill banega
     modal.style.display = 'flex';
 }
 
   function saveBillToHistory() {
     const customerId = document.getElementById('billCustomerSelect').value;
-    if(!customerId || customerId === 'cash') return; // CASH SKIP
+    if(!customerId || customerId === 'cash') return;
 
     const customer = appState.customers.find(c => c.id === customerId);
     if(!customer) return;
 
     const grandTotal = parseFloat(document.getElementById('grandTotal').innerText.replace('₹',''));
-    if(grandTotal === 0) return; // KHALI BILL SKIP
+    if(grandTotal === 0) return;
 
+    // YE SARI INFO EK SAATH SAVE KARO
     const billTransaction = {
         id: 'BILL_' + Date.now(),
         type: 'bill',
         customerId: customerId,
         amount: grandTotal,
-        note: 'GST Bill - ' + currentBillItems.map(i => i.name).join(', '),
         date: new Date().toISOString().split('T')[0],
-        items: currentBillItems
+        
+        // NAYE FIELDS
+        invoiceNo: document.getElementById('invoiceNo').innerText,
+        vehicleNo: document.getElementById('vehicleNo').innerText,
+        paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash', // agar dropdown hai to
+        items: currentBillItems, // pura item array: name, hsn, qty, rate, gst, bags
+        company: appState.company // company gst, pan bhi
     };
 
     appState.transactions.push(billTransaction);
@@ -1568,6 +1571,7 @@ function openBillModal() {
     saveData();
     updateUI();
 }
+  
 // Load data from localStorage
 function loadData() {
   const saved = localStorage.getItem('khataMitraPro'); // PURANA WALA HI RAKHA
@@ -2150,23 +2154,23 @@ function renderCustomerTransactions(filter = 'all') {
 
         // AGAR BILL HAI TO ALAG CARD
         if(t.type === 'bill') {
-            return `
-            <div class="transaction-item" style="border-left: 4px solid #2196F3;">
-              <div class="transaction-info">
-                <div class="transaction-icon" style="background: #E3F2FD; color: #2196F3;">
-                  <i class="fas fa-file-invoice"></i>
-                </div>
-                <div class="transaction-details">
-                  <h4>🧾 GST Bill ${hasPhoto? ' 📸' : ''}</h4>
-                  <p>${t.note || ''} • ${formatDate(t.date)}</p>
-                </div>
-              </div>
-              <div class="transaction-amount balance-negative">
-    ₹${t.amount.toFixed(2)} 
-</div>
-            </div>
-          `;
-        }
+    return `
+    <div class="transaction-item" style="border-left: 4px solid #2196F3; cursor:pointer;" onclick="showBillDetail('${t.id}')">
+      <div class="transaction-info">
+        <div class="transaction-icon" style="background: #E3F2FD; color: #2196F3;">
+          <i class="fas fa-file-invoice"></i>
+        </div>
+        <div class="transaction-details">
+          <h4>🧾 Bill No: ${t.invoiceNo || t.id.slice(-6)}</h4>
+          <p>${t.items.length} Items • ${t.vehicleNo} • ${formatDate(t.date)}</p>
+        </div>
+      </div>
+      <div class="transaction-amount balance-negative">
+        ₹${t.amount.toFixed(2)}
+      </div>
+    </div>
+  `;
+}
 
         // VARNA UDHAR/JAMA WALA PURANA CARD
         return `
