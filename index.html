@@ -1362,14 +1362,12 @@
 
       <!-- BILL VIEW MODAL -->
 <div class="modal" id="billViewModal">
-  <div class="modal-content" style="max-width: 700px;">
+  <div class="modal-content">
     <div class="modal-header">
-      <h3 data-hi="बिल विवरण" data-en="Bill Details">बिल विवरण</h3>
+      <h3>बिल विवरण</h3>
       <button class="close-btn" onclick="closeModal('billViewModal')">&times;</button>
     </div>
-    <div id="billViewContent">
-      <!-- JS se bhar jayega -->
-    </div>
+    <div id="billViewContent"></div>
   </div>
 </div>
 
@@ -1435,29 +1433,24 @@ function addItemToBill() {
         name: document.getElementById('itemName').value,
         hsn: document.getElementById('itemHSN').value,
         bags: document.getElementById('itemBags').value,
-        qty: parseFloat(document.getElementById('itemQty').value),
-        rate: parseFloat(document.getElementById('itemRate').value),
-        gst: parseFloat(document.getElementById('itemGST').value)
+        qty: parseFloat(document.getElementById('itemQty').value) || 0,
+        rate: parseFloat(document.getElementById('itemRate').value) || 0,
+        gst: parseFloat(document.getElementById('itemGST').value) || 0
     };
     if(!item.name || !item.rate) { alert('Item name aur rate dalo'); return; }
     
-    // YE 2 LINE NAYI ADD KAR
-    const base = item.qty * item.rate;
-    const gstAmount = base * (item.gst/100);
-    item.total = base + gstAmount; // total save ho jayega
+    item.total = (item.qty * item.rate) * (1 + item.gst/100); // total nikal liya
     
     currentBillItems.push(item);
     generateBillPreview();
     
-    // input khali kar do
+    // form khali
     document.getElementById('itemName').value = '';
     document.getElementById('itemHSN').value = '';
     document.getElementById('itemBags').value = '';
     document.getElementById('itemQty').value = '';
     document.getElementById('itemRate').value = '';
-    document.getElementById('itemGST').value = '5'; // default 5%
 }
-
   function renderBillItems() {
     let list = document.getElementById('billItemsList');
     list.innerHTML = '';
@@ -1539,25 +1532,10 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
 
   // BILL KHOLTE HAI
 function openBillModal() {
-    currentBillItems = []; // SABSE PEHLE KHALI KARO
-    renderBillItems(); // Table bhi khali karo
-    
-    const modal = document.getElementById('billModal');
-    const customerSelect = document.getElementById('billCustomerSelect');
-
-    document.getElementById('billVehicleNo').value = '';
-    document.getElementById('billBuyerBank').value = '';
-    
-    // Customer list
-    customerSelect.innerHTML = '<option value="cash">Cash Customer</option>';
-    if(appState && appState.customers && appState.customers.length > 0) {
-        appState.customers.forEach(c => {
-            customerSelect.innerHTML += `<option value="${c.id}">${c.name} - ${c.phone}</option>`;
-        });
-    }
-    
-    generateBillPreview(); // 0 ka bill banega
-    modal.style.display = 'flex';
+    currentBillItems = []; // SABSE ZAROORI LINE
+    renderBillItems(); // table khali
+    document.getElementById('billModal').style.display = 'flex';
+    generateBillPreview(); // 0 ka bill
 }
 
   function saveBillToHistory() {
@@ -1655,49 +1633,24 @@ function saveSettings() {
 
 function showBillDetail(billId) {
     const bill = appState.transactions.find(t => t.id === billId);
-    if(!bill) return;
+    if(!bill || !bill.items) { alert('Bill data nahi mila'); return; }
 
-    // Bill ka HTML banayenge
     let itemsHtml = bill.items.map((item, i) => `
         <tr>
-            <td>${i+1}</td>
-            <td>${item.name}</td>
-            <td>${item.hsn || '-'}</td>
-            <td>${item.bags || '-'}</td>
-            <td>${item.qty}</td>
-            <td>₹${item.rate}</td>
-            <td>${item.gst}%</td>
-            <td>₹${item.total}</td>
+            <td style="padding:5px;">${i+1}</td>
+            <td style="padding:5px;">${item.name}</td>
+            <td style="padding:5px;">${item.hsn || '-'}</td>
+            <td style="padding:5px;">${item.bags || '-'}</td>
+            <td style="padding:5px;">${item.qty}</td>
+            <td style="padding:5px;">₹${item.rate}</td>
+            <td style="padding:5px;">${item.gst}%</td>
+            <td style="padding:5px;"><b>₹${item.total.toFixed(2)}</b></td>
         </tr>
     `).join('');
 
-    const html = `
-        <div style="padding:15px; max-height:80vh; overflow-y:auto;">
-            <h3 style="text-align:center; margin-bottom:10px;">${appState.company.name}</h3>
-            <p style="text-align:center; font-size:12px;">GST: ${appState.company.gst} | PAN: ${appState.company.pan}</p>
-            <hr>
-            <p><b>Bill No:</b> ${bill.invoiceNo || bill.id} 
-               <b style="float:right;">Date:</b> ${formatDate(bill.date)}</p>
-            <p><b>Customer:</b> ${appState.customers.find(c=>c.id===bill.customerId)?.name}</p>
-            <p><b>Vehicle No:</b> ${bill.vehicleNo || '-'} 
-               <b style="float:right;">Payment:</b> ${bill.paymentMode || 'Cash'}</p>
-            <hr>
-            <table style="width:100%; font-size:12px; border-collapse:collapse;">
-                <tr style="background:#f2f2f2;">
-                    <th>#</th><th>Item</th><th>HSN</th><th>Bags</th><th>Qty</th><th>Rate</th><th>GST</th><th>Total</th>
-                </tr>
-                ${itemsHtml}
-            </table>
-            <hr>
-            <h4 style="text-align:right;">Grand Total: ₹${bill.amount.toFixed(2)}</h4>
-            <button onclick="closeModal('billViewModal')" class="btn btn-primary" style="width:100%; margin-top:10px;">बंद करें</button>
-        </div>
-    `;
-
-    document.getElementById('billViewContent').innerHTML = html;
+    document.getElementById('billViewContent').innerHTML = `<div style="padding:10px;">${itemsHtml}</div>`;
     document.getElementById('billViewModal').classList.add('active');
 }
-
   
 // ==================== UI UPDATE FUNCTIONS ====================
 function updateUI() {
