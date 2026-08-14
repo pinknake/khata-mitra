@@ -940,6 +940,12 @@
         <option value="cash" data-hi="Cash Customer" data-en="Cash Customer">Cash Customer</option>
       </select>
     </div>
+    <div style="padding: 15px; background: #fff; border-bottom: 1px solid #ddd;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+        <input type="text" id="billVehicleNo" placeholder="Vehicle No" class="form-control" onchange="generateBillPreview()">
+        <input type="text" id="billBuyerBank" placeholder="Buyer Bank Details" class="form-control" onchange="generateBillPreview()">
+    </div>
+</div>
 
     <!-- ITEM ADD KARNE WALA -->
     <div style="padding: 15px; background: #fff; border-bottom: 1px solid #ddd;">
@@ -968,12 +974,12 @@
         </tr>
         <tr>
             <td colspan="2" style="text-align:center; padding:5px;">
-                <h3 style="margin:0;" id="companyName"></h3>
-                <p style="margin:2px 0;" id="companyAddress"></p>
-                <p style="margin:2px 0;"><b>GST:</b> <span id="companyGST"></span> | <b>PAN:</b> <span id="companyPAN"></span></p>
-                <p style="margin:2px 0;"><b>Mobile:</b> <span id="companyMobile"></span> | <b>Email:</b> <span id="companyEmail"></span></p>
-                <p style="margin:2px 0;"><b>Bank:</b> <span id="companyBank"></span></p>
-            </td>
+<!-- NAYA -->
+<h3 style="margin:0;" id="billCompanyName"></h3>
+<p style="margin:2px 0;" id="billCompanyAddress"></p>
+<p style="margin:2px 0;"><b>GST:</b> <span id="billCompanyGST"></span> | <b>PAN:</b> <span id="billCompanyPAN"></span></p>
+<p style="margin:2px 0;"><b>Mobile:</b> <span id="billCompanyMobile"></span> | <b>Email:</b> <span id="billCompanyEmail"></span></p>
+<p style="margin:2px 0;"><b>Bank:</b> <span id="billCompanyBank"></span></p>    </td>
         </tr>
     </table>
 
@@ -1442,15 +1448,15 @@ function generateBillPreview() {
     let customer = appState.customers.find(c => c.id == document.getElementById('billCustomerSelect').value) || {};
     let company = appState.company || {}; // SETTING SE DATA
     let total = 0, totalCGST = 0, totalSGST = 0;
-    
-    // 0. COMPANY DETAIL BHARO - SETTING SE
-    document.getElementById('companyName').innerText = company.name || 'Khata Mitra';
-    document.getElementById('companyAddress').innerText = company.address || 'Ratia Road Tehsil';
-    document.getElementById('companyGST').innerText = company.gst || '22AAGGHYY5';
-    document.getElementById('companyPAN').innerText = company.pan || 'AAABBBB2034';
-    document.getElementById('companyMobile').innerText = company.mobile || '';
-    document.getElementById('companyEmail').innerText = company.email || '';
-    document.getElementById('companyBank').innerText = company.bank || '';
+
+// NAYA
+document.getElementById('billCompanyName').innerText = company.name || 'Khata Mitra';
+document.getElementById('billCompanyAddress').innerText = company.address || '';
+document.getElementById('billCompanyGST').innerText = company.gst || '';
+document.getElementById('billCompanyPAN').innerText = company.pan || '';
+document.getElementById('billCompanyMobile').innerText = company.mobile || '';
+document.getElementById('billCompanyEmail').innerText = company.email || '';
+document.getElementById('billCompanyBank').innerText = company.bank || '';
     
     // 1. BUYER DETAIL - BAKE SAB PAHLE JAISE HI RAHEGA
     document.getElementById('buyerName').innerText = customer.name || 'Cash Customer';
@@ -1464,7 +1470,11 @@ function generateBillPreview() {
     // 2. INVOICE DETAIL
     document.getElementById('invoiceNo').innerText = 'KM' + Date.now().toString().slice(-6);
     document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('en-IN');
-    
+
+// INVOICE DETAIL KE NICHE
+document.getElementById('vehicleNo').innerText = document.getElementById('billVehicleNo').value;
+document.getElementById('buyerBank').innerText = document.getElementById('billBuyerBank').value || customer.bank || '';
+  
     // 3. ITEM TABLE
     let tbody = document.getElementById('itemTableBody');
     tbody.innerHTML = '';
@@ -1502,6 +1512,9 @@ function openBillModal() {
     currentBillItems = []; 
     const modal = document.getElementById('billModal');
     const customerSelect = document.getElementById('billCustomerSelect');
+
+    document.getElementById('billVehicleNo').value = ''; // NAYA
+    document.getElementById('billBuyerBank').value = ''; // NAYA
     
     // 1. Customer list safe tarike se load karo
     customerSelect.innerHTML = '<option value="cash">Cash Customer</option>';
@@ -1553,20 +1566,6 @@ function initDemoData() {
   ];
   saveData();
 }
-
-function saveSettings() {
-    appState.company.name = document.getElementById('companyName').value;
-    appState.company.address = document.getElementById('companyAddress').value;
-    appState.company.gst = document.getElementById('companyGST').value.toUpperCase();
-    appState.company.pan = document.getElementById('companyPAN').value.toUpperCase();
-    appState.company.bank = document.getElementById('companyBank').value;
-    appState.company.upi = document.getElementById('companyUPI').value;
-    
-    
-    saveData();
-    alert('सेटिंग्स सेव हो गई');
-}
-
   
 // ==================== SETTINGS FUNCTIONS ====================
 function loadSettings() {
@@ -2632,29 +2631,6 @@ saveData = function(){
   if(currentUser && navigator.onLine) cloudBackup(); 
 }
 
-    // SETTINGS LOAD
-function loadSettings() {
-    document.getElementById('companyName').value = appState.company.name || '';
-    document.getElementById('companyAddress').value = appState.company.address || '';
-    document.getElementById('companyGST').value = appState.company.gst || '';
-    document.getElementById('companyPAN').value = appState.company.pan || '';
-    document.getElementById('companyBank').value = appState.company.bank || '';
-    document.getElementById('companyUPI').value = appState.company.upi || '';
-}
-
-// SETTINGS SAVE
-function saveSettings() {
-    appState.company.name = document.getElementById('companyName').value;
-    appState.company.address = document.getElementById('companyAddress').value;
-    appState.company.gst = document.getElementById('companyGST').value.toUpperCase();
-    appState.company.pan = document.getElementById('companyPAN').value.toUpperCase();
-    appState.company.bank = document.getElementById('companyBank').value;
-    appState.company.upi = document.getElementById('companyUPI').value;
-    
-    saveData();
-    alert(currentLanguage === 'hi' ? 'सेटिंग्स सेव हो गई' : 'Settings saved');
-}
-    
 function downloadBillAsImage() {
     if(currentBillItems.length === 0) {
         alert('Pehle item add karo');
