@@ -927,6 +927,49 @@
       
 <!-- Bill Modal -->
 <div class="modal" id="billModal">
+<div style="display:flex; border-bottom:2px solid #ddd;">
+    <button id="tabQuick" onclick="switchTab('quick')" class="tab-btn active">1. Quick Entry</button>
+    <button id="tabBill" onclick="switchTab('bill')" class="tab-btn">2. Bill Preview</button>
+</div>
+
+<!-- TAB 1 CONTENT -->
+<div id="tabContentQuick" class="tab-content">
+    <!-- Yaha form aayega -->
+  <h3>Customer</h3>
+<select id="quickCustomer" class="form-control" onchange="loadCustomerToForm()"></select>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0;">
+    <input type="text" id="quickVehicle" placeholder="Vehicle No" class="form-control">
+    <input type="text" id="quickBank" placeholder="Buyer Bank" class="form-control">
+</div>
+
+<h3>Add Item</h3>
+<div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 80px; gap:8px;">
+    <input type="text" id="qItem" placeholder="Item Name" class="form-control">
+    <input type="text" id="qHSN" placeholder="HSN" class="form-control">
+    <input type="number" id="qBags" placeholder="Bags" class="form-control">
+    <input type="number" id="qQty" placeholder="Qty Kg/Qtl" class="form-control">
+    <input type="number" id="qRate" placeholder="Rate" class="form-control">
+    <input type="number" id="qGST" placeholder="GST%" class="form-control" value="5">
+    <button onclick="addItemToQuick()" class="btn btn-primary">+</button>
+</div>
+
+<div id="quickItemsList" style="margin-top:15px;"></div>
+
+<button onclick="saveQuickEntry()" class="btn btn-success" style="width:100%; margin-top:15px;">Save & Go to Bill</button>
+</div>
+
+<!-- TAB 2 CONTENT -->
+<div id="tabContentBill" class="tab-content" style="display:none;">
+    <!-- Tera purana bill preview yaha aayega -->
+</div>
+
+<style>
+.tab-btn { flex:1; padding:12px; border:none; background:#f1f1f1; cursor:pointer; font-weight:bold; }
+.tab-btn.active { background:#2196F3; color:white; }
+.tab-content { padding:15px; }
+</style>
+  
   <div class="modal-content" style="max-width: 800px; width: 100%;">
     <div class="modal-header">
       <h3 data-hi="GST बिल" data-en="GST Bill">GST बिल</h3>
@@ -1590,6 +1633,62 @@ function saveSettings() {
     alert('सेटिंग्स सेव हो गई');
 }
 
+
+
+let quickBillData = { customerId: null, items: [], vehicle: '', bank: '' };
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    
+    if(tab === 'quick') {
+        document.getElementById('tabQuick').classList.add('active');
+        document.getElementById('tabContentQuick').style.display = 'block';
+    } else {
+        document.getElementById('tabBill').classList.add('active');
+        document.getElementById('tabContentBill').style.display = 'block';
+        generateBillPreview(); // Bill tab me jate hi preview ban jaye
+    }
+}
+
+function addItemToQuick() {
+    const item = {
+        name: document.getElementById('qItem').value,
+        hsn: document.getElementById('qHSN').value,
+        bags: parseFloat(document.getElementById('qBags').value) || 0,
+        qty: parseFloat(document.getElementById('qQty').value) || 0,
+        rate: parseFloat(document.getElementById('qRate').value) || 0,
+        gst: parseFloat(document.getElementById('qGST').value) || 0
+    };
+    quickBillData.items.push(item);
+    renderQuickItems();
+    // Clear form
+    ['qItem','qHSN','qBags','qQty','qRate'].forEach(id => document.getElementById(id).value = '');
+}
+
+function renderQuickItems() {
+    let html = '<table style="width:100%; font-size:12px;"><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amt</th></tr>';
+    quickBillData.items.forEach((i, idx) => {
+        html += `<tr><td>${i.name}</td><td>${i.qty}Kg</td><td>₹${i.rate}</td><td>₹${(i.qty*i.rate).toFixed(2)}</td></tr>`;
+    });
+    html += '</table>';
+    document.getElementById('quickItemsList').innerHTML = html;
+}
+
+function saveQuickEntry() {
+    quickBillData.customerId = document.getElementById('quickCustomer').value;
+    quickBillData.vehicle = document.getElementById('quickVehicle').value;
+    quickBillData.bank = document.getElementById('quickBank').value;
+    
+    currentBillItems = quickBillData.items; // Full bill wale ko data de do
+    document.getElementById('billVehicleNo').value = quickBillData.vehicle;
+    document.getElementById('billBuyerBank').value = quickBillData.bank;
+    document.getElementById('billCustomerSelect').value = quickBillData.customerId;
+    
+    switchTab('bill'); // Seedha bill preview pe bhej do
+}
+
+  
 // ==================== UI UPDATE FUNCTIONS ====================
 function updateUI() {
   updateDashboard();
