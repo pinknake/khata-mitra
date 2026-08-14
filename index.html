@@ -2093,10 +2093,10 @@ document.addEventListener('DOMContentLoaded', loadData);
     window.currentCustomerId = customerId;
 
     document.getElementById('detailCustomerName').textContent = customer.name;
-    document.getElementById('detailBalance').textContent = '₹' + Math.abs(customer.balance);
+    document.getElementById('detailBalance').textContent = '₹' + Math.abs(customer.balance || 0);
     document.getElementById('detailPhone').textContent = customer.phone || '-';
 
-    // Show customer photos - ye wala same rehne de
+    // Show customer photos
     const photos = getCustomerPhotos(customerId);
     const photosContainer = document.getElementById('customerPhotos');
     if (photos.length > 0) {
@@ -2113,15 +2113,9 @@ document.addEventListener('DOMContentLoaded', loadData);
       photosContainer.innerHTML = `<p style="color: var(--gray); text-align: center; grid-column: span 3;" data-hi="कोई फोटो नहीं" data-en="No photos">कोई फोटो नहीं</p>`;
     }
 
-    // YE NAYI LINE ADD KAR: FILTER BUTTONS
-    const txHeader = document.querySelector('#customerTransactions').parentElement.querySelector('h4');
-    
-        <div style="display:flex; gap:5px; margin-bottom:15px;">
-            <button onclick="filterCustomerTx('all')" class="btn btn-outline btn-sm">All</button>
-            <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
-            <button onclick="filterCustomerTx('bill')" class="btn btn-outline btn-sm">Bill</button>
-        </div>
-    `);
+    // YE WALI 3 LINE HATA DE - KYUKI BUTTON AB HTML ME HAIN
+    // const txHeader = document.querySelector('#customerTransactions').parentElement.querySelector('h4');
+    // txHeader.insertAdjacentHTML('beforebegin', `...`);
 
     renderCustomerTransactions('all'); // Pehli baar all dikhao
 
@@ -2129,7 +2123,6 @@ document.addEventListener('DOMContentLoaded', loadData);
     document.getElementById('customerDetailModal').setAttribute('data-customer-id', customerId);
     document.getElementById('customerDetailModal').classList.add('active');
 }
-
 
 // 1. FILTER KE LIYE
 function filterCustomerTx(type) {
@@ -2169,7 +2162,7 @@ function renderCustomerTransactions(filter = 'all') {
                 </div>
               </div>
               <div class="transaction-amount balance-negative">
-                ₹${t.amount}
+                +₹${t.amount}
               </div>
             </div>
           `;
