@@ -1345,8 +1345,6 @@
           <!-- Will be populated by JS -->
         </div>
 
-        <!-- Customer Detail Modal ke andar -->
-<h4 style="margin-bottom: 15px;" data-hi="लेन-देन इतिहास" data-en="Transaction History">लेन-देन इतिहास</h4>
 
 <!-- YE 3 BUTTON YAHI DAAL DE EK BAAR -->
 <div id="ledgerFilterBtns" style="display:flex; gap:5px; margin-bottom:15px;">
@@ -1354,7 +1352,8 @@
     <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
     <button onclick="filterCustomerTx('bill')" class="btn btn-outline btn-sm">Bill</button>
 </div>
-
+        
+<h4 style="margin-bottom: 15px;" data-hi="लेन-देन इतिहास" data-en="Transaction History">लेन-देन इतिहास</h4
 <div id="customerTransactions" class="transaction-list" style="max-height: 300px; overflow-y: auto;">
   <!-- Will be populated by JS -->
         </div>
@@ -1545,30 +1544,30 @@ function openBillModal() {
 
   function saveBillToHistory() {
     const customerId = document.getElementById('billCustomerSelect').value;
-    if(!customerId || customerId === 'cash') return; // Cash skip
+    if(!customerId || customerId === 'cash') return; // CASH SKIP
 
     const customer = appState.customers.find(c => c.id === customerId);
     if(!customer) return;
+
+    const grandTotal = parseFloat(document.getElementById('grandTotal').innerText.replace('₹',''));
+    if(grandTotal === 0) return; // KHALI BILL SKIP
 
     const billTransaction = {
         id: 'BILL_' + Date.now(),
         type: 'bill',
         customerId: customerId,
-        amount: parseFloat(document.getElementById('grandTotal').innerText.replace('₹','')),
+        amount: grandTotal,
         note: 'GST Bill - ' + currentBillItems.map(i => i.name).join(', '),
         date: new Date().toISOString().split('T')[0],
-        items: currentBillItems // pura item list save
+        items: currentBillItems
     };
 
     appState.transactions.push(billTransaction);
-
-    // Customer ka balance bhi badha do
     customer.balance = (customer.balance || 0) + billTransaction.amount;
 
     saveData();
     updateUI();
 }
-  
 // Load data from localStorage
 function loadData() {
   const saved = localStorage.getItem('khataMitraPro'); // PURANA WALA HI RAKHA
