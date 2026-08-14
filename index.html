@@ -1345,15 +1345,18 @@
           <!-- Will be populated by JS -->
         </div>
 
-        <div style="display:flex; gap:5px; margin-bottom:15px;">
-    <button onclick="filterCustomerTx('all')" class="btn btn-outline" id="filterAll">All</button>
-    <button onclick="filterCustomerTx('payment')" class="btn btn-outline" id="filterPayment">Udhar/Jama</button>
-    <button onclick="filterCustomerTx('bill')" class="btn btn-outline" id="filterBill">Bill</button>
+        <!-- Customer Detail Modal ke andar -->
+<h4 style="margin-bottom: 15px;" data-hi="लेन-देन इतिहास" data-en="Transaction History">लेन-देन इतिहास</h4>
+
+<!-- YE 3 BUTTON YAHI DAAL DE EK BAAR -->
+<div id="ledgerFilterBtns" style="display:flex; gap:5px; margin-bottom:15px;">
+    <button onclick="filterCustomerTx('all')" class="btn btn-outline btn-sm">All</button>
+    <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
+    <button onclick="filterCustomerTx('bill')" class="btn btn-outline btn-sm">Bill</button>
 </div>
-        
-        <h4 style="margin-bottom: 15px;" data-hi="लेन-देन इतिहास" data-en="Transaction History">लेन-देन इतिहास</h4>
-        <div id="customerTransactions" class="transaction-list" style="max-height: 300px; overflow-y: auto;">
-          <!-- Will be populated by JS -->
+
+<div id="customerTransactions" class="transaction-list" style="max-height: 300px; overflow-y: auto;">
+  <!-- Will be populated by JS -->
         </div>
       </div>
     </div>
@@ -2113,7 +2116,7 @@ document.addEventListener('DOMContentLoaded', loadData);
 
     // YE NAYI LINE ADD KAR: FILTER BUTTONS
     const txHeader = document.querySelector('#customerTransactions').parentElement.querySelector('h4');
-    txHeader.insertAdjacentHTML('beforebegin', `
+    
         <div style="display:flex; gap:5px; margin-bottom:15px;">
             <button onclick="filterCustomerTx('all')" class="btn btn-outline btn-sm">All</button>
             <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
