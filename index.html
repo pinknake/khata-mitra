@@ -1198,11 +1198,12 @@
 
   <div class="form-group">
     <label>Company Mobile</label>
-    <input type="text" id="companyMobile" class="form-control" placeholder="9876543210">
+    <input type="text" id="companyMobile" class="form-control" placeholder="98123XXXXX">
 </div>
+
 <div class="form-group">
     <label>Company Email</label>
-    <input type="email" id="companyEmail" class="form-control" placeholder="abc@gmail.com">
+    <input type="email" id="companyEmail" class="form-control" placeholder="khata@gmail.com">
 </div>
   
   <button class="btn btn-primary" onclick="saveSettings()">
@@ -1458,22 +1459,19 @@ document.getElementById('billCompanyMobile').innerText = company.mobile || '';
 document.getElementById('billCompanyEmail').innerText = company.email || '';
 document.getElementById('billCompanyBank').innerText = company.bank || '';
     
-    // 1. BUYER DETAIL - BAKE SAB PAHLE JAISE HI RAHEGA
-    document.getElementById('buyerName').innerText = customer.name || 'Cash Customer';
-    document.getElementById('buyerAddress').innerText = customer.address || '';
-    document.getElementById('buyerMobile').innerText = customer.mobile || '';
-    document.getElementById('buyerGSTIN').innerText = customer.gstin || '';
-    document.getElementById('buyerPAN').innerText = customer.pan || '';
-    document.getElementById('buyerBank').innerText = customer.bank || '';
-    
-    
-    // 2. INVOICE DETAIL
-    document.getElementById('invoiceNo').innerText = 'KM' + Date.now().toString().slice(-6);
-    document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('en-IN');
-
-// INVOICE DETAIL KE NICHE
-document.getElementById('vehicleNo').innerText = document.getElementById('billVehicleNo').value;
+    // 1. BUYER DETAIL - NAAM MAP KAR DIYA
+document.getElementById('buyerName').innerText = customer.name || 'Cash Customer';
+document.getElementById('buyerAddress').innerText = customer.address || '';
+document.getElementById('buyerMobile').innerText = customer.phone || '';        // phone -> mobile
+document.getElementById('buyerGSTIN').innerText = customer.gst || '';           // gst -> gstin
+document.getElementById('buyerPAN').innerText = customer.pan || '';
 document.getElementById('buyerBank').innerText = document.getElementById('billBuyerBank').value || customer.bank || '';
+
+// 2. INVOICE DETAIL
+document.getElementById('invoiceNo').innerText = 'KM' + Date.now().toString().slice(-6);
+document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('en-IN');
+document.getElementById('vehicleNo').innerText = document.getElementById('billVehicleNo').value || customer.vehicle || ''; // vehicle -> vehicleNo
+
   
     // 3. ITEM TABLE
     let tbody = document.getElementById('itemTableBody');
