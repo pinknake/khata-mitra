@@ -5,6 +5,9 @@
   <script>
 /* ===== KHATA MITRA DOCTOR CODE ===== */
 
+    window.onerror = function(msg) { alert("ERROR: " + msg); }
+  
+
 // 1. JS ERROR PAKDO
 window.onerror = function(msg, url, line) { 
     alert("❌ JS ERROR:\n" + msg + "\nLine: " + line); 
@@ -947,8 +950,9 @@ function doctorCheck(){
         </div>
 
         <!-- Recent Transactions -->
-          <button onclick="openBillModal()">GST बिल बनाएं</button>
-    
+          <button onclick="try{openBillModal()}catch(e){alert(e.message)}">
+    📄 GST बिल बनाएं
+</button>
         <h3 style="margin: 20px 0 10px 0;" data-hi="हाल के लेन-देन" data-en="Recent Transactions">हाल के लेन-देन</h3>
         <div id="recentTransactions" class="transaction-list">
           <!-- Will be populated by JS -->
