@@ -2882,32 +2882,38 @@ function shareBillOnWhatsApp() {
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
 
-  // GLOBAL VARIABLE
-let currentBillItems = [];
+<script>
+// ===== GLOBAL VARIABLES SABSE UPAR =====
+var currentBillItems = [];
+var appState = { customers: [], transactions: [] }; // agar nahi hai to
 
+// ===== MODAL FUNCTIONS =====
 function closeModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
 function openBillModal() {
-    currentBillItems = []; // purana data saaf
-    document.getElementById('itemTableBody').innerHTML = ''; // table khali
-    document.getElementById('billModal').style.display = 'flex'; // modal kholo
-    generateBillPreview(); // bill update
-    alert("Bill Modal Khul gaya"); // test ke liye - baad me hata dena
+    currentBillItems = []; 
+    document.getElementById('itemTableBody').innerHTML = '';
+    document.getElementById('billModal').style.display = 'flex';
+    generateBillPreview();
 }
 
-// BAHAR CLICK KARNE SE BAND HO
+// ===== TEMP FUNCTIONS =====
+function generateBillPreview(){ 
+    console.log("Bill Preview");
+}
+function addItemToBill(){ 
+    alert("Item add hoga"); 
+}
+
+// ===== MODAL BAHAR CLICK SE BAND =====
 window.addEventListener('click', function(event) {
     if (event.target.classList.contains('modal')) {
         event.target.style.display = 'none';
     }
 });
-
-// TEMP FUNCTION JAB TAK BAKI CODE NAHI HAI
-function generateBillPreview(){ console.log("preview"); }
-function addItemToBill(){ alert("addItemToBill banana baaki hai"); }
-    
+</script>
   </script>    
 </body>
 </html>
