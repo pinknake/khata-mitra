@@ -2814,6 +2814,23 @@ function shareBillOnWhatsApp() {
 }
 
   </script>
+<script>
+// 1. JS Error
+window.onerror = function(msg, url, line) { alert("JS ERROR:\n" + msg + "\nLine: " + line); return true; }
 
+// 2. Button Check
+setTimeout(function(){
+    document.querySelectorAll('[onclick]').forEach(btn => {
+        let fn = btn.getAttribute('onclick').split(')[0];
+        if(typeof window[fn]!== 'function'){
+            btn.style.border = '4px solid red';
+            btn.title = "ERROR: " + fn + " function nahi hai";
+        }
+    });
+}, 500);
+</script>
+
+<style>*{outline:1px solid #eee}</style>
+    
 </body>
 </html>
