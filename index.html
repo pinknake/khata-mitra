@@ -1483,28 +1483,6 @@ let appState = {
 
 let currentBillItems = []; // upar global me dalna
 
-       // GLOBAL VARIABLE
-let currentBillItems = [];
-
-function closeModal(id) {
-    document.getElementById(id).style.display = 'none';
-}
-
-function openBillModal() {
-    currentBillItems = []; // purana data saaf
-    document.getElementById('itemTableBody').innerHTML = ''; // table khali
-    document.getElementById('billModal').style.display = 'flex'; // modal kholo
-    generateBillPreview(); // bill update
-    alert("Bill Modal Khul gaya"); // test ke liye - baad me hata dena
-}
-
-// BAHAR CLICK KARNE SE BAND HO
-window.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
-});
-
 function addItemToBill() {
     let item = {
         name: document.getElementById('itemName').value,
@@ -2903,25 +2881,32 @@ function shareBillOnWhatsApp() {
     let whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
-   
-    console.log("openBillModal = ", typeof openBillModal);
-console.log("closeModal = ", typeof closeModal);
 
-  
-// 1. JS Error
-window.onerror = function(msg, url, line) { alert("JS ERROR:\n" + msg + "\nLine: " + line); return true; }
+  // GLOBAL VARIABLE
+let currentBillItems = [];
 
-// 2. Button Check
-setTimeout(function(){
-    document.querySelectorAll('[onclick]').forEach(btn => {
-        let fn = btn.getAttribute('onclick').split(')[0];
-        if(typeof window[fn]!== 'function'){
-            btn.style.border = '4px solid red';
-            btn.title = "ERROR: " + fn + " function nahi hai";
-        }
-    });
-}, 500);
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
 
+function openBillModal() {
+    currentBillItems = []; // purana data saaf
+    document.getElementById('itemTableBody').innerHTML = ''; // table khali
+    document.getElementById('billModal').style.display = 'flex'; // modal kholo
+    generateBillPreview(); // bill update
+    alert("Bill Modal Khul gaya"); // test ke liye - baad me hata dena
+}
+
+// BAHAR CLICK KARNE SE BAND HO
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
+
+// TEMP FUNCTION JAB TAK BAKI CODE NAHI HAI
+function generateBillPreview(){ console.log("preview"); }
+function addItemToBill(){ alert("addItemToBill banana baaki hai"); }
     
   </script>    
 </body>
