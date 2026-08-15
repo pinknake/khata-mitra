@@ -24,6 +24,19 @@
       box-sizing: border-box;
     }
 
+
+
+body.dark-mode {
+      
+}
+
+body {
+      
+}
+
+
+     
+
     :root {
       --primary: #6a1b9a;
       --primary-dark: #4a0072;
@@ -35,6 +48,11 @@
       --dark: #1e3d58;
       --light: #f8f9fa;
       --gray: #6c757d;
+             --bg: #f5f7fa;
+      --card-bg: #fff;
+      --text: #1e3d58;
+      --border: #e0e0e0;
+      --muted: #6c757d;
     }
 
     body {
@@ -44,12 +62,41 @@
       padding: 0;
       min-height: 100vh;
       transition: all 0.3s ease;
+       background: var(--bg);
+      color: var(--text);
     }
 
     body.dark-mode {
       background: #121212;
       color: #fff;
+       --bg: #121212;
+      --card-bg: #1e1e1e;
+      --text: #e0e0e0;
+      --border: #333;
+      --muted: #aaa;
     }
+     .app-container {
+  background: var(--card-bg);
+  color: var(--text);
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+.modal-content {
+  background: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+input, select, textarea {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.transaction-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+}
 
     
     /* App Container */
