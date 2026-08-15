@@ -1426,28 +1426,6 @@ let appState = {
   settings: { darkMode: false, language: 'hi', autoReminder: false }
 };
 
-let currentBillItems = []; // global me
-
-// ===== MODAL FUNCTIONS - YE NAYA JOD DE =====
-function closeModal(id) {
-    document.getElementById(id).style.display = 'none';
-}
-
-function openBillModal() {
-    currentBillItems = []; 
-    document.getElementById('itemTableBody').innerHTML = '';
-    renderBillItems(); // list bhi khali karo
-    document.getElementById('billModal').style.display = 'flex';
-    generateBillPreview();
-}
-
-// ===== MODAL BAHAR CLICK SE BAND =====
-window.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
-});
-
 function addItemToBill() {
     let item = {
         name: document.getElementById('itemName').value,
