@@ -2865,8 +2865,9 @@ function addItemToBill() {
     if(!item.name || !item.rate) { alert('Item name aur rate dalo'); return; }
     
     item.total = (item.qty * item.rate) * (1 + item.gst/100);
+    
     currentBillItems.push(item);
-    renderBillItems();
+    renderBillItems(); // YE LINE ADD KI
     generateBillPreview();
     
     document.getElementById('itemName').value = '';
@@ -2891,9 +2892,110 @@ function deleteItem(i) {
     generateBillPreview();
 }
 
-function generateBillPreview(){ 
-    console.log("Bill Preview chal raha");
+function generateBillPreview() {
+    let customer = appState.customers.find(c => c.id == document.getElementById('billCustomerSelect').value) || {};
+    let company = appState.company || {}; // SETTING SE DATA
+    let total = 0, totalCGST = 0, totalSGST = 0;
+
+// NAYA
+document.getElementById('billCompanyName').innerText = company.name || 'Khata Mitra';
+document.getElementById('billCompanyAddress').innerText = company.address || '';
+document.getElementById('billCompanyGST').innerText = company.gst || '';
+document.getElementById('billCompanyPAN').innerText = company.pan || '';
+document.getElementById('billCompanyMobile').innerText = company.mobile || '';
+document.getElementById('billCompanyEmail').innerText = company.email || '';
+document.getElementById('billCompanyBank').innerText = company.bank || '';
+    
+    // 1. BUYER DETAIL - NAAM MAP KAR DIYA
+document.getElementById('buyerName').innerText = customer.name || 'Cash Customer';
+document.getElementById('buyerAddress').innerText = customer.address || '';
+document.getElementById('buyerMobile').innerText = customer.phone || '';        // phone -> mobile
+document.getElementById('buyerGSTIN').innerText = customer.gst || '';           // gst -> gstin
+document.getElementById('buyerPAN').innerText = customer.pan || '';
+document.getElementById('buyerBank').innerText = document.getElementById('billBuyerBank').value || customer.bank || '';
+
+// 2. INVOICE DETAIL
+document.getElementById('invoiceNo').innerText = 'KM' + Date.now().toString().slice(-6);
+document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('en-IN');
+document.getElementById('vehicleNo').innerText = document.getElementById('billVehicleNo').value || customer.vehicle || ''; // vehicle -> vehicleNo
+
+  
+    // 3. ITEM TABLE
+    let tbody = document.getElementById('itemTableBody');
+    tbody.innerHTML = '';
+    currentBillItems.forEach((item, i) => {
+        let amount = item.qty * item.rate;
+        let gstRate = item.gst || 0;
+        let cgst = (amount * gstRate/2) / 100;
+        let sgst = (amount * gstRate/2) / 100;
+        
+        total += amount;
+        totalCGST += cgst;
+        totalSGST += sgst;
+        
+        tbody.innerHTML += `<tr>
+            <td style="border:1px solid #000; padding:4px;">${i+1}</td>
+            <td style="border:1px solid #000; padding:4px;">${item.name}</td>
+            <td style="border:1px solid #000; padding:4px;">${item.hsn}</td>
+            <td style="border:1px solid #000; padding:4px;">${item.bags}</td>
+            <td style="border:1px solid #000; padding:4px;">${item.qty} Kg</td>
+            <td style="border:1px solid #000; padding:4px;">₹${item.rate}</td>
+            <td style="border:1px solid #000; padding:4px;">${gstRate}%</td>
+            <td style="border:1px solid #000; padding:4px;">₹${amount.toFixed(2)}</td>
+        </tr>`;
+    });
+    
+    // 4. TOTAL
+    document.getElementById('subTotal').innerText = '₹' + total.toFixed(2);
+    document.getElementById('totalCGST').innerText = '₹' + totalCGST.toFixed(2);
+    document.getElementById('totalSGST').innerText = '₹' + totalSGST.toFixed(2);
+    document.getElementById('grandTotal').innerText = '₹' + (total + totalCGST + totalSGST).toFixed(2);
+
+  
+    saveBillToHistory();
+  }
+
+
+// YE BHI ZAROORI HAI
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
+
+  function saveBillToHistory() {
+    const customerId = document.getElementById('billCustomerSelect').value;
+    if(!customerId || customerId === 'cash') return;
+
+    const customer = appState.customers.find(c => c.id === customerId);
+    if(!customer) return;
+
+    const grandTotal = parseFloat(document.getElementById('grandTotal').innerText.replace('₹',''));
+    if(grandTotal === 0) return;
+
+    // YE SARI INFO EK SAATH SAVE KARO
+    const billTransaction = {
+        id: 'BILL_' + Date.now(),
+        type: 'bill',
+        customerId: customerId,
+        amount: grandTotal,
+        date: new Date().toISOString().split('T')[0],
+        
+        // NAYE FIELDS
+        invoiceNo: document.getElementById('invoiceNo').innerText,
+        vehicleNo: document.getElementById('vehicleNo').innerText,
+        paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash', // agar dropdown hai to
+        items: currentBillItems // copy karke save karo
+        company: appState.company // company gst, pan bhi
+    };
+
+    appState.transactions.push(billTransaction);
+    customer.balance = (customer.balance || 0) + billTransaction.amount;
+
+    saveData();
+    updateUI();
 }
+
 </script>
 
 </body>
