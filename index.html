@@ -1452,6 +1452,10 @@ body.dark-mode .transaction-item {
           <h3 id="transactionModalTitle">नया लेन-देन</h3>
           <button class="close-btn" onclick="closeModal('addTransactionModal')">&times;</button>
         </div>
+
+         <div id="customerHistoryBox" style="background:#f5f5f5; padding:10px; border-radius:8px; margin-bottom:10px; display:none;">
+  <b data-hi="बकाया:" data-en="Balance:">बकाया:</b> <span id="oldBalance">₹0</span>
+</div>
         
         <div class="form-group">
           <label data-hi="ग्राहक *" data-en="Customer *">ग्राहक *</label>
@@ -1541,6 +1545,10 @@ body.dark-mode .transaction-item {
             <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
             <button onclick="filterCustomerTx('bill')" class="btn btn-outline btn-sm">Bill</button>
         </div>
+
+         <div id="customerHistoryList" style="margin-top:10px;">
+  <!-- Yaha transaction list ayegi -->
+</div>
                 
         <h4 style="margin-bottom: 15px;" data-hi="लेन-देन इतिहास" data-en="Transaction History">लेन-देन इतिहास</h4>
         <div id="customerTransactions" class="transaction-list" style="max-height: 300px; overflow-y: auto;">
@@ -1785,6 +1793,85 @@ let appState = {
 };
 
 let currentBillItems = [];
+
+
+let selectedCustomerId = null; // sabse upar global bana de
+
+function openCustomerModal(customerId) {
+    selectedCustomerId = customerId;
+    const customer = appState.customers.find(c => c.id === customerId);
+    
+    document.getElementById('customerName').innerText = customer.name;
+    document.getElementById('customerBalance').innerText = '₹' + (customer.balance || 0);
+    document.getElementById('customerPhone').innerText = customer.phone;
+    
+    // Pehle All dikha de
+    filterTransactions('all'); 
+    
+    document.getElementById('customerModal').style.display = 'flex';
+}
+
+
+function filterTransactions(filterType) {
+    // Saare transaction nikal jo is customer ke hain
+    let transactions = appState.transactions.filter(t => t.customerId === selectedCustomerId);
+    
+    // Filter laga
+    if(filterType === 'bill') {
+        transactions = transactions.filter(t => t.type === 'bill');
+    }
+    if(filterType === 'udhar_jama') {
+        transactions = transactions.filter(t => t.type === 'udhar' || t.type === 'jama' || t.type === 'gave' || t.type === 'receive');
+    }
+    
+    let html = '';
+    if(transactions.length === 0) {
+        html = '<p style="text-align:center; color:#888;">कोई लेन-देन नहीं</p>';
+    }
+    
+    transactions.reverse().forEach(t => {
+        let isCredit = t.type === 'jama' || t.type === 'receive'; // Paisa aya
+        let isBill = t.type === 'bill';
+        
+        let color = isCredit ? 'green' : 'red';
+        let sign = isCredit ? '+' : '-';
+        let icon = isCredit ? '↓' : '↑';
+        let title = isBill ? 'बिल' : (isCredit ? 'जमा किया' : 'उधार दिया');
+        
+        html += `
+        <div onclick="showTransactionDetail('${t.id}')" style="display:flex; align-items:center; padding:12px; background:white; border-radius:10px; margin-bottom:8px; cursor:pointer;">
+            <div style="background:${isCredit ? '#e8f5e9' : '#ffebee'}; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; margin-right:10px;">
+                <span style="color:${color}; font-size:20px;">${icon}</span>
+            </div>
+            <div style="flex:1;">
+                <b>${title}</b>
+                <div style="font-size:12px; color:#666;">${t.note || ''} • ${t.date}</div>
+            </div>
+            <div style="color:${color}; font-weight:bold; font-size:16px;">
+                ${sign} ₹${t.amount}
+            </div>
+        </div>
+        `;
+    });
+    
+    document.getElementById('customerHistoryList').innerHTML = html;
+}
+
+
+// Click karne pe detail dikhane ke liye
+function showTransactionDetail(transactionId) {
+    const t = appState.transactions.find(tr => tr.id == transactionId);
+    if(!t) return;
+    
+    alert(`Detail:
+    Type: ${t.type}
+    Amount: ₹${t.amount}
+    Date: ${t.date}
+    Note: ${t.note}`);
+    // Yaha tu bill jaisa alag detail modal bhi khol sakta hai
+}
+
+   
 
 // ==================== MODAL CONTROL ====================
 function closeModal(id) {
