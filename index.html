@@ -1799,13 +1799,22 @@ function openBillModal() {
    
     // YE 2 LINE ADD KAR - Customer dropdown bharne ke liye
     const billCustomerSelect = document.getElementById('billCustomerSelect');
+
+    // YE SAFETY CHECK ADD KAR DE
+    if(!Array.isArray(customers)) {
+        customers = []; // agar array nahi hai to khali array bana de
+    }
+    
+    // dropdown reset
     billCustomerSelect.innerHTML = '<option value="">Cash Customer</option>';
-    customers.forEach(c => {
+
+   // YAHAN CHANGE KIYA
+    appState.customers.forEach(c => {
         billCustomerSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
     });
     generateBillPreview();
 }
-
+   
 // BAHR CLICK SE BAND
 window.addEventListener('click', function(event) {
     if (event.target.classList.contains('modal')) {
@@ -1964,11 +1973,17 @@ function loadData() {
       let loadedData = JSON.parse(saved);
       // Agar company nahi hai to bana do
       if(!loadedData.company) loadedData.company = { name: '', address: '', gst: '', pan: '', bank: '', upi: '' };
+      
+      // YE 2 SAFETY LINE ADD KAR DE
+      if(!Array.isArray(loadedData.customers)) loadedData.customers = [];
+      if(!Array.isArray(loadedData.transactions)) loadedData.transactions = [];
+      
       appState = loadedData;
     } catch (e) { console.error('Error loading data', e); }
   }
   
-  if (appState.customers.length === 0) { initDemoData(); }
+  // YE CHECK BHI BADAL DE - warna error dega agar customers hi na ho
+  if (!appState.customers || appState.customers.length === 0) { initDemoData(); }
   if (appState.settings.language) { setLanguage(appState.settings.language); }
   
   loadSettings(); // SETTINGS LOAD
