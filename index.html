@@ -2826,6 +2826,26 @@ function shareBillOnWhatsApp() {
 
 
 <script>
+
+
+let currentLanguage = 'hi'; 
+
+function setLanguage(lang) {
+  currentLanguage = lang;
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.remove('active');
+    if (btn.textContent.includes(lang === 'hi' ? 'हिंदी' : 'ENG')) {
+      btn.classList.add('active');
+    }
+  });
+  document.querySelectorAll('[data-hi][data-en]').forEach(el => {
+    el.textContent = el.getAttribute(`data-${lang}`);
+  });
+  document.getElementById('appTitle').textContent = lang === 'hi' ? 'खाता मित्र प्रो' : 'Khata Mitra Pro';
+  appState.settings.language = lang;
+  saveData();
+}
+
 let appState = {
   company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '', mobile: '', email: '' },
   customers: [],
@@ -3096,38 +3116,6 @@ function showBillDetail(billId) {
     document.getElementById('billViewModal').style.display = 'flex';
 }
 
-
-// ==================== TAB SWITCH FUNCTION ====================
-function switchTab(tabName) {
-    // Sabhi tab aur pane se active hatao
-    document.querySelectorAll('.nav-tab').forEach(tab => tab.classList.remove('active'));
-    document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-    
-    // Jispe click kiya usko active karo
-    event.currentTarget.classList.add('active');
-    document.getElementById(tabName).classList.add('active');
-    
-    // Data refresh kar do
-    updateUI();
-}
-
-// ==================== MODAL OPEN FUNCTION ====================
-function openAddModal(type) {
-    document.getElementById('modalTitle').innerText = 
-        type === 'customer' ? 'नया ग्राहक' :
-        type === 'udhar' ? 'उधार दें' :
-        type === 'jama' ? 'जमा करें' : 'नया आइटम';
-    
-    document.getElementById('transactionType').value = type;
-    document.getElementById('addModal').style.display = 'flex';
-    
-    // Form clear
-    document.getElementById('customerSelect').value = '';
-    document.getElementById('amountInput').value = '';
-    document.getElementById('noteInput').value = '';
-}
-   
-  
 // ==================== UI UPDATE FUNCTIONS ====================
 function updateUI() {
   updateDashboard();
