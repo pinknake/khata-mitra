@@ -843,28 +843,26 @@
           <div class="stat-value" id="netBalance">₹0</div>
         </div>
       </div>
-    </div>
-
-    <!-- Navigation Tabs -->
+       
+<!-- Navigation Tabs -->
     <div class="nav-tabs">
-      <div class="nav-tab active" onclick="switchTab('dashboard')">
+      <div class="nav-tab active" onclick="try{switchTab('dashboard')}catch(e){alert('Dashboard Error: '+e.message)}">
         <i class="fas fa-home"></i> <span class="tab-label" data-hi="होम" data-en="Home">होम</span>
       </div>
-      <div class="nav-tab" onclick="switchTab('customers')">
+      <div class="nav-tab" onclick="try{switchTab('customers')}catch(e){alert('Customers Error: '+e.message)}">
         <i class="fas fa-users"></i> <span class="tab-label" data-hi="ग्राहक" data-en="Customers">ग्राहक</span>
       </div>
-      <div class="nav-tab" onclick="switchTab('history')">
+      <div class="nav-tab" onclick="try{switchTab('history')}catch(e){alert('History Error: '+e.message)}">
         <i class="fas fa-history"></i> <span class="tab-label" data-hi="हिस्ट्री" data-en="History">हिस्ट्री</span>
       </div>
-      <div class="nav-tab" onclick="switchTab('reports')">
+      <div class="nav-tab" onclick="try{switchTab('reports')}catch(e){alert('Reports Error: '+e.message)}">
         <i class="fas fa-chart-bar"></i> <span class="tab-label" data-hi="रिपोर्ट" data-en="Reports">रिपोर्ट</span>
       </div>
       
-      <div class="nav-tab" onclick="switchTab('settings')">
-    <i class="fas fa-cog"></i> 
-    <span class="tab-label" data-hi="सेटिंग" data-en="Settings">सेटिंग</span>
-</div>
-      
+      <div class="nav-tab" onclick="try{switchTab('settings')}catch(e){alert('Settings Error: '+e.message)}">
+        <i class="fas fa-cog"></i> 
+        <span class="tab-label" data-hi="सेटिंग" data-en="Settings">सेटिंग</span>
+      </div>
     </div>
   
     <!-- Main Content -->
@@ -873,23 +871,22 @@
       <div class="tab-pane active" id="dashboard">
         <!-- Quick Actions -->
         <div class="quick-actions">
-          <div class="quick-action" onclick="openAddModal('customer')">
+          <div class="quick-action" onclick="try{openAddModal('customer')}catch(e){alert('Customer Modal Error: '+e.message)}">
             <i class="fas fa-user-plus"></i>
             <span data-hi="नया ग्राहक" data-en="New Customer">नया ग्राहक</span>
           </div>
-          <div class="quick-action" onclick="openAddModal('udhar')">
+          <div class="quick-action" onclick="try{openAddModal('udhar')}catch(e){alert('Udhar Error: '+e.message)}">
             <i class="fas fa-arrow-up"></i>
             <span data-hi="उधार दें" data-en="Give">उधार दें</span>
           </div>
-          <div class="quick-action" onclick="openAddModal('jama')">
+          <div class="quick-action" onclick="try{openAddModal('jama')}catch(e){alert('Jama Error: '+e.message)}">
             <i class="fas fa-arrow-down"></i>
             <span data-hi="जमा करें" data-en="Receive">जमा करें</span>
           </div>
-          <div class="quick-action" onclick="openAddModal('item')">
+          <div class="quick-action" onclick="try{openAddModal('item')}catch(e){alert('Item Error: '+e.message)}">
             <i class="fas fa-box"></i>
             <span data-hi="आइटम" data-en="Item">आइटम</span>
           </div>
-
         </div>
 
         <!-- Recent Transactions -->
