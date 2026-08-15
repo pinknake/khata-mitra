@@ -1481,7 +1481,27 @@ let appState = {
   settings: { darkMode: false, language: 'hi', autoReminder: false }
 };
 
-let currentBillItems = []; // upar global me dalna
+let currentBillItems = []; // global me
+
+// ===== MODAL FUNCTIONS - YE NAYA JOD DE =====
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function openBillModal() {
+    currentBillItems = []; 
+    document.getElementById('itemTableBody').innerHTML = '';
+    renderBillItems(); // list bhi khali karo
+    document.getElementById('billModal').style.display = 'flex';
+    generateBillPreview();
+}
+
+// ===== MODAL BAHAR CLICK SE BAND =====
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
 
 function addItemToBill() {
     let item = {
@@ -1494,19 +1514,20 @@ function addItemToBill() {
     };
     if(!item.name || !item.rate) { alert('Item name aur rate dalo'); return; }
     
-    item.total = (item.qty * item.rate) * (1 + item.gst/100); // total nikal liya
+    item.total = (item.qty * item.rate) * (1 + item.gst/100);
     
     currentBillItems.push(item);
+    renderBillItems(); // YE LINE ADD KI
     generateBillPreview();
     
-    // form khali
     document.getElementById('itemName').value = '';
     document.getElementById('itemHSN').value = '';
     document.getElementById('itemBags').value = '';
     document.getElementById('itemQty').value = '';
     document.getElementById('itemRate').value = '';
 }
-  function renderBillItems() {
+
+function renderBillItems() {
     let list = document.getElementById('billItemsList');
     list.innerHTML = '';
     currentBillItems.forEach((item, i) => {
@@ -1520,7 +1541,6 @@ function deleteItem(i) {
     renderBillItems();
     generateBillPreview();
 }
-
 
 function generateBillPreview() {
     let customer = appState.customers.find(c => c.id == document.getElementById('billCustomerSelect').value) || {};
@@ -2882,38 +2902,6 @@ function shareBillOnWhatsApp() {
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
 
-<script>
-// ===== GLOBAL VARIABLES SABSE UPAR =====
-var currentBillItems = [];
-var appState = { customers: [], transactions: [] }; // agar nahi hai to
-
-// ===== MODAL FUNCTIONS =====
-function closeModal(id) {
-    document.getElementById(id).style.display = 'none';
-}
-
-function openBillModal() {
-    currentBillItems = []; 
-    document.getElementById('itemTableBody').innerHTML = '';
-    document.getElementById('billModal').style.display = 'flex';
-    generateBillPreview();
-}
-
-// ===== TEMP FUNCTIONS =====
-function generateBillPreview(){ 
-    console.log("Bill Preview");
-}
-function addItemToBill(){ 
-    alert("Item add hoga"); 
-}
-
-// ===== MODAL BAHAR CLICK SE BAND =====
-window.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
-});
-</script>
   </script>    
 </body>
 </html>
