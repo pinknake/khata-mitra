@@ -893,8 +893,8 @@
         </div>
 
         <!-- Recent Transactions -->
-          <button class="btn btn-primary" onclick="openBillModal()" style="margin-bottom: 15px;">
-    <i class="fas fa-file-invoice"></i> <span data-hi="GST बिल बनाएं" data-en="Generate GST Bill">GST बिल बनाएं</span>
+          <button onclick="try{openBillModal()}catch(e){alert(e.message)}">
+    📄 GST बिल बनाएं
 </button>
         <h3 style="margin: 20px 0 10px 0;" data-hi="हाल के लेन-देन" data-en="Recent Transactions">हाल के लेन-देन</h3>
         <div id="recentTransactions" class="transaction-list">
