@@ -824,24 +824,55 @@
 .transaction-item, .tab-pane h3, .tab-pane p { color: #333; }
 .transaction-item strong { color: #000; }
 
-/* ===== DARK MODE OVERRIDE ===== */
-body.dark {
-    background: #121212;
-    color: #EEE;
+/* ========= DARK MODE TEXT FIX ========= */
+body.dark-mode {
+  color: #EEE;
 }
-body.dark .quick-action { background: #2D2D2D; }
-body.dark .quick-action span { color: #EEE !important; } /* YEHI MAIN FIX HAI */
-body.dark .quick-action i { color: #A855F7; }
 
-body.dark .transaction-item, 
-body.dark .tab-pane h3, 
-body.dark .tab-pane p { color: #EEE; }
-body.dark .transaction-item strong { color: white; }
+/* Quick Action Text */
+.quick-action span {
+  color: #333; /* Light mode */
+  font-weight: 500;
+}
+body.dark-mode .quick-action span {
+  color: #EEE !important; /* Dark mode */
+}
 
-body.dark .nav-tabs { background: #1E1E1E; }
-body.dark .nav-tab { color: #AAA; }
-body.dark .nav-tab.active { color: white; }
-   
+/* Transaction + Heading Text */
+.tab-pane h3, 
+.transaction-details h4,
+.transaction-details p,
+.customer-info h3,
+.customer-info p {
+  color: #333; /* Light mode */
+}
+body.dark-mode .tab-pane h3,
+body.dark-mode .transaction-details h4,
+body.dark-mode .transaction-details p,
+body.dark-mode .customer-info h3,
+body.dark-mode .customer-info p {
+  color: #EEE; /* Dark mode */
+}
+
+/* Nav Tab Inactive Color Dark me */
+body.dark-mode .nav-tab {
+  color: #AAA;
+}
+body.dark-mode .nav-tab.active {
+  color: white;
+}
+
+/* "हाल के लेन-देन" jaisa heading */
+.main-content h3 {
+  color: #333;
+}
+body.dark-mode .main-content h3 {
+  color: white;
+}
+   .tab-pane.active {
+      display: block;
+} /* YE } ADD KAR DE */
+     
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
