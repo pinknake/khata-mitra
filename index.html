@@ -2980,20 +2980,20 @@ window.addEventListener('click', function(event) {
     const grandTotal = parseFloat(document.getElementById('grandTotal').innerText.replace('₹',''));
     if(grandTotal === 0) return;
 
-    // YE SARI INFO EK SAATH SAVE KARO
     const billTransaction = {
         id: 'BILL_' + Date.now(),
         type: 'bill',
         customerId: customerId,
+        customerName: customer.name, // <-- YE ADD KIYA
         amount: grandTotal,
         date: new Date().toISOString().split('T')[0],
-        
-        // NAYE FIELDS
+
         invoiceNo: document.getElementById('invoiceNo').innerText,
         vehicleNo: document.getElementById('vehicleNo').innerText,
-        paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash', // agar dropdown hai to
-        items: currentBillItems, // <-- yahan comma laga
-        company: appState.company    };
+        paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash',
+        items: currentBillItems, // <-- YAHAN COMMA LAGAYA
+        company: appState.company
+    };
 
     appState.transactions.push(billTransaction);
     customer.balance = (customer.balance || 0) + billTransaction.amount;
@@ -3001,7 +3001,6 @@ window.addEventListener('click', function(event) {
     saveData();
     updateUI();
 }
-
  
 // Load data from localStorage
 function loadData() {
@@ -3109,6 +3108,226 @@ function updateUI() {
   updateReports();
 }
 
+   function updateDashboard() {
+  document.getElementById('totalCustomers').textContent = appState.customers.length;
+  let totalUdhar = 0, totalJama = 0;
+  appState.customers.forEach(c => {
+    if (c.balance > 0) totalUdhar += c.balance;
+    else totalJama += Math.abs(c.balance);
+  });
+  document.getElementById('totalUdhar').textContent = '₹' + totalUdhar;
+  document.getElementById('totalJama').textContent = '₹' + totalJama;
+  document.getElementById('netBalance').textContent = '₹' + (totalUdhar - totalJama);
+}
+
+// PAGE LOAD HOTE HI
+document.addEventListener('DOMContentLoaded', loadData);
+
+
+    function updateCustomerList() {
+      const list = document.getElementById('customerList');
+      const searchTerm = document.getElementById('customerSearch')?.value.toLowerCase() || '';
+      
+      const filtered = appState.customers.filter(c => 
+        c.name.toLowerCase().includes(searchTerm) || 
+        (c.phone && c.phone.includes(searchTerm))
+      );
+      
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <p data-hi="कोई ग्राहक नहीं मिला" data-en="No customers found">कोई ग्राहक नहीं मिला</p>
+          </div>
+        `;
+        return;
+      }
+      
+      list.innerHTML = filtered.map(customer => `
+        <div class="customer-card" onclick="viewCustomer('${customer.id}')">
+          <div class="customer-info">
+            <h3>${customer.name}</h3>
+            <p>📞 ${customer.phone || (currentLanguage === 'hi' ? 'नंबर नहीं' : 'No number')}</p>
+          </div>
+          <div class="customer-balance ${customer.balance >= 0 ? 'balance-positive' : 'balance-negative'}">
+            ${customer.balance >= 0 ? '₹' + customer.balance : '-₹' + Math.abs(customer.balance)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateRecentTransactions() {
+      const recent = document.getElementById('recentTransactions');
+      const transactions = [...appState.transactions].reverse().slice(0, 5);
+      
+      if (transactions.length === 0) {
+        recent.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-exchange-alt"></i>
+            <p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p>
+          </div>
+        `;
+        return;
+      }
+      
+      recent.innerHTML = transactions.map(t => {
+        const customer = appState.customers.find(c => c.id === t.customerId);
+        const typeText = t.type === 'udhar' 
+          ? (currentLanguage === 'hi' ? 'उधार दिया' : 'Gave')
+          : (currentLanguage === 'hi' ? 'जमा लिया' : 'Received');
+        
+        return `
+          <div class="transaction-item" onclick="viewCustomer('${t.customerId}')">
+            <div class="transaction-info">
+              <div class="transaction-icon ${t.type === 'udhar' ? 'icon-udhar' : 'icon-jama'}">
+                <i class="fas ${t.type === 'udhar' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+              </div>
+              <div class="transaction-details">
+                <h4>${customer?.name || 'Unknown'}</h4>
+                <p>${t.note || (currentLanguage === 'hi' ? 'कोई विवरण नहीं' : 'No description')} • ${formatDate(t.date)}</p>
+              </div>
+            </div>
+            <div class="transaction-amount ${t.type === 'udhar' ? 'balance-negative' : 'balance-positive'}">
+              ${t.type === 'udhar' ? '-' : '+'} ₹${t.amount}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateAllTransactions() {
+      const container = document.getElementById('allTransactions');
+      const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
+      
+      let filtered = [...appState.transactions].reverse();
+      
+      if (searchTerm) {
+        filtered = filtered.filter(t => {
+          const customer = appState.customers.find(c => c.id === t.customerId);
+          return customer?.name.toLowerCase().includes(searchTerm) || 
+                 (t.note && t.note.toLowerCase().includes(searchTerm));
+        });
+      }
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-history"></i>
+            <p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = filtered.map(t => {
+        const customer = appState.customers.find(c => c.id === t.customerId);
+        const typeText = t.type === 'udhar' 
+          ? (currentLanguage === 'hi' ? 'उधार' : 'Gave')
+          : (currentLanguage === 'hi' ? 'जमा' : 'Received');
+        
+        return `
+          <div class="transaction-item" onclick="viewCustomer('${t.customerId}')">
+            <div class="transaction-info">
+              <div class="transaction-icon ${t.type === 'udhar' ? 'icon-udhar' : 'icon-jama'}">
+                <i class="fas ${t.type === 'udhar' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+              </div>
+              <div class="transaction-details">
+                <h4>${customer?.name || 'Unknown'}</h4>
+                <p>${t.note || ''} • ${t.mode || 'cash'} • ${formatDate(t.date)}</p>
+              </div>
+            </div>
+            <div class="transaction-amount ${t.type === 'udhar' ? 'balance-negative' : 'balance-positive'}">
+              ${t.type === 'udhar' ? '-' : '+'} ₹${t.amount}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+   function updateReports() {
+      const month = document.getElementById('reportMonth')?.value || '3';
+      const year = document.getElementById('reportYear')?.value || '2024';
+      
+      const monthlyTransactions = appState.transactions.filter(t => {
+        const [y, m] = t.date.split('-');
+        return y === year && m === month.padStart(2, '0');
+      });
+      
+      let monthlyUdhar = 0, monthlyJama = 0;
+      monthlyTransactions.forEach(t => {
+        if (t.type === 'udhar') monthlyUdhar += t.amount;
+        else monthlyJama += t.amount;
+      });
+      
+      document.getElementById('monthlyUdhar').textContent = '₹' + monthlyUdhar;
+      document.getElementById('monthlyJama').textContent = '₹' + monthlyJama;
+      
+      // Update chart
+      updateChart(monthlyTransactions);
+    }
+
+    // Chart instance
+    let monthlyChart = null;
+
+    function updateChart(transactions) {
+      const ctx = document.getElementById('monthlyChart').getContext('2d');
+      
+      // Group by date
+      const dailyData = {};
+      transactions.forEach(t => {
+        const day = t.date.split('-')[2];
+        if (!dailyData[day]) {
+          dailyData[day] = { udhar: 0, jama: 0 };
+        }
+        if (t.type === 'udhar') dailyData[day].udhar += t.amount;
+        else dailyData[day].jama += t.amount;
+      });
+      
+      const days = Object.keys(dailyData).sort((a, b) => parseInt(a) - parseInt(b));
+      const udharData = days.map(d => dailyData[d].udhar);
+      const jamaData = days.map(d => dailyData[d].jama);
+      
+      if (monthlyChart) {
+        monthlyChart.destroy();
+      }
+      
+      monthlyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: days.map(d => d + (currentLanguage === 'hi' ? ' तारीख' : '')),
+          datasets: [
+            {
+              label: currentLanguage === 'hi' ? 'उधार दिया' : 'Given',
+              data: udharData,
+              backgroundColor: '#e53935',
+              borderRadius: 8
+            },
+            {
+              label: currentLanguage === 'hi' ? 'जमा लिया' : 'Received',
+              data: jamaData,
+              backgroundColor: '#2ec4b6',
+              borderRadius: 8
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: value => '₹' + value
+              }
+            }
+          }
+        }
+      });
+    }
    
        
 </script>
