@@ -1395,66 +1395,11 @@
 
     <script src="fire.js"></script>
 
-  
 <script>
-  /* ===== KHATA MITRA DOCTOR CODE ===== */
-
-// 1. JS ERROR PAKDO
-window.onerror = function(msg, url, line) { 
-    alert("❌ JS ERROR:\n" + msg + "\nLine: " + line); 
-    return true; 
-}
-
-// 2. PAGE LOAD HOTE HI CHECK KAREGA
-window.addEventListener('load', function(){
-    setTimeout(doctorCheck, 500); // 0.5 sec baad check kare
-});
-
-function doctorCheck(){
-    let errors = [];
-
-    // A. IMPORTANT FUNCTION HAIN YA NAHI
-    let mustFunctions = ['openBillModal', 'closeModal', 'addItemToBill', 'generateBillPreview', 'renderBillItems'];
-    mustFunctions.forEach(fn => {
-        if(typeof window[fn]!== 'function'){
-            errors.push("FUNCTION MISSING: " + fn + "()");
-        }
-    });
-
-    // B. IMPORTANT ID HAIN YA NAHI
-    let mustIds = ['billModal', 'billViewModal', 'billViewContent', 'itemName', 'itemRate'];
-    mustIds.forEach(id => {
-        if(!document.getElementById(id)){
-            errors.push("ID MISSING: #" + id);
-        }
-    });
-
-    // C. BUTTON JISME ONCLICK HAI PAR FUNCTION NAHI
-    document.querySelectorAll('[onclick]').forEach(btn => {
-        let fn = btn.getAttribute('onclick').split(')[0].trim();
-        if(typeof window[fn]!== 'function'){
-            btn.style.border = '3px solid red'; // laal kar dega
-            btn.title = "ERROR: " + fn + " function nahi mila";
-            errors.push("BUTTON BROKEN: onclick='" + fn + "'");
-        }
-    });
-
-    // RESULT DIKHAO
-    if(errors.length > 0){
-        alert("⚠️ " + errors.length + " PROBLEM MILI:\n\n" + errors.join("\n"));
-    } else {
-        alert("✅ Sab sahi hai. Koi missing connection nahi");
-    }
-}
-/* ===== DOCTOR CODE KHATAM ===== */
-</script>
-
-    <script>
 
 // ==================== LANGUAGE SUPPORT ====================
 
-  
-  let currentLanguage = 'hi'; 
+let currentLanguage = 'hi'; 
 
 function setLanguage(lang) {
   currentLanguage = lang;
@@ -2903,5 +2848,84 @@ function shareBillOnWhatsApp() {
 }
 
   </script>    
+
+
+<script>
+// ==================== GLOBAL STATE ====================
+let appState = {
+  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '', mobile: '', email: '' },
+  customers: [],
+  transactions: [],
+  photos: [], 
+  settings: { darkMode: false, language: 'hi', autoReminder: false }
+};
+
+let currentBillItems = [];
+
+// ==================== MODAL CONTROL ====================
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function openBillModal() {
+    currentBillItems = []; 
+    document.getElementById('itemTableBody').innerHTML = '';
+    renderBillItems(); 
+    document.getElementById('billModal').style.display = 'flex';
+    generateBillPreview();
+}
+
+// BAHR CLICK SE BAND
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
+
+// ==================== BILL FUNCTIONS ====================
+function addItemToBill() {
+    let item = {
+        name: document.getElementById('itemName').value,
+        hsn: document.getElementById('itemHSN').value,
+        bags: document.getElementById('itemBags').value,
+        qty: parseFloat(document.getElementById('itemQty').value) || 0,
+        rate: parseFloat(document.getElementById('itemRate').value) || 0,
+        gst: parseFloat(document.getElementById('itemGST').value) || 0
+    };
+    if(!item.name || !item.rate) { alert('Item name aur rate dalo'); return; }
+    
+    item.total = (item.qty * item.rate) * (1 + item.gst/100);
+    currentBillItems.push(item);
+    renderBillItems();
+    generateBillPreview();
+    
+    document.getElementById('itemName').value = '';
+    document.getElementById('itemHSN').value = '';
+    document.getElementById('itemBags').value = '';
+    document.getElementById('itemQty').value = '';
+    document.getElementById('itemRate').value = '';
+}
+
+function renderBillItems() {
+    let list = document.getElementById('billItemsList');
+    list.innerHTML = '';
+    currentBillItems.forEach((item, i) => {
+        list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #eee;">${i+1}. ${item.name} - ${item.qty}Kg @ ₹${item.rate} 
+        <button onclick="deleteItem(${i})" style="float:right; color:red;">X</button></div>`;
+    });
+}
+
+function deleteItem(i) {
+    currentBillItems.splice(i,1);
+    renderBillItems();
+    generateBillPreview();
+}
+
+function generateBillPreview(){ 
+    console.log("Bill Preview chal raha");
+}
+</script>
+
 </body>
+   
 </html>
