@@ -893,9 +893,8 @@
         </div>
 
         <!-- Recent Transactions -->
-          <button onclick="try{openBillModal()}catch(e){alert(e.message)}">
-    📄 GST बिल बनाएं
-</button>
+          <button onclick="openBillModal()">GST बिल बनाएं</button>
+    
         <h3 style="margin: 20px 0 10px 0;" data-hi="हाल के लेन-देन" data-en="Recent Transactions">हाल के लेन-देन</h3>
         <div id="recentTransactions" class="transaction-list">
           <!-- Will be populated by JS -->
@@ -1399,7 +1398,7 @@
 <script>
 
 // ==================== LANGUAGE SUPPORT ====================
-window.onerror = function(msg) { alert("ERROR: " + msg); }
+
   
   let currentLanguage = 'hi'; 
 
@@ -2812,6 +2811,9 @@ function shareBillOnWhatsApp() {
     let whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
+   
+    console.log("openBillModal = ", typeof openBillModal);
+console.log("closeModal = ", typeof closeModal);
 
   </script>
 <script>
