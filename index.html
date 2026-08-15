@@ -1,64 +1,7 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-
-  <script>
-/* ===== KHATA MITRA DOCTOR CODE ===== */
-
-    window.onerror = function(msg) { alert("ERROR: " + msg); }
-  
-
-// 1. JS ERROR PAKDO
-window.onerror = function(msg, url, line) { 
-    alert("❌ JS ERROR:\n" + msg + "\nLine: " + line); 
-    return true; 
-}
-
-// 2. PAGE LOAD HOTE HI CHECK KAREGA
-window.addEventListener('load', function(){
-    setTimeout(doctorCheck, 500); // 0.5 sec baad check kare
-});
-
-function doctorCheck(){
-    let errors = [];
-
-    // A. IMPORTANT FUNCTION HAIN YA NAHI
-    let mustFunctions = ['openBillModal', 'closeModal', 'addItemToBill', 'generateBillPreview', 'renderBillItems'];
-    mustFunctions.forEach(fn => {
-        if(typeof window[fn]!== 'function'){
-            errors.push("FUNCTION MISSING: " + fn + "()");
-        }
-    });
-
-    // B. IMPORTANT ID HAIN YA NAHI
-    let mustIds = ['billModal', 'billViewModal', 'billViewContent', 'itemName', 'itemRate'];
-    mustIds.forEach(id => {
-        if(!document.getElementById(id)){
-            errors.push("ID MISSING: #" + id);
-        }
-    });
-
-    // C. BUTTON JISME ONCLICK HAI PAR FUNCTION NAHI
-    document.querySelectorAll('[onclick]').forEach(btn => {
-        let fn = btn.getAttribute('onclick').split(')[0].trim();
-        if(typeof window[fn]!== 'function'){
-            btn.style.border = '3px solid red'; // laal kar dega
-            btn.title = "ERROR: " + fn + " function nahi mila";
-            errors.push("BUTTON BROKEN: onclick='" + fn + "'");
-        }
-    });
-
-    // RESULT DIKHAO
-    if(errors.length > 0){
-        alert("⚠️ " + errors.length + " PROBLEM MILI:\n\n" + errors.join("\n"));
-    } else {
-        alert("✅ Sab sahi hai. Koi missing connection nahi");
-    }
-}
-/* ===== DOCTOR CODE KHATAM ===== */
-</script>
-  
-  <meta charset="UTF-8">
+   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <meta name="msvalidate.01" content="6A5216B40BA355ACBFACF5106BAFDD3F" />
   <title>Khata Mitra Pro 💰</title>
@@ -1454,6 +1397,59 @@ function doctorCheck(){
 
   
 <script>
+  /* ===== KHATA MITRA DOCTOR CODE ===== */
+
+// 1. JS ERROR PAKDO
+window.onerror = function(msg, url, line) { 
+    alert("❌ JS ERROR:\n" + msg + "\nLine: " + line); 
+    return true; 
+}
+
+// 2. PAGE LOAD HOTE HI CHECK KAREGA
+window.addEventListener('load', function(){
+    setTimeout(doctorCheck, 500); // 0.5 sec baad check kare
+});
+
+function doctorCheck(){
+    let errors = [];
+
+    // A. IMPORTANT FUNCTION HAIN YA NAHI
+    let mustFunctions = ['openBillModal', 'closeModal', 'addItemToBill', 'generateBillPreview', 'renderBillItems'];
+    mustFunctions.forEach(fn => {
+        if(typeof window[fn]!== 'function'){
+            errors.push("FUNCTION MISSING: " + fn + "()");
+        }
+    });
+
+    // B. IMPORTANT ID HAIN YA NAHI
+    let mustIds = ['billModal', 'billViewModal', 'billViewContent', 'itemName', 'itemRate'];
+    mustIds.forEach(id => {
+        if(!document.getElementById(id)){
+            errors.push("ID MISSING: #" + id);
+        }
+    });
+
+    // C. BUTTON JISME ONCLICK HAI PAR FUNCTION NAHI
+    document.querySelectorAll('[onclick]').forEach(btn => {
+        let fn = btn.getAttribute('onclick').split(')[0].trim();
+        if(typeof window[fn]!== 'function'){
+            btn.style.border = '3px solid red'; // laal kar dega
+            btn.title = "ERROR: " + fn + " function nahi mila";
+            errors.push("BUTTON BROKEN: onclick='" + fn + "'");
+        }
+    });
+
+    // RESULT DIKHAO
+    if(errors.length > 0){
+        alert("⚠️ " + errors.length + " PROBLEM MILI:\n\n" + errors.join("\n"));
+    } else {
+        alert("✅ Sab sahi hai. Koi missing connection nahi");
+    }
+}
+/* ===== DOCTOR CODE KHATAM ===== */
+</script>
+
+    <script>
 
 // ==================== LANGUAGE SUPPORT ====================
 
@@ -1590,17 +1586,24 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
   }
 
   // BILL KHOLTE HAI
-function openBillModal() {
-    alert("Bill khul raha hai"); // test ke liye
-    currentBillItems = [];
-    renderBillItems();
-    document.getElementById('billModal').style.display = 'flex';
-    generateBillPreview();
-}
-
 function closeModal(id) {
     document.getElementById(id).style.display = 'none';
 }
+
+// YE BHI DAAL DE - BILL KHOLNE KE LIYE
+function openBillModal() {
+    currentBillItems = []; // purana khali karo
+    document.getElementById('itemTableBody').innerHTML = ''; // table khali
+    document.getElementById('billModal').style.display = 'flex'; // kholo
+    generateBillPreview(); // preview update
+}
+
+// YE BHI ZAROORI HAI
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
 
   function saveBillToHistory() {
     const customerId = document.getElementById('billCustomerSelect').value;
