@@ -2312,8 +2312,13 @@ document.addEventListener('DOMContentLoaded', loadData);
 
     function openAddModal(type) {
       closeModal('quickMenuModal');
-      
-      if (type === 'customer') {
+       
+    if(type === 'bill') {
+        openBillModal(); // bill ka alag modal
+        return;
+    }
+    // ... baki ka purana code udhar/jama ke liye
+     if (type === 'customer') {
         document.getElementById('addCustomerModal').classList.add('active');
       } else if (type === 'udhar' || type === 'jama') {
         const title = document.getElementById('transactionModalTitle');
