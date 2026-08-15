@@ -1694,7 +1694,6 @@ function saveSettings() {
     alert('सेटिंग्स सेव हो गई');
 }
 
-
 function showBillDetail(billId) {
     const bill = appState.transactions.find(t => t.id === billId);
     if(!bill || !bill.items) { alert('Bill data nahi mila'); return; }
@@ -1712,8 +1711,25 @@ function showBillDetail(billId) {
         </tr>
     `).join('');
 
-    document.getElementById('billViewContent').innerHTML = `<div style="padding:10px;">${itemsHtml}</div>`;
-    document.getElementById('billViewModal').classList.add('active');
+    // YE PURA TABLE BANA KE DAAL
+    document.getElementById('billViewContent').innerHTML = `
+        <div style="padding:10px;">
+            <h3>Bill No: ${bill.invoiceNo || bill.id.slice(-6)}</h3>
+            <p>Customer: ${bill.customerName} | Date: ${formatDate(bill.date)}</p>
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eee;">
+                        <th>#</th><th>Item</th><th>HSN</th><th>Bags</th><th>Qty</th><th>Rate</th><th>GST</th><th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>${itemsHtml}</tbody>
+            </table>
+            <h3 style="text-align:right; margin-top:10px;">Grand Total: ₹${bill.amount.toFixed(2)}</h3>
+        </div>
+    `;
+
+    // DISPLAY SE KHOLO, CLASS SE NAHI
+    document.getElementById('billViewModal').style.display = 'flex';
 }
   
 // ==================== UI UPDATE FUNCTIONS ====================
