@@ -1533,10 +1533,15 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
 
   // BILL KHOLTE HAI
 function openBillModal() {
-    currentBillItems = []; // SABSE ZAROORI LINE
-    renderBillItems(); // table khali
+    alert("Bill khul raha hai"); // test ke liye
+    currentBillItems = [];
+    renderBillItems();
     document.getElementById('billModal').style.display = 'flex';
-    generateBillPreview(); // 0 ka bill
+    generateBillPreview();
+}
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
 }
 
   function saveBillToHistory() {
@@ -2815,8 +2820,7 @@ function shareBillOnWhatsApp() {
     console.log("openBillModal = ", typeof openBillModal);
 console.log("closeModal = ", typeof closeModal);
 
-  </script>
-<script>
+  
 // 1. JS Error
 window.onerror = function(msg, url, line) { alert("JS ERROR:\n" + msg + "\nLine: " + line); return true; }
 
@@ -2830,9 +2834,8 @@ setTimeout(function(){
         }
     });
 }, 500);
-</script>
 
-<style>*{outline:1px solid #eee}</style>
     
+  </script>    
 </body>
 </html>
