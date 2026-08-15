@@ -816,21 +816,41 @@
 }
 .nav-tab i { display: block; font-size: 18px; margin-bottom: 4px; }
 
-/* QUICK ACTION WORD WAPAS LANE KE LIYE */
+/* QUICK ACTION - LIGHT + DARK DONO KE LIYE */
 .quick-action {
     text-align: center;
     padding: 15px 5px;
+    background: white;
+    border-radius: 15px;
 }
 .quick-action span {
-    display: block !important; /* YE IMPORTANT HAI */
+    display: block !important;
     font-size: 12px;
-    color: white;
+    color: #333 !important; /* YE WHITE KI JAGAH DARK GREY */
     margin-top: 8px;
     font-weight: 500;
 }
 .quick-action i {
     font-size: 24px;
-    color: #7B2CBF;
+    color: #7B2CBF; /* purple icon */
+}
+
+/* DARK MODE KE LIYE ALAG */
+body.dark .quick-action {
+    background: #2D2D2D;
+}
+body.dark .quick-action span {
+    color: white !important; /* dark me white */
+}
+body.dark .quick-action i {
+    color: #A855F7; /* dark me light purple */
+}
+
+     .tab-pane h3, .tab-pane p, .transaction-item {
+    color: #333; /* light mode text */
+}
+body.dark .tab-pane h3, body.dark .tab-pane p, body.dark .transaction-item {
+    color: #EEE; /* dark mode text */
 }
    
   </style>
