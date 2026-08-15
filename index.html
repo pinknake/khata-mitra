@@ -1947,22 +1947,27 @@ window.addEventListener('click', function(event) {
         id: 'BILL_' + Date.now(),
         type: 'bill',
         customerId: customerId,
-        customerName: customer.name, // <-- YE ADD KIYA
+        customerName: customer.name,
         amount: grandTotal,
         date: new Date().toISOString().split('T')[0],
-
         invoiceNo: document.getElementById('invoiceNo').innerText,
         vehicleNo: document.getElementById('vehicleNo').innerText,
         paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash',
-        items: currentBillItems, // <-- YAHAN COMMA LAGAYA
+        items: currentBillItems,
         company: appState.company
     };
 
     appState.transactions.push(billTransaction);
-    customer.balance = (customer.balance || 0) + billTransaction.amount;
+    
+    // YE 2 LINE ADD KAR - Balance update ke liye
+    customer.balance = (customer.balance || 0) + grandTotal;
+    customer.totalBilled = (customer.totalBilled || 0) + grandTotal; // optional: total business track
 
     saveData();
     updateUI();
+    
+    showToast('Bill Saved! ₹' + grandTotal); // optional
+    closeBillModal(); // optional: bill band ho jaye
 }
  
 // Load data from localStorage
