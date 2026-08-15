@@ -3357,6 +3357,787 @@ document.addEventListener('DOMContentLoaded', loadData);
         }
       });
     }
+
+
+
+
+
+
+
+
+    // ==================== MODAL FUNCTIONS ====================
+    function openQuickMenu() {
+      document.getElementById('quickMenuModal').classList.add('active');
+    }
+
+    function openAddModal(type) {
+      closeModal('quickMenuModal');
+      
+      if (type === 'customer') {
+        document.getElementById('addCustomerModal').classList.add('active');
+      } else if (type === 'udhar' || type === 'jama') {
+        const title = document.getElementById('transactionModalTitle');
+        title.textContent = type === 'udhar' 
+          ? (currentLanguage === 'hi' ? 'उधार दें' : 'Give Money')
+          : (currentLanguage === 'hi' ? 'जमा करें' : 'Receive Money');
+        
+        document.getElementById('saveTransactionBtn').setAttribute('data-type', type);
+        
+        // Populate customer dropdown
+        const select = document.getElementById('transactionCustomer');
+        select.innerHTML = '<option value="">' + 
+          (currentLanguage === 'hi' ? 'ग्राहक चुनें' : 'Select Customer') + 
+          '</option>' + 
+          appState.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        
+        // Set today's date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('transactionDate').value = today;
+        
+        // Clear photo preview
+        document.getElementById('photoPreview').innerHTML = '';
+        
+        document.getElementById('addTransactionModal').classList.add('active');
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+
+    // ==================== PHOTO FUNCTIONS ====================
+    function previewTransactionPhoto(event) {
+      const preview = document.getElementById('photoPreview');
+      preview.innerHTML = '';
+      
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.style.width = '100px';
+          img.style.height = '100px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '10px';
+          preview.appendChild(img);
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function savePhoto(transactionId, file, caption) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const photo = {
+            id: Date.now().toString(),
+            transactionId: transactionId,
+            data: e.target.result,
+            caption: caption || '',
+            date: new Date().toISOString()
+          };
+          
+          if (!appState.photos) appState.photos = [];
+          appState.photos.push(photo);
+          resolve(photo);
+        }
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function getTransactionPhotos(transactionId) {
+      return appState.photos?.filter(p => p.transactionId === transactionId) || [];
+    }
+
+    function getCustomerPhotos(customerId) {
+      const transactionIds = appState.transactions
+        .filter(t => t.customerId === customerId)
+        .map(t => t.id);
+      
+      return appState.photos?.filter(p => transactionIds.includes(p.transactionId)) || [];
+    }
+
+    function deletePhoto(photoId) {
+      if (appState.photos) {
+        appState.photos = appState.photos.filter(p => p.id !== photoId);
+        saveData();
+        
+        // Refresh customer detail if open
+        const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
+        if (customerId) {
+          viewCustomer(customerId);
+        }
+        
+        showToast(currentLanguage === 'hi' ? 'फोटो हटा दी गई' : 'Photo deleted');
+      }
+    }
+
+    function openZoom(imageSrc, caption) {
+      document.getElementById('zoomImage').src = imageSrc;
+      document.getElementById('zoomCaption').textContent = caption || '';
+      document.getElementById('zoomModal').classList.add('active');
+    }
+
+    function closeZoom() {
+      document.getElementById('zoomModal').classList.remove('active');
+    }
+
+
+// ==================== CRUD OPERATIONS ====================
+    function addCustomer() {
+      const name = document.getElementById('newCustomerName').value.trim();
+      const phone = document.getElementById('newCustomerPhone').value.trim();
+      const address = document.getElementById('newCustomerAddress').value.trim();
+      const gst = document.getElementById('newCustomerGST').value.trim().toUpperCase();
+      const pan = document.getElementById('newCustomerPAN').value.trim().toUpperCase();
+      const vehicle = document.getElementById('newCustomerVehicle').value.trim().toUpperCase();
+      const bank = document.getElementById('newCustomerBank').value.trim();
+      
+      if (!name) {
+        showToast(currentLanguage === 'hi' ? 'नाम दर्ज करें' : 'Enter name', 'error');
+        return;
+      }
+      
+      const newCustomer = {
+        id: Date.now().toString(),
+        name,
+        phone,
+        address,
+        gst,        // <-- Naya add kiya
+        pan,        // <-- Naya add kiya  
+        vehicle,    // <-- Naya add kiya
+        bank,       // <-- Naya add kiya
+        balance: 0,
+        createdAt: new Date().toISOString()
+      };
+      
+      appState.customers.push(newCustomer);
+      saveData();
+      updateUI();
+      
+      closeModal('addCustomerModal');
+      showToast(currentLanguage === 'hi' ? 'ग्राहक जोड़ दिया गया' : 'Customer added');
+      
+      // Clear form - sab field clear
+      document.getElementById('newCustomerName').value = '';
+      document.getElementById('newCustomerPhone').value = '';
+      document.getElementById('newCustomerAddress').value = '';
+      document.getElementById('newCustomerGST').value = '';
+      document.getElementById('newCustomerPAN').value = '';
+      document.getElementById('newCustomerVehicle').value = '';
+      document.getElementById('newCustomerBank').value = '';
+    }
+
+    async function saveTransaction() {
+      const customerId = document.getElementById('transactionCustomer').value;
+      const amount = parseFloat(document.getElementById('transactionAmount').value);
+      const note = document.getElementById('transactionNote').value.trim();
+      const date = document.getElementById('transactionDate').value;
+      const mode = document.getElementById('transactionMode').value;
+      const type = document.getElementById('saveTransactionBtn').getAttribute('data-type');
+      const photoFile = document.getElementById('transactionPhoto').files[0];
+      
+      if (!customerId) {
+        showToast(currentLanguage === 'hi' ? 'ग्राहक चुनें' : 'Select customer', 'error');
+        return;
+      }
+      
+      if (!amount || amount <= 0) {
+        showToast(currentLanguage === 'hi' ? 'सही राशि दर्ज करें' : 'Enter valid amount', 'error');
+        return;
+      }
+      
+      // Show loading
+      document.getElementById('loadingSpinner').style.display = 'block';
+      
+      const transaction = {
+        id: Date.now().toString(),
+        customerId,
+        type,
+        amount,
+        note,
+        date,
+        mode,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Update customer balance
+      const customer = appState.customers.find(c => c.id === customerId);
+      if (type === 'udhar') {
+        customer.balance += amount;
+      } else {
+        customer.balance -= amount;
+      }
+      
+      appState.transactions.push(transaction);
+      
+      // Save photo if uploaded
+      if (photoFile) {
+        await savePhoto(transaction.id, photoFile, note);
+      }
+      
+      saveData();
+      updateUI();
+      
+      // Hide loading
+      document.getElementById('loadingSpinner').style.display = 'none';
+      
+      closeModal('addTransactionModal');
+      showToast(currentLanguage === 'hi' ? 'लेन-देन सेव हो गया' : 'Transaction saved');
+      
+      // Clear form
+      document.getElementById('transactionAmount').value = '';
+      document.getElementById('transactionNote').value = '';
+      document.getElementById('transactionPhoto').value = '';
+      document.getElementById('photoPreview').innerHTML = '';
+    }
+
+
+
+
+   // ==================== CUSTOMER DETAILS ====================
+    function viewCustomer(customerId) {
+    const customer = appState.customers.find(c => c.id === customerId);
+    if (!customer) return;
+
+    // Store for filter
+    window.currentCustomerId = customerId;
+
+    document.getElementById('detailCustomerName').textContent = customer.name;
+    document.getElementById('detailBalance').textContent = '₹' + Math.abs(customer.balance || 0);
+    document.getElementById('detailPhone').textContent = customer.phone || '-';
+
+    // Show customer photos
+    const photos = getCustomerPhotos(customerId);
+    const photosContainer = document.getElementById('customerPhotos');
+    if (photos.length > 0) {
+      photosContainer.innerHTML = photos.map(photo => `
+        <div class="gallery-item">
+          <img src="${photo.data}" onclick="openZoom('${photo.data}', '${photo.caption}')">
+          <div class="caption">${photo.caption || ''}</div>
+          <div class="delete-photo" onclick="event.stopPropagation(); deletePhoto('${photo.id}')">
+            <i class="fas fa-times"></i>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      photosContainer.innerHTML = `<p style="color: var(--gray); text-align: center; grid-column: span 3;" data-hi="कोई फोटो नहीं" data-en="No photos">कोई फोटो नहीं</p>`;
+    }
+
+    // YE WALI 3 LINE HATA DE - KYUKI BUTTON AB HTML ME HAIN
+    // const txHeader = document.querySelector('#customerTransactions').parentElement.querySelector('h4');
+    // txHeader.insertAdjacentHTML('beforebegin', `...`);
+
+    renderCustomerTransactions('all'); // Pehli baar all dikhao
+
+    // Store customer ID for actions
+    document.getElementById('customerDetailModal').setAttribute('data-customer-id', customerId);
+    document.getElementById('customerDetailModal').classList.add('active');
+}
+
+// 1. FILTER KE LIYE
+function filterCustomerTx(type) {
+    renderCustomerTransactions(type);
+}
+
+// 2. RENDER KE LIYE - BILL + UDHAR DONO
+function renderCustomerTransactions(filter = 'all') {
+    let transactions = appState.transactions.filter(t => t.customerId === window.currentCustomerId);
+
+    if(filter === 'payment') transactions = transactions.filter(t => t.type === 'udhar' || t.type === 'jama');
+    if(filter === 'bill') transactions = transactions.filter(t => t.type === 'bill');
+
+    transactions.reverse(); // Naya upar
+
+    const container = document.getElementById('customerTransactions');
+
+    if (transactions.length === 0) {
+        container.innerHTML = `<div class="empty-state"><i class="fas fa-exchange-alt"></i><p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p></div>`;
+        return;
+    }
+
+    container.innerHTML = transactions.map(t => {
+        const hasPhoto = getTransactionPhotos(t.id).length > 0;
+
+        // AGAR BILL HAI TO ALAG CARD
+        if(t.type === 'bill') {
+    return `
+    <div class="transaction-item" style="border-left: 4px solid #2196F3; cursor:pointer;" onclick="showBillDetail('${t.id}')">
+      <div class="transaction-info">
+        <div class="transaction-icon" style="background: #E3F2FD; color: #2196F3;">
+          <i class="fas fa-file-invoice"></i>
+        </div>
+        <div class="transaction-details">
+          <h4>🧾 Bill No: ${t.invoiceNo || t.id.slice(-6)}</h4>
+          <p>${t.items.length} Items • ${t.vehicleNo} • ${formatDate(t.date)}</p>
+        </div>
+      </div>
+      <div class="transaction-amount balance-negative">
+        ₹${t.amount.toFixed(2)}
+      </div>
+    </div>
+  `;
+}
+
+        // VARNA UDHAR/JAMA WALA PURANA CARD
+        return `
+            <div class="transaction-item">
+              <div class="transaction-info">
+                <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
+                  <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+                </div>
+                <div class="transaction-details">
+                  <h4>${t.type === 'udhar'
+                   ? (currentLanguage === 'hi'? 'उधार दिया' : 'Gave')
+                    : (currentLanguage === 'hi'? 'जमा लिया' : 'Received')}
+                    ${hasPhoto? ' 📸' : ''}</h4>
+                  <p>${t.note || ''} • ${formatDate(t.date)}</p>
+                </div>
+              </div>
+              <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
+                ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
+              </div>
+            </div>
+          `;
+    }).join('');
+}
+
+
+
+// ==================== PDF EXPORT ====================
+    function exportCustomerPDF() {
+      const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
+      const customer = appState.customers.find(c => c.id === customerId);
+      
+      if (!customer) return;
+      
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      // Colors
+      const primaryColor = [106, 27, 154]; // #6a1b9a
+      const successColor = [46, 196, 182]; // #2ec4b6
+      const dangerColor = [229, 57, 53]; // #e53935
+      
+      // Header
+      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+      doc.rect(0, 0, 210, 40, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(22);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Khata Statement', 105, 20, { align: 'center' });
+      
+      // Customer Info
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Customer Details', 20, 55);
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Name: ${customer.name}`, 20, 65);
+      doc.text(`Phone: ${customer.phone || 'N/A'}`, 20, 72);
+      doc.text(`Address: ${customer.address || 'N/A'}`, 20, 79);
+      
+      // Balance
+      const balanceY = 95;
+      doc.setFillColor(customer.balance >= 0 ? dangerColor[0] : successColor[0], 
+                      customer.balance >= 0 ? dangerColor[1] : successColor[1], 
+                      customer.balance >= 0 ? dangerColor[2] : successColor[2]);
+      doc.roundedRect(20, balanceY - 5, 170, 25, 5, 5, 'F');
+      
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`Current Balance: ₹${Math.abs(customer.balance)} ${customer.balance >= 0 ? '(To Receive)' : '(To Pay)'}`, 105, balanceY + 10, { align: 'center' });
+      
+      // Transactions Table
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(14);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Transaction History', 20, 135);
+      
+      const transactions = appState.transactions
+        .filter(t => t.customerId === customerId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      let y = 150;
+      
+      // Table Header
+      doc.setFillColor(240, 240, 240);
+      doc.rect(20, y - 5, 170, 10, 'F');
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.text('Date', 25, y);
+      doc.text('Type', 55, y);
+      doc.text('Description', 85, y);
+      doc.text('Amount', 160, y);
+      
+      y += 10;
+      
+      // Table Rows
+      doc.setFont('helvetica', 'normal');
+      let totalGiven = 0, totalReceived = 0;
+      
+      transactions.forEach((t, index) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 30;
+          
+          // Header on new page
+          doc.setFillColor(240, 240, 240);
+          doc.rect(20, y - 5, 170, 10, 'F');
+          
+          doc.setFont('helvetica', 'bold');
+          doc.text('Date', 25, y);
+          doc.text('Type', 55, y);
+          doc.text('Description', 85, y);
+          doc.text('Amount', 160, y);
+          
+          y += 10;
+          doc.setFont('helvetica', 'normal');
+        }
+        
+        const amount = t.amount;
+        if (t.type === 'udhar') {
+          totalGiven += amount;
+          doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
+        } else {
+          totalReceived += amount;
+          doc.setTextColor(successColor[0], successColor[1], successColor[2]);
+        }
+        
+        doc.text(formatDate(t.date), 25, y);
+        doc.text(t.type === 'udhar' ? 'Given' : 'Received', 55, y);
+        
+        // Truncate long description
+        let desc = t.note || '-';
+        if (desc.length > 20) desc = desc.substring(0, 18) + '...';
+        doc.text(desc, 85, y);
+        
+        doc.text(`₹${amount}`, 170, y, { align: 'right' });
+        
+        y += 8;
+      });
+      
+
+// Summary
+      y += 10;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(20, y, 190, y);
+      y += 10;
+      
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('Summary:', 20, y);
+      y += 8;
+      
+      doc.setFont('helvetica', 'normal');
+      doc.text(`Total Given:`, 20, y);
+      doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
+      doc.text(`₹${totalGiven}`, 100, y);
+      
+      y += 8;
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Total Received:`, 20, y);
+      doc.setTextColor(successColor[0], successColor[1], successColor[2]);
+      doc.text(`₹${totalReceived}`, 100, y);
+      
+      y += 8;
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Net Balance:`, 20, y);
+      doc.setTextColor(customer.balance >= 0 ? dangerColor[0] : successColor[0], 
+                      customer.balance >= 0 ? dangerColor[1] : successColor[1], 
+                      customer.balance >= 0 ? dangerColor[2] : successColor[2]);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`₹${Math.abs(customer.balance)} ${customer.balance >= 0 ? '(To Receive)' : '(To Pay)'}`, 100, y);
+      
+      // Footer
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`Generated on ${new Date().toLocaleDateString()} - Page ${i} of ${totalPages}`, 105, 290, { align: 'center' });
+      }
+      
+      doc.save(`${customer.name.replace(/\s+/g, '_')}_Khata.pdf`);
+      showToast(currentLanguage === 'hi' ? 'PDF डाउनलोड हो रहा है' : 'PDF is downloading');
+    }
+
+    function printCustomerDetail() {
+      const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
+      const customer = appState.customers.find(c => c.id === customerId);
+      
+      if (!customer) return;
+      
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>${customer.name} - Khata Statement</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              .header { background: #6a1b9a; color: white; padding: 20px; text-align: center; }
+              .info { margin: 20px 0; }
+              .balance { padding: 15px; border-radius: 10px; color: white; margin: 20px 0; }
+              table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+              th { background: #f0f0f0; padding: 10px; text-align: left; }
+              td { padding: 10px; border-bottom: 1px solid #ddd; }
+              .given { color: #e53935; }
+              .received { color: #2ec4b6; }
+              .footer { text-align: center; color: #666; font-size: 12px; margin-top: 30px; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <h1>Khata Statement</h1>
+            </div>
+            
+            <div class="info">
+              <h2>${customer.name}</h2>
+              <p>Phone: ${customer.phone || 'N/A'}</p>
+              <p>Address: ${customer.address || 'N/A'}</p>
+            </div>
+            
+            <div class="balance" style="background: ${customer.balance >= 0 ? '#e53935' : '#2ec4b6'}">
+              <h3>Current Balance: ₹${Math.abs(customer.balance)} ${customer.balance >= 0 ? '(To Receive)' : '(To Pay)'}</h3>
+            </div>
+            
+            <h3>Transaction History</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${appState.transactions
+                  .filter(t => t.customerId === customerId)
+                  .sort((a, b) => new Date(b.date) - new Date(a.date))
+                  .map(t => `
+                    <tr>
+                      <td>${formatDate(t.date)}</td>
+                      <td class="${t.type === 'udhar' ? 'given' : 'received'}">${t.type === 'udhar' ? 'Given' : 'Received'}</td>
+                      <td>${t.note || '-'}</td>
+                      <td class="${t.type === 'udhar' ? 'given' : 'received'}">₹${t.amount}</td>
+                    </tr>
+                  `).join('')}
+              </tbody>
+            </table>
+            
+            <div class="footer">
+              Generated on ${new Date().toLocaleString()}
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+
+
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function formatDate(dateString) {
+      if (!dateString) return '';
+      const [year, month, day] = dateString.split('-');
+      return `${day}/${month}/${year}`;
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.background = type === 'success' ? '#2ec4b6' : '#e53935';
+      toast.classList.add('show');
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    function switchTab(tabName) {
+      // Update tab buttons
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+      
+      // Show selected tab
+      document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+      });
+      document.getElementById(tabName).classList.add('active');
+      
+      if (tabName === 'reports') {
+        updateReports();
+      }
+      
+      if(tabName === 'settings'){
+        loadCompanySettings();
+    }
+      
+    }
+      
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      const icon = document.getElementById('darkModeToggle');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+      
+      appState.settings.darkMode = document.body.classList.contains('dark-mode');
+      saveData();
+    }
+
+    function searchCustomers() {
+      updateCustomerList();
+    }
+
+    function searchHistory() {
+      updateAllTransactions();
+    }
+
+    function shareOnWhatsApp() {
+      const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
+      const customer = appState.customers.find(c => c.id === customerId);
+      
+      if (!customer) return;
+      
+      const transactions = appState.transactions
+        .filter(t => t.customerId === customerId)
+        .sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      let message = `*${customer.name}* का खाता विवरण\n`;
+      message += `📞 ${customer.phone || 'नंबर नहीं'}\n`;
+      message += `💰 बैलेंस: ₹${Math.abs(customer.balance)} ${customer.balance >= 0 ? '(लेना है)' : '(देना है)'}\n\n`;
+      message += `📝 लेन-देन:\n`;
+      
+      transactions.forEach(t => {
+        message += `${formatDate(t.date)}: ${t.type === 'udhar' ? 'उधार दिया' : 'जमा लिया'} ₹${t.amount}`;
+        if (t.note) message += ` (${t.note})`;
+        message += '\n';
+      });
+      
+      const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+      window.open(url, '_blank');
+    }
+
+    function showNotifications() {
+      showToast(currentLanguage === 'hi' ? 'कोई नई सूचना नहीं' : 'No new notifications', 'info');
+    }
+
+    function showAnalytics() {
+      switchTab('reports');
+      document.querySelectorAll('.nav-tab')[3].click();
+    }
+
+
+
+
+// ==================== BACKUP FUNCTIONS - APP CREATOR FIX ====================
+function exportBackup() {
+  const dataStr = JSON.stringify(appState);
+  const fileName = `KhataBackup_${new Date().toISOString().split('T')[0]}.khatamitra`;
+
+  // Tarika 1: Clipboard me copy - Sabse safe for App Creator
+  navigator.clipboard.writeText(dataStr).then(() => {
+    showToast(currentLanguage === 'hi'?
+      'Data copy ho gaya! Notes me paste karke.khatamitra file bana lo' :
+      'Data copied! Paste in Notes and save as.khatamitra file');
+
+    // Saath me share option bhi khol dete hain
+    if(navigator.share) {
+      navigator.share({
+        title: 'Khata Mitra Backup',
+        text: dataStr
+      });
+    } else {
+      // WhatsApp option
+      window.open(`https://wa.me/?text=${encodeURIComponent(dataStr.substring(0,1000))}...`, '_blank');
+    }
+
+  }).catch(() => {
+    // Agar clipboard fail ho to direct download try
+    const blob = new Blob([dataStr], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    showToast(currentLanguage === 'hi'? 'Naye tab me file khul gayi. Waha se Save karo' : 'File opened in new tab. Save from there');
+  });
+}
+
+function importBackup(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  if(!confirm(currentLanguage === 'hi'? 'Kya purana data overwrite karna hai?' : 'Overwrite existing data?')) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const importedData = JSON.parse(e.target.result);
+      appState = importedData;
+      saveData();
+      updateUI();
+      showToast(currentLanguage === 'hi'? 'Backup restore ho gaya' : 'Backup restored');
+    } catch(err) {
+      showToast(currentLanguage === 'hi'? 'Galat file hai' : 'Invalid file', 'error');
+    }
+  }
+  reader.readAsText(file);
+}
+
+// Har 7 din me auto backup download
+function autoBackupToFile() {
+  if(localStorage.getItem('lastAutoBackup')) {
+    const last = new Date(localStorage.getItem('lastAutoBackup'));
+    const days = (new Date() - last) / (1000*60*60*24);
+    if(days < 7) {
+      showToast(currentLanguage === 'hi'? '7 din baad fir backup hoga' : 'Next backup in 7 days');
+      return;
+    }
+  }
+  exportBackup();
+  localStorage.setItem('lastAutoBackup', new Date().toISOString());
+  showToast(currentLanguage === 'hi'? 'Auto backup ho gaya' : 'Auto backup done');
+}
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      
+      // Set up event listeners
+      document.getElementById('reportMonth').addEventListener('change', updateReports);
+      document.getElementById('reportYear').addEventListener('change', updateReports);
+      
+      // Close modals when clicking outside
+      window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+          e.target.classList.remove('active');
+        }
+      });
+      
+      // Check for dark mode preference
+      if (appState.settings.darkMode) {
+        document.body.classList.add('dark-mode');
+        document.getElementById('darkModeToggle').classList.replace('fa-moon', 'fa-sun');
+      }
+      
+      // Add APK generation button
+      addAPKButton();
+      
+      // Register service worker for PWA
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').catch(err => {
+          console.log('Service worker registration failed:', err);
+        });
+      }
+    });
+  </script>
    
        
 </script>
