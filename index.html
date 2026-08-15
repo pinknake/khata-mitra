@@ -1796,6 +1796,13 @@ function openBillModal() {
     document.getElementById('itemTableBody').innerHTML = '';
     renderBillItems(); 
     document.getElementById('billModal').style.display = 'flex';
+   
+    // YE 2 LINE ADD KAR - Customer dropdown bharne ke liye
+    const billCustomerSelect = document.getElementById('billCustomerSelect');
+    billCustomerSelect.innerHTML = '<option value="">Cash Customer</option>';
+    customers.forEach(c => {
+        billCustomerSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+    });
     generateBillPreview();
 }
 
