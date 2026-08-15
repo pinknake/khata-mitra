@@ -1483,6 +1483,28 @@ let appState = {
 
 let currentBillItems = []; // upar global me dalna
 
+       // GLOBAL VARIABLE
+let currentBillItems = [];
+
+function closeModal(id) {
+    document.getElementById(id).style.display = 'none';
+}
+
+function openBillModal() {
+    currentBillItems = []; // purana data saaf
+    document.getElementById('itemTableBody').innerHTML = ''; // table khali
+    document.getElementById('billModal').style.display = 'flex'; // modal kholo
+    generateBillPreview(); // bill update
+    alert("Bill Modal Khul gaya"); // test ke liye - baad me hata dena
+}
+
+// BAHAR CLICK KARNE SE BAND HO
+window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+    }
+});
+
 function addItemToBill() {
     let item = {
         name: document.getElementById('itemName').value,
@@ -1585,18 +1607,6 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
     saveBillToHistory();
   }
 
-  // BILL KHOLTE HAI
-function closeModal(id) {
-    document.getElementById(id).style.display = 'none';
-}
-
-// YE BHI DAAL DE - BILL KHOLNE KE LIYE
-function openBillModal() {
-    currentBillItems = []; // purana khali karo
-    document.getElementById('itemTableBody').innerHTML = ''; // table khali
-    document.getElementById('billModal').style.display = 'flex'; // kholo
-    generateBillPreview(); // preview update
-}
 
 // YE BHI ZAROORI HAI
 window.addEventListener('click', function(event) {
