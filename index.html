@@ -2829,6 +2829,13 @@ function shareBillOnWhatsApp() {
 
 
 <script>
+let appState = {
+  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '', mobile: '', email: '' },
+  customers: [],
+  transactions: [],
+  photos: [], 
+  settings: { darkMode: false, language: 'hi', autoReminder: false }
+};
 
 let currentBillItems = [];
 
@@ -2985,9 +2992,8 @@ window.addEventListener('click', function(event) {
         invoiceNo: document.getElementById('invoiceNo').innerText,
         vehicleNo: document.getElementById('vehicleNo').innerText,
         paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash', // agar dropdown hai to
-        items: currentBillItems // copy karke save karo
-        company: appState.company // company gst, pan bhi
-    };
+        items: currentBillItems, // <-- yahan comma laga
+        company: appState.company    };
 
     appState.transactions.push(billTransaction);
     customer.balance = (customer.balance || 0) + billTransaction.amount;
