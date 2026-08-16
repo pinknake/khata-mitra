@@ -2047,149 +2047,132 @@ function openBillModal() {
 }
    
 // ==================== BILL FUNCTIONS ====================
+let currentBillItems = []; // Global array for bill items
+
 function addItemToBill() {
-    let item = {
-        name: document.getElementById('itemName').value,
-        hsn: document.getElementById('itemHSN').value,
-        bags: document.getElementById('itemBags').value,
-        qty: parseFloat(document.getElementById('itemQty').value) || 0,
-        rate: parseFloat(document.getElementById('itemRate').value) || 0,
-        gst: parseFloat(document.getElementById('itemGST').value) || 0
-    };
-    if(!item.name || !item.rate) { alert('Item name aur rate dalo'); return; }
-    
-    item.total = (item.qty * item.rate) * (1 + item.gst/100);
-    
-    currentBillItems.push(item);
-    renderBillItems(); // YE LINE ADD KI
-    generateBillPreview();
-    
+    const name = document.getElementById('itemName').value;
+    const hsn = document.getElementById('itemHSN').value;
+    const bags = parseFloat(document.getElementById('itemBags').value) || 0;
+    const qty = parseFloat(document.getElementById('itemQty').value) || 0;
+    const rate = parseFloat(document.getElementById('itemRate').value) || 0;
+    const gst = parseFloat(document.getElementById('itemGST').value) || 0;
+
+    if(!name || rate <= 0 || qty <= 0) {
+        alert(currentLanguage === 'hi'? 'Item Name, Qty aur Rate zaroori hai' : 'Item Name, Qty and Rate required');
+        return;
+    }
+
+    const subtotal = qty * rate;
+    const gstAmount = subtotal * (gst / 100);
+    const total = subtotal + gstAmount;
+
+    currentBillItems.push({ name, hsn, bags, qty, rate, gst, subtotal, gstAmount, total });
+
+    // Input clear
     document.getElementById('itemName').value = '';
     document.getElementById('itemHSN').value = '';
-    document.getElementById('itemBags').value = '';
-    document.getElementById('itemQty').value = '';
     document.getElementById('itemRate').value = '';
-}
 
-function renderBillItems() {
-    let list = document.getElementById('billItemsList');
-    list.innerHTML = '';
-    currentBillItems.forEach((item, i) => {
-        list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #eee;">${i+1}. ${item.name} - ${item.qty}Kg @ ₹${item.rate} 
-        <button onclick="deleteItem(${i})" style="float:right; color:red;">X</button></div>`;
-    });
-}
-
-function deleteItem(i) {
-    currentBillItems.splice(i,1);
     renderBillItems();
     generateBillPreview();
 }
 
-function generateBillPreview() {
-    let customer = appState.customers.find(c => c.id == document.getElementById('billCustomerSelect').value) || {};
-    let company = appState.company || {}; // SETTING SE DATA
-    let total = 0, totalCGST = 0, totalSGST = 0;
-
-// NAYA
-document.getElementById('billCompanyName').innerText = company.name || 'Khata Mitra';
-document.getElementById('billCompanyAddress').innerText = company.address || '';
-document.getElementById('billCompanyGST').innerText = company.gst || '';
-document.getElementById('billCompanyPAN').innerText = company.pan || '';
-document.getElementById('billCompanyMobile').innerText = company.mobile || '';
-document.getElementById('billCompanyEmail').innerText = company.email || '';
-document.getElementById('billCompanyBank').innerText = company.bank || '';
-    
-    // 1. BUYER DETAIL - NAAM MAP KAR DIYA
-document.getElementById('buyerName').innerText = customer.name || 'Cash Customer';
-document.getElementById('buyerAddress').innerText = customer.address || '';
-document.getElementById('buyerMobile').innerText = customer.phone || '';        // phone -> mobile
-document.getElementById('buyerGSTIN').innerText = customer.gst || '';           // gst -> gstin
-document.getElementById('buyerPAN').innerText = customer.pan || '';
-document.getElementById('buyerBank').innerText = document.getElementById('billBuyerBank').value || customer.bank || '';
-
-// 2. INVOICE DETAIL
-document.getElementById('invoiceNo').innerText = 'KM' + Date.now().toString().slice(-6);
-document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('en-IN');
-document.getElementById('vehicleNo').innerText = document.getElementById('billVehicleNo').value || customer.vehicle || ''; // vehicle -> vehicleNo
-
-  
-    // 3. ITEM TABLE
-    let tbody = document.getElementById('itemTableBody');
-    tbody.innerHTML = '';
-    currentBillItems.forEach((item, i) => {
-        let amount = item.qty * item.rate;
-        let gstRate = item.gst || 0;
-        let cgst = (amount * gstRate/2) / 100;
-        let sgst = (amount * gstRate/2) / 100;
-        
-        total += amount;
-        totalCGST += cgst;
-        totalSGST += sgst;
-        
-        tbody.innerHTML += `<tr>
-            <td style="border:1px solid #000; padding:4px;">${i+1}</td>
+function renderBillItems() {
+    const tbody = document.getElementById('itemTableBody');
+    tbody.innerHTML = currentBillItems.map((item, i) => `
+        <tr>
+            <td style="border:1px solid #000; padding:4px; text-align:center;">${i+1}</td>
             <td style="border:1px solid #000; padding:4px;">${item.name}</td>
-            <td style="border:1px solid #000; padding:4px;">${item.hsn}</td>
-            <td style="border:1px solid #000; padding:4px;">${item.bags}</td>
-            <td style="border:1px solid #000; padding:4px;">${item.qty} Kg</td>
-            <td style="border:1px solid #000; padding:4px;">₹${item.rate}</td>
-            <td style="border:1px solid #000; padding:4px;">${gstRate}%</td>
-            <td style="border:1px solid #000; padding:4px;">₹${amount.toFixed(2)}</td>
-        </tr>`;
-    });
-    
-    // 4. TOTAL
-    document.getElementById('subTotal').innerText = '₹' + total.toFixed(2);
-    document.getElementById('totalCGST').innerText = '₹' + totalCGST.toFixed(2);
-    document.getElementById('totalSGST').innerText = '₹' + totalSGST.toFixed(2);
-    document.getElementById('grandTotal').innerText = '₹' + (total + totalCGST + totalSGST).toFixed(2);
+            <td style="border:1px solid #000; padding:4px; text-align:center;">${item.hsn || '-'}</td>
+            <td style="border:1px solid #000; padding:4px; text-align:center;">${item.bags}</td>
+            <td style="border:1px solid #000; padding:4px; text-align:right;">${item.qty}</td>
+            <td style="border:1px solid #000; padding:4px; text-align:right;">₹${item.rate.toFixed(2)}</td>
+            <td style="border:1px solid #000; padding:4px; text-align:center;">${item.gst}%</td>
+            <td style="border:1px solid #000; padding:4px; text-align:right;"><b>₹${item.total.toFixed(2)}</b></td>
+        </tr>
+    `).join('');
+}
 
-  
-    saveBillToHistory();
-  }
-
-// BAHR CLICK SE BAND
-window.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.classList.remove('active');
-    }
-});
-
-  function saveBillToHistory() {
+function generateBillPreview() {
     const customerId = document.getElementById('billCustomerSelect').value;
-    if(!customerId || customerId === '') return; // 'cash' hata diya
+    const customer = appState.customers.find(c => c.id === customerId) || { name: 'Cash Customer', address: '', phone: '', gst: '', pan: '', bank: '' };
 
+    // Company details from appState
+    document.getElementById('billCompanyName').innerText = appState.company?.name || 'Your Company';
+    document.getElementById('billCompanyAddress').innerText = appState.company?.address || '';
+    document.getElementById('billCompanyGST').innerText = appState.company?.gst || '';
+    document.getElementById('billCompanyPAN').innerText = appState.company?.pan || '';
+    document.getElementById('billCompanyMobile').innerText = appState.company?.mobile || '';
+    document.getElementById('billCompanyEmail').innerText = appState.company?.email || '';
+    document.getElementById('billCompanyBank').innerText = appState.company?.bank || '';
+
+    // Buyer details
+    document.getElementById('buyerName').innerText = customer.name;
+    document.getElementById('buyerAddress').innerText = customer.address || '';
+    document.getElementById('buyerMobile').innerText = customer.phone || '';
+    document.getElementById('buyerGSTIN').innerText = customer.gst || '';
+    document.getElementById('buyerPAN').innerText = customer.pan || '';
+    document.getElementById('buyerBank').innerText = customer.bank || '';
+
+    // Invoice details
+    const invNo = 'INV' + Date.now().toString().slice(-6);
+    document.getElementById('invoiceNo').innerText = invNo;
+    document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('en-IN');
+    document.getElementById('vehicleNo').innerText = document.getElementById('billVehicleNo').value || '-';
+
+    // Totals
+    let subTotal = 0, totalGST = 0;
+    currentBillItems.forEach(item => {
+        subTotal += item.subtotal;
+        totalGST += item.gstAmount;
+    });
+    const cgst = totalGST / 2;
+    const sgst = totalGST / 2;
+    const grandTotal = subTotal + totalGST;
+
+    document.getElementById('subTotal').innerText = '₹' + subTotal.toFixed(2);
+    document.getElementById('totalCGST').innerText = '₹' + cgst.toFixed(2);
+    document.getElementById('totalSGST').innerText = '₹' + sgst.toFixed(2);
+    document.getElementById('grandTotal').innerText = '₹' + grandTotal.toFixed(2);
+}
+
+function openBillInBrowser() {
+    const content = document.getElementById('billContent').innerHTML;
+    const win = window.open('', '', 'height=700,width=900');
+    win.document.write('<html><head><title>Print Bill</title>');
+    win.document.write('<style>body{font-family:Arial;} table{border-collapse:collapse;} th,td{border:1px solid #000;}</style>');
+    win.document.write('</head><body>');
+    win.document.write(content);
+    win.document.write('</body></html>');
+    win.document.close();
+    win.print();
+}
+
+   function saveBill() {
+    const customerId = document.getElementById('billCustomerSelect').value;
     const customer = appState.customers.find(c => c.id === customerId);
-    if(!customer) return;
-
-    const grandTotal = parseFloat(document.getElementById('grandTotal').innerText.replace('₹',''));
-    if(grandTotal === 0) return;
+    const amount = parseFloat(document.getElementById('grandTotal').innerText.replace('₹',''));
 
     const billTransaction = {
-        id: 'BILL_' + Date.now(),
-        type: 'bill',
+        id: 'bill_' + Date.now(),
         customerId: customerId,
-        amount: grandTotal,
+        type: 'bill',
+        amount: amount,
+        note: 'GST Bill - ' + currentBillItems.length + ' items',
         date: new Date().toISOString().split('T')[0],
-        invoiceNo: document.getElementById('invoiceNo').innerText,
-        vehicleNo: document.getElementById('vehicleNo').innerText,
-        paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash',
+        paymentMode: 'bill',
         items: currentBillItems,
-        note: 'Bill ' + document.getElementById('invoiceNo').innerText // ledger me dikhega
+        invoiceNo: document.getElementById('invoiceNo').innerText,
+        customerName: customer?.name || 'Cash'
     };
 
     appState.transactions.push(billTransaction);
-
-    // Balance + karo kyunki bill = udhar
-    customer.balance = (customer.balance || 0) + grandTotal;
-
+    if(customerId!== 'cash') customer.balance += amount; // udhar maan ke
     saveData();
+    closeModal('billModal');
     updateUI();
-    showToast(currentLanguage === 'hi'? `बिल सेव हो गया ₹${grandTotal}` : `Bill Saved ₹${grandTotal}`);
-    closeBillModal();
+    alert('Bill Saved!');
 }
-
   
 // ==================== SETTINGS FUNCTIONS ====================
 function loadSettings() {
