@@ -1025,8 +1025,12 @@ body.dark-mode .transaction-item {
     pointer-events: auto;
     z-index: 10;
     position: relative;
+    z-index: 1;
 }
+
 #ledgerFilterBtns button.active {
+   position: relative; /* parent ko relative do */
+    z-index: 5;
     background: var(--primary);
     color: white;
     border-color: var(--primary);
@@ -3265,7 +3269,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-</script> // <-- Yaha sirf 1 hi </script> hona chahiye
+</script> 
 
 </body>
 </html>
