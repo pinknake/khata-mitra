@@ -2174,7 +2174,7 @@ function saveSettings() {
     alert('सेटिंग्स सेव हो गई');
 }
 
-function showBillDetail(billId) {
+    function showBillDetail(billId) {
     const bill = appState.transactions.find(t => t.id === billId);
     if(!bill || !bill.items) { alert('Bill data nahi mila'); return; }
 
@@ -2191,12 +2191,11 @@ function showBillDetail(billId) {
         </tr>
     `).join('');
 
-    // YE PURA TABLE BANA KE DAAL
     document.getElementById('billViewContent').innerHTML = `
         <div style="padding:10px;">
             <h3>Bill No: ${bill.invoiceNo || bill.id.slice(-6)}</h3>
             <p>Customer: ${bill.customerName} | Date: ${formatDate(bill.date)}</p>
-            <table style="width:100%; border-collapse:collapse;">
+            <table style="width:100%; border-collapse:collapse; font-size:12px;">
                 <thead>
                     <tr style="background:#eee;">
                         <th>#</th><th>Item</th><th>HSN</th><th>Bags</th><th>Qty</th><th>Rate</th><th>GST</th><th>Total</th>
@@ -2207,9 +2206,17 @@ function showBillDetail(billId) {
             <h3 style="text-align:right; margin-top:10px;">Grand Total: ₹${bill.amount.toFixed(2)}</h3>
         </div>
     `;
-
-    // DISPLAY SE KHOLO, CLASS SE NAHI
     document.getElementById('billViewModal').style.display = 'flex';
+}
+
+// YE FUNCTION ADD KAR
+function viewCustomer(customerId){
+  openCustomerModal(customerId); // purane wale ko call kar de
+}
+
+function formatDate(dateStr){ // YE BHI ADD KAR
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('hi-IN');
 }
 
 // ==================== UI UPDATE FUNCTIONS ====================
@@ -2221,7 +2228,7 @@ function updateUI() {
   updateReports();
 }
 
-   function updateDashboard() {
+function updateDashboard() {
   document.getElementById('totalCustomers').textContent = appState.customers.length;
   let totalUdhar = 0, totalJama = 0;
   appState.customers.forEach(c => {
@@ -2233,129 +2240,106 @@ function updateUI() {
   document.getElementById('netBalance').textContent = '₹' + (totalUdhar - totalJama);
 }
 
-// PAGE LOAD HOTE HI
-document.addEventListener('DOMContentLoaded', loadData);
+function updateCustomerList() {
+  const list = document.getElementById('customerList');
+  const searchTerm = document.getElementById('customerSearch')?.value.toLowerCase() || '';
+  const filtered = appState.customers.filter(c => 
+    c.name.toLowerCase().includes(searchTerm) || 
+    (c.phone && c.phone.includes(searchTerm))
+  );
+  
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty-state"><i class="fas fa-users"></i><p>कोई ग्राहक नहीं मिला</p></div>`;
+    return;
+  }
+  
+  list.innerHTML = filtered.map(customer => `
+    <div class="customer-card" onclick="viewCustomer('${customer.id}')">
+      <div class="customer-info">
+        <h3>${customer.name}</h3>
+        <p>📞 ${customer.phone || 'नंबर नहीं'}</p>
+      </div>
+      <div class="customer-balance ${customer.balance >= 0 ? 'balance-positive' : 'balance-negative'}">
+        ${customer.balance >= 0 ? '₹' + customer.balance : '-₹' + Math.abs(customer.balance)}
+      </div>
+    </div>
+  `).join('');
+}
 
-
-    function updateCustomerList() {
-      const list = document.getElementById('customerList');
-      const searchTerm = document.getElementById('customerSearch')?.value.toLowerCase() || '';
-      
-      const filtered = appState.customers.filter(c => 
-        c.name.toLowerCase().includes(searchTerm) || 
-        (c.phone && c.phone.includes(searchTerm))
-      );
-      
-      if (filtered.length === 0) {
-        list.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-users"></i>
-            <p data-hi="कोई ग्राहक नहीं मिला" data-en="No customers found">कोई ग्राहक नहीं मिला</p>
+function updateRecentTransactions() {
+  const recent = document.getElementById('recentTransactions');
+  const transactions = [...appState.transactions].reverse().slice(0, 5);
+  
+  if (transactions.length === 0) {
+    recent.innerHTML = `<div class="empty-state"><i class="fas fa-exchange-alt"></i><p>कोई लेन-देन नहीं</p></div>`;
+    return;
+  }
+  
+  recent.innerHTML = transactions.map(t => {
+    const customer = appState.customers.find(c => c.id === t.customerId);
+    const isCredit = t.type === 'jama' || t.type === 'receive';
+    return `
+      <div class="transaction-item" onclick="viewCustomer('${t.customerId}')">
+        <div class="transaction-info">
+          <div class="transaction-icon ${isCredit ? 'icon-jama' : 'icon-udhar'}">
+            <i class="fas ${isCredit ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
           </div>
-        `;
-        return;
-      }
-      
-      list.innerHTML = filtered.map(customer => `
-        <div class="customer-card" onclick="viewCustomer('${customer.id}')">
-          <div class="customer-info">
-            <h3>${customer.name}</h3>
-            <p>📞 ${customer.phone || (currentLanguage === 'hi' ? 'नंबर नहीं' : 'No number')}</p>
-          </div>
-          <div class="customer-balance ${customer.balance >= 0 ? 'balance-positive' : 'balance-negative'}">
-            ${customer.balance >= 0 ? '₹' + customer.balance : '-₹' + Math.abs(customer.balance)}
+          <div class="transaction-details">
+            <h4>${customer?.name || 'Unknown'}</h4>
+            <p>${t.note || 'कोई विवरण नहीं'} • ${formatDate(t.date)}</p>
           </div>
         </div>
-      `).join('');
-    }
+        <div class="transaction-amount ${isCredit ? 'balance-positive' : 'balance-negative'}">
+          ${isCredit ? '+' : '-'} ₹${t.amount}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
-    function updateRecentTransactions() {
-      const recent = document.getElementById('recentTransactions');
-      const transactions = [...appState.transactions].reverse().slice(0, 5);
-      
-      if (transactions.length === 0) {
-        recent.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-exchange-alt"></i>
-            <p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p>
+function updateAllTransactions() {
+  const container = document.getElementById('allTransactions');
+  const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
+  
+  let filtered = [...appState.transactions].reverse();
+  
+  if (searchTerm) {
+    filtered = filtered.filter(t => {
+      const customer = appState.customers.find(c => c.id === t.customerId);
+      return customer?.name.toLowerCase().includes(searchTerm) || 
+             (t.note && t.note.toLowerCase().includes(searchTerm));
+    });
+  }
+  
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-history"></i><p>कोई लेन-देन नहीं</p></div>`;
+    return;
+  }
+  
+  container.innerHTML = filtered.map(t => { // YAHAN SE EXTRA RETURN HATA
+    const customer = appState.customers.find(c => c.id === t.customerId);
+    const isCredit = t.type === 'jama' || t.type === 'receive';
+    
+    return `
+      <div class="transaction-item" onclick="viewCustomer('${t.customerId}')">
+        <div class="transaction-info">
+          <div class="transaction-icon ${isCredit ? 'icon-jama' : 'icon-udhar'}">
+            <i class="fas ${isCredit ? 'fa-arrow-down' : 'fa-arrow-up'}"></i>
           </div>
-        `;
-        return;
-      }
-      
-      recent.innerHTML = transactions.map(t => {
-        const customer = appState.customers.find(c => c.id === t.customerId);
-        const typeText = t.type === 'udhar' 
-          ? (currentLanguage === 'hi' ? 'उधार दिया' : 'Gave')
-          : (currentLanguage === 'hi' ? 'जमा लिया' : 'Received');
-        
-        return `
-          <div class="transaction-item" onclick="viewCustomer('${t.customerId}')">
-            <div class="transaction-info">
-              <div class="transaction-icon ${t.type === 'udhar' ? 'icon-udhar' : 'icon-jama'}">
-                <i class="fas ${t.type === 'udhar' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
-              </div>
-              <div class="transaction-details">
-                <h4>${customer?.name || 'Unknown'}</h4>
-                <p>${t.note || (currentLanguage === 'hi' ? 'कोई विवरण नहीं' : 'No description')} • ${formatDate(t.date)}</p>
-              </div>
-            </div>
-            <div class="transaction-amount ${t.type === 'udhar' ? 'balance-negative' : 'balance-positive'}">
-              ${t.type === 'udhar' ? '-' : '+'} ₹${t.amount}
-            </div>
+          <div class="transaction-details">
+            <h4>${customer?.name || 'Unknown'}</h4>
+            <p>${t.note || ''} • ${t.paymentMode || 'cash'} • ${formatDate(t.date)}</p>
           </div>
-        `;
-      }).join('');
-    }
+        </div>
+        <div class="transaction-amount ${isCredit ? 'balance-positive' : 'balance-negative'}">
+          ${isCredit ? '+' : '-'} ₹${t.amount}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
 
-    function updateAllTransactions() {
-      const container = document.getElementById('allTransactions');
-      const searchTerm = document.getElementById('historySearch')?.value.toLowerCase() || '';
-      
-      let filtered = [...appState.transactions].reverse();
-      
-      if (searchTerm) {
-        filtered = filtered.filter(t => {
-          const customer = appState.customers.find(c => c.id === t.customerId);
-          return customer?.name.toLowerCase().includes(searchTerm) || 
-                 (t.note && t.note.toLowerCase().includes(searchTerm));
-        });
-      }
-      
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <i class="fas fa-history"></i>
-            <p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p>
-          </div>
-        `;
-        return;
-      }
-      
-      container.innerHTML = filtered.map(t => {
-        const customer = appState.customers.find(c => c.id === t.customerId);
-        const typeText = t.type === 'udhar' 
-          ? (currentLanguage === 'hi' ? 'उधार' : 'Gave')
-          : (currentLanguage === 'hi' ? 'जमा' : 'Received');
-        
-        return `
-          <div class="transaction-item" onclick="viewCustomer('${t.customerId}')">
-            <div class="transaction-info">
-              <div class="transaction-icon ${t.type === 'udhar' ? 'icon-udhar' : 'icon-jama'}">
-                <i class="fas ${t.type === 'udhar' ? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
-              </div>
-              <div class="transaction-details">
-                <h4>${customer?.name || 'Unknown'}</h4>
-                <p>${t.note || ''} • ${t.mode || 'cash'} • ${formatDate(t.date)}</p>
-              </div>
-            </div>
-            <div class="transaction-amount ${t.type === 'udhar' ? 'balance-negative' : 'balance-positive'}">
-              ${t.type === 'udhar' ? '-' : '+'} ₹${t.amount}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
+document.addEventListener('DOMContentLoaded', loadData);
 
    function updateReports() {
       const month = document.getElementById('reportMonth')?.value || '3';
@@ -2442,14 +2426,7 @@ document.addEventListener('DOMContentLoaded', loadData);
       });
     }
 
-
-
-
-
-
-
-
-    // ==================== MODAL FUNCTIONS ====================
+  // ==================== MODAL FUNCTIONS ====================
     function openQuickMenu() {
       document.getElementById('quickMenuModal').classList.add('active');
     }
