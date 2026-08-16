@@ -1822,9 +1822,16 @@ function shareBillOnWhatsApp() {
 
 
 <script>
-
-
 let currentLanguage = 'hi'; 
+let appState = {
+  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '', mobile: '', email: '' },
+  customers: [],
+  transactions: [],
+  photos: [], 
+  settings: { darkMode: false, language: 'hi', autoReminder: false }
+};
+let currentBillItems = [];
+let selectedCustomerId = null; 
 
 function setLanguage(lang) {
   currentLanguage = lang;
@@ -1842,37 +1849,26 @@ function setLanguage(lang) {
   saveData();
 }
 
-let appState = {
-  company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '', mobile: '', email: '' },
-  customers: [],
-  transactions: [],
-  photos: [], 
-  settings: { darkMode: false, language: 'hi', autoReminder: false }
-};
-
-let currentBillItems = [];
-
-
-let selectedCustomerId = null; // sabse upar global bana de
-
 function openCustomerModal(customerId) {
     selectedCustomerId = customerId;
     const customer = appState.customers.find(c => c.id === customerId);
+    if(!customer) return; // safety add
     
     document.getElementById('customerName').innerText = customer.name;
     document.getElementById('customerBalance').innerText = '₹' + (customer.balance || 0);
-    document.getElementById('customerPhone').innerText = customer.phone;
+    document.getElementById('customerPhone').innerText = customer.phone || '';
     
-    // Pehle All dikha de
     filterTransactions('all'); 
-    
-    document.getElementById('customerModal').style.display = 'flex';
+    document.getElementById('customerModal').classList.add('active'); // style.display ki jagah class
 }
 
-   function showTransactionDetail(transactionId) {
+// YE WALA RAKH - ALERT WALA HATA DE
+function showTransactionDetail(transactionId) {
     const t = appState.transactions.find(tr => tr.id == transactionId);
+    if(!t) return; // PEHLE CHECK
+    
     const customer = appState.customers.find(c => c.id === t.customerId);
-    if(!t) return;
+    if(!customer) return;
     
     const isCredit = t.type === 'jama' || t.type === 'receive';
     const typeText = isCredit ? 'जमा किया' : 'उधार दिया';
@@ -1892,15 +1888,12 @@ function openCustomerModal(customerId) {
         <p><b>Transaction ID:</b> ${t.id}</p>
       </div>
     `;
-    
-    document.getElementById('transactionDetailModal').style.display = 'flex';
+    document.getElementById('transactionDetailModal').classList.add('active');
 }
 
 function filterTransactions(filterType) {
-    // Saare transaction nikal jo is customer ke hain
     let transactions = appState.transactions.filter(t => t.customerId === selectedCustomerId);
     
-    // Filter laga
     if(filterType === 'bill') {
         transactions = transactions.filter(t => t.type === 'bill');
     }
@@ -1910,13 +1903,12 @@ function filterTransactions(filterType) {
     
     let html = '';
     if(transactions.length === 0) {
-        html = '<p style="text-align:center; color:#888;">कोई लेन-देन नहीं</p>';
+        html = `<p style="text-align:center; color:#888;">${currentLanguage==='hi'?'कोई लेन-देन नहीं':'No Transactions'}</p>`;
     }
     
     transactions.reverse().forEach(t => {
-        let isCredit = t.type === 'jama' || t.type === 'receive'; // Paisa aya
+        let isCredit = t.type === 'jama' || t.type === 'receive';
         let isBill = t.type === 'bill';
-        
         let color = isCredit ? 'green' : 'red';
         let sign = isCredit ? '+' : '-';
         let icon = isCredit ? '↓' : '↑';
@@ -1929,7 +1921,7 @@ function filterTransactions(filterType) {
             </div>
             <div style="flex:1;">
                 <b>${title}</b>
-                <div style="font-size:12px; color:#666;">${t.note || ''} • ${t.date}</div>
+                <div style="font-size:12px; color:#666;">${t.note || ''} • ${formatDate(t.date)}</div>
             </div>
             <div style="color:${color}; font-weight:bold; font-size:16px;">
                 ${sign} ₹${t.amount}
@@ -1940,22 +1932,6 @@ function filterTransactions(filterType) {
     
     document.getElementById('customerHistoryList').innerHTML = html;
 }
-
-
-// Click karne pe detail dikhane ke liye
-function showTransactionDetail(transactionId) {
-    const t = appState.transactions.find(tr => tr.id == transactionId);
-    if(!t) return;
-    
-    alert(`Detail:
-    Type: ${t.type}
-    Amount: ₹${t.amount}
-    Date: ${t.date}
-    Note: ${t.note}`);
-    // Yaha tu bill jaisa alag detail modal bhi khol sakta hai
-}
-
-   
 
 // ==================== MODAL CONTROL ====================
 function closeModal(id) {
