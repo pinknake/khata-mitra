@@ -1962,36 +1962,29 @@ function closeModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
+let currentBillItems = []; // YE GLOBAL ADD KAR SABSE UPAR
+
 function openBillModal() {
     currentBillItems = []; 
     document.getElementById('itemTableBody').innerHTML = '';
-    renderBillItems(); 
-    document.getElementById('billModal').style.display = 'flex';
-   
-    // YE 2 LINE ADD KAR - Customer dropdown bharne ke liye
-    const billCustomerSelect = document.getElementById('billCustomerSelect');
-
-    // YE SAFETY CHECK ADD KAR DE
-    if(!Array.isArray(customers)) {
-        customers = []; // agar array nahi hai to khali array bana de
-    }
     
+    // Customer dropdown bharne ke liye
+    const billCustomerSelect = document.getElementById('billCustomerSelect');
+    if(!billCustomerSelect) return;
+
     // dropdown reset
     billCustomerSelect.innerHTML = '<option value="">Cash Customer</option>';
 
-   // YAHAN CHANGE KIYA
+    // YAHAN appState.customers use karo
     appState.customers.forEach(c => {
         billCustomerSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
     });
+    
+    renderBillItems(); // table khali kar dega
     generateBillPreview();
+    
+    document.getElementById('billModal').classList.add('active'); // display flex ki jagah class
 }
-   
-// BAHR CLICK SE BAND
-window.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
-    }
-});
 
 // ==================== BILL FUNCTIONS ====================
 function addItemToBill() {
@@ -2096,11 +2089,10 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
     saveBillToHistory();
   }
 
-
-// YE BHI ZAROORI HAI
+// BAHR CLICK SE BAND
 window.addEventListener('click', function(event) {
     if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
+        event.target.classList.remove('active');
     }
 });
 
