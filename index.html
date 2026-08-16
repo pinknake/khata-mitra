@@ -1019,6 +1019,18 @@ body.dark-mode .transaction-item {
   border-radius: 0 0 40px 40px;
   padding: 25px 20px 30px 20px;
 }
+
+     #ledgerFilterBtns button {
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 10;
+    position: relative;
+}
+#ledgerFilterBtns button.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
      
   </style>
 
@@ -3160,13 +3172,21 @@ function openCustomerDetailModal(customerId) {
     document.getElementById('detailBalance').innerText = '₹' + Math.abs(customer.balance || 0);
     document.getElementById('detailPhone').innerText = customer.phone || '-';
     
-    filterCustomerTx('all'); // pehle sab dikha de
-    
     document.getElementById('customerDetailModal').style.display = 'flex';
+    
+    // YE 2 LINE NAYI ADD KAR
+    setTimeout(() => {
+        document.querySelector('#ledgerFilterBtns button').click(); // "All" pe auto click
+    }, 100);
 }
 
 // 2. Filter + List banane wala
 function filterCustomerTx(type) {
+    // 1. Button active karo
+    document.querySelectorAll('#ledgerFilterBtns button').forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active'); // jispe click kiya wahi active
+    
+    // 2. List filter karo
     let txs = appState.transactions.filter(t => t.customerId === currentCustomerId);
     
     if(type === 'payment') txs = txs.filter(t => t.type === 'udhar' || t.type === 'jama');
@@ -3204,7 +3224,7 @@ function filterCustomerTx(type) {
     
     document.getElementById('customerTransactions').innerHTML = html || '<p style="text-align:center;">कोई लेन-देन नहीं</p>';
 }
-
+   
 // 3. Udhar Jama detail kholne wala
 function showTransactionDetail(transactionId) {
     const t = appState.transactions.find(tr => tr.id == transactionId);
