@@ -2098,7 +2098,7 @@ window.addEventListener('click', function(event) {
 
   function saveBillToHistory() {
     const customerId = document.getElementById('billCustomerSelect').value;
-    if(!customerId || customerId === 'cash') return;
+    if(!customerId || customerId === '') return; // 'cash' hata diya
 
     const customer = appState.customers.find(c => c.id === customerId);
     if(!customer) return;
@@ -2110,29 +2110,25 @@ window.addEventListener('click', function(event) {
         id: 'BILL_' + Date.now(),
         type: 'bill',
         customerId: customerId,
-        customerName: customer.name,
         amount: grandTotal,
         date: new Date().toISOString().split('T')[0],
         invoiceNo: document.getElementById('invoiceNo').innerText,
         vehicleNo: document.getElementById('vehicleNo').innerText,
         paymentMode: document.getElementById('billPaymentMode')?.value || 'Cash',
         items: currentBillItems,
-        company: appState.company
+        note: 'Bill ' + document.getElementById('invoiceNo').innerText // ledger me dikhega
     };
 
     appState.transactions.push(billTransaction);
-    
-    // YE 2 LINE ADD KAR - Balance update ke liye
+
+    // Balance + karo kyunki bill = udhar
     customer.balance = (customer.balance || 0) + grandTotal;
-    customer.totalBilled = (customer.totalBilled || 0) + grandTotal; // optional: total business track
 
     saveData();
     updateUI();
-    
-    showToast('Bill Saved! ₹' + grandTotal); // optional
-    closeBillModal(); // optional: bill band ho jaye
+    showToast(currentLanguage === 'hi'? `बिल सेव हो गया ₹${grandTotal}` : `Bill Saved ₹${grandTotal}`);
+    closeBillModal();
 }
- 
 // Load data from localStorage
 function loadData() {
   const saved = localStorage.getItem('khataMitraPro'); // PURANA WALA HI RAKHA
