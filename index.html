@@ -1914,18 +1914,18 @@ function openCustomerModal(customerId) {
 // YE WALA RAKH - ALERT WALA HATA DE
 function showTransactionDetail(transactionId) {
     const t = appState.transactions.find(tr => tr.id == transactionId);
-    if(!t) return; // PEHLE CHECK
-    
+    if(!t) return;
+
     const customer = appState.customers.find(c => c.id === t.customerId);
     if(!customer) return;
-    
+
     const isCredit = t.type === 'jama' || t.type === 'receive';
-    const typeText = isCredit ? 'जमा किया' : 'उधार दिया';
-    const color = isCredit ? 'var(--success)' : 'var(--danger)';
-    const sign = isCredit ? '+' : '-';
-    
+    const typeText = isCredit? 'जमा किया' : 'उधार दिया';
+    const color = isCredit? 'var(--success)' : 'var(--danger)';
+    const sign = isCredit? '+' : '-';
+
     document.getElementById('tdTitle').innerText = typeText;
-    
+
     document.getElementById('tdBody').innerHTML = `
       <div style="background:var(--card-bg); padding:15px; border-radius:10px; border:1px solid var(--border);">
         <p><b data-hi="ग्राहक:" data-en="Customer:">ग्राहक:</b> ${customer.name}</p>
@@ -1942,30 +1942,30 @@ function showTransactionDetail(transactionId) {
 
 function filterTransactions(filterType) {
     let transactions = appState.transactions.filter(t => t.customerId === selectedCustomerId);
-    
+
     if(filterType === 'bill') {
         transactions = transactions.filter(t => t.type === 'bill');
     }
     if(filterType === 'udhar_jama') {
         transactions = transactions.filter(t => t.type === 'udhar' || t.type === 'jama' || t.type === 'gave' || t.type === 'receive');
     }
-    
+
     let html = '';
     if(transactions.length === 0) {
         html = `<p style="text-align:center; color:#888;">${currentLanguage==='hi'?'कोई लेन-देन नहीं':'No Transactions'}</p>`;
     }
-    
+
     transactions.reverse().forEach(t => {
         let isCredit = t.type === 'jama' || t.type === 'receive';
         let isBill = t.type === 'bill';
-        let color = isCredit ? 'green' : 'red';
-        let sign = isCredit ? '+' : '-';
-        let icon = isCredit ? '↓' : '↑';
-        let title = isBill ? 'बिल' : (isCredit ? 'जमा किया' : 'उधार दिया');
-        
+        let color = isCredit? 'green' : 'red';
+        let sign = isCredit? '+' : '-';
+        let icon = isCredit? '↓' : '↑';
+        let title = isBill? 'बिल' : (isCredit? 'जमा किया' : 'उधार दिया');
+
         html += `
         <div onclick="showTransactionDetail('${t.id}')" style="display:flex; align-items:center; padding:12px; background:white; border-radius:10px; margin-bottom:8px; cursor:pointer;">
-            <div style="background:${isCredit ? '#e8f5e9' : '#ffebee'}; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; margin-right:10px;">
+            <div style="background:${isCredit? '#e8f5e9' : '#ffebee'}; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; margin-right:10px;">
                 <span style="color:${color}; font-size:20px;">${icon}</span>
             </div>
             <div style="flex:1;">
@@ -1978,88 +1978,74 @@ function filterTransactions(filterType) {
         </div>
         `;
     });
-    
+
     document.getElementById('customerHistoryList').innerHTML = html;
 }
 
 // ==================== MODAL CONTROL ====================
+// SIRF 1 BAAR RAKH
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if(modal) modal.classList.remove('active');
+}
+
 function openQuickMenu() {
-      document.getElementById('quickMenuModal').classList.add('active');
-    }
-
-function openBillModal(){
-  document.getElementById('billModal').classList.add('active');
-  // customer dropdown bhi bhar de yaha
-}
-   
-    function openAddModal(type) {
-      closeModal('quickMenuModal');
-       
-    if(type === 'bill') {
-        openBillModal(); // bill ka alag modal
-        return;
-    }
-    // ... baki ka purana code udhar/jama ke liye
-     if (type === 'customer') {
-        document.getElementById('addCustomerModal').classList.add('active');
-      } else if (type === 'udhar' || type === 'jama') {
-        const title = document.getElementById('transactionModalTitle');
-        title.textContent = type === 'udhar' 
-          ? (currentLanguage === 'hi' ? 'उधार दें' : 'Give Money')
-          : (currentLanguage === 'hi' ? 'जमा करें' : 'Receive Money');
-        
-        document.getElementById('saveTransactionBtn').setAttribute('data-type', type);
-        
-        // Populate customer dropdown
-        const select = document.getElementById('transactionCustomer');
-        select.innerHTML = '<option value="">' + 
-          (currentLanguage === 'hi' ? 'ग्राहक चुनें' : 'Select Customer') + 
-          '</option>' + 
-          appState.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        
-        // Set today's date
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('transactionDate').value = today;
-        
-        // Clear photo preview
-        document.getElementById('photoPreview').innerHTML = '';
-        
-        document.getElementById('addTransactionModal').classList.add('active');
-      }
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
-   
-   function closeModal(id) {
-    document.getElementById(id).style.display = 'none';
+  document.getElementById('quickMenuModal').classList.add('active');
 }
 
+function openAddModal(type) {
+  closeModal('quickMenuModal');
 
+  if(type === 'bill') {
+    openBillModal();
+    return;
+  }
 
+  if (type === 'customer') {
+    document.getElementById('addCustomerModal').classList.add('active');
+  } else if (type === 'udhar' || type === 'jama') {
+    const title = document.getElementById('transactionModalTitle');
+    title.textContent = type === 'udhar'
+     ? (currentLanguage === 'hi'? 'उधार दें' : 'Give Money')
+      : (currentLanguage === 'hi'? 'जमा करें' : 'Receive Money');
+
+    document.getElementById('saveTransactionBtn').setAttribute('data-type', type);
+
+    const select = document.getElementById('transactionCustomer');
+    select.innerHTML = '<option value="">' +
+      (currentLanguage === 'hi'? 'ग्राहक चुनें' : 'Select Customer') +
+      '</option>' +
+      appState.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('transactionDate').value = today;
+    document.getElementById('photoPreview').innerHTML = '';
+
+    document.getElementById('addTransactionModal').classList.add('active');
+  }
+}
+
+// SIRF YE WALA RAKH - UPAR WALA HATA DE
 function openBillModal() {
-    currentBillItems = []; 
+    currentBillItems = [];
     document.getElementById('itemTableBody').innerHTML = '';
-    
-    // Customer dropdown bharne ke liye
+
     const billCustomerSelect = document.getElementById('billCustomerSelect');
     if(!billCustomerSelect) return;
 
-    // dropdown reset
     billCustomerSelect.innerHTML = '<option value="">Cash Customer</option>';
 
-    // YAHAN appState.customers use karo
-    appState.customers.forEach(c => {
-        billCustomerSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-    });
-    
-    renderBillItems(); // table khali kar dega
-    generateBillPreview();
-    
-    document.getElementById('billModal').classList.add('active'); // display flex ki jagah class
-}
+    if(appState.customers && appState.customers.length > 0){ // safety add
+        appState.customers.forEach(c => {
+            billCustomerSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
+    }
 
+    renderBillItems();
+    generateBillPreview();
+    document.getElementById('billModal').classList.add('active');
+}
+   
 // ==================== BILL FUNCTIONS ====================
 function addItemToBill() {
     let item = {
