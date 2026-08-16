@@ -1579,10 +1579,6 @@ body.dark-mode .transaction-item {
             <button onclick="filterCustomerTx('payment')" class="btn btn-outline btn-sm">Udhar/Jama</button>
             <button onclick="filterCustomerTx('bill')" class="btn btn-outline btn-sm">Bill</button>
         </div>
-
-         <div id="customerHistoryList" style="margin-top:10px;">
-  <!-- Yaha transaction list ayegi -->
-</div>
                 
         <h4 style="margin-bottom: 15px;" data-hi="लेन-देन इतिहास" data-en="Transaction History">लेन-देन इतिहास</h4>
         <div id="customerTransactions" class="transaction-list" style="max-height: 300px; overflow-y: auto;">
@@ -3153,6 +3149,82 @@ function renderCustomerTransactions(filter = 'all') {
     }
 
 
+   let currentCustomerId = null; // global bana le
+
+// 1. Customer kholega to ye chalega
+function openCustomerDetailModal(customerId) {
+    currentCustomerId = customerId;
+    const customer = appState.customers.find(c => c.id === customerId);
+    
+    document.getElementById('detailCustomerName').innerText = customer.name;
+    document.getElementById('detailBalance').innerText = '₹' + Math.abs(customer.balance || 0);
+    document.getElementById('detailPhone').innerText = customer.phone || '-';
+    
+    filterCustomerTx('all'); // pehle sab dikha de
+    
+    document.getElementById('customerDetailModal').style.display = 'flex';
+}
+
+// 2. Filter + List banane wala
+function filterCustomerTx(type) {
+    let txs = appState.transactions.filter(t => t.customerId === currentCustomerId);
+    
+    if(type === 'payment') txs = txs.filter(t => t.type === 'udhar' || t.type === 'jama');
+    if(type === 'bill') txs = txs.filter(t => t.type === 'bill');
+    
+    let html = '';
+    txs.reverse().forEach(t => {
+        let isPayment = t.type === 'udhar' || t.type === 'jama';
+        
+        if(isPayment) {
+            let isCredit = t.type === 'jama';
+            html += `
+            <div onclick="showTransactionDetail('${t.id}')" style="display:flex; padding:12px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; cursor:pointer;">
+                <div style="flex:1;">
+                    <b>${isCredit ? 'जमा किया' : 'उधार दिया'}</b>
+                    <div style="font-size:12px; color:var(--muted);">${t.note || 'Cash'} • ${formatDate(t.date)}</div>
+                </div>
+                <div style="color:${isCredit ? 'var(--success)' : 'var(--danger)'}; font-weight:bold;">
+                    ${isCredit ? '+' : '-'} ₹${t.amount}
+                </div>
+            </div>
+            `;
+        } else { // Bill
+            html += `
+            <div onclick="viewBill('${t.id}')" style="display:flex; padding:12px; background:var(--card-bg); border:1px solid var(--border); border-radius:10px; margin-bottom:8px; cursor:pointer;">
+                <div style="flex:1;">
+                    <b>बिल No: ${t.billNo}</b>
+                    <div style="font-size:12px; color:var(--muted);">${t.items?.length || 1} Items • ${formatDate(t.date)}</div>
+                </div>
+                <div style="color:var(--danger); font-weight:bold;">- ₹${t.amount}</div>
+            </div>
+            `;
+        }
+    });
+    
+    document.getElementById('customerTransactions').innerHTML = html || '<p style="text-align:center;">कोई लेन-देन नहीं</p>';
+}
+
+// 3. Udhar Jama detail kholne wala
+function showTransactionDetail(transactionId) {
+    const t = appState.transactions.find(tr => tr.id == transactionId);
+    const customer = appState.customers.find(c => c.id === t.customerId);
+    
+    const isCredit = t.type === 'jama';
+    
+    document.getElementById('tdTitle').innerText = isCredit ? 'जमा विवरण' : 'उधार विवरण';
+    
+    document.getElementById('tdBody').innerHTML = `
+      <p><b>ग्राहक:</b> ${customer.name}</p>
+      <p><b>तारीख:</b> ${formatDate(t.date)}</p>
+      <p><b>राशि:</b> ₹${t.amount}</p>
+      <p><b>भुगतान:</b> ${t.paymentMode || 'Cash'}</p>
+      <p><b>विवरण:</b> ${t.note || '-'}</p>
+    `;
+    
+    document.getElementById('transactionDetailModal').style.display = 'flex';
+}
+
 
 
 // ==================== BACKUP FUNCTIONS - APP CREATOR FIX ====================
@@ -3253,8 +3325,7 @@ function autoBackupToFile() {
       }
     });
   </script>
-   
-       
+          
 </script>
 
 </body>
