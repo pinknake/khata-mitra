@@ -3248,41 +3248,48 @@ function autoBackupToFile() {
   localStorage.setItem('lastAutoBackup', new Date().toISOString());
   showToast(currentLanguage === 'hi'? 'Auto backup ho gaya' : 'Auto backup done');
 }
+
     // ==================== INITIALIZATION ====================
-    document.addEventListener('DOMContentLoaded', () => {
-      loadData();
-      
-      // Set up event listeners
-      document.getElementById('reportMonth').addEventListener('change', updateReports);
-      document.getElementById('reportYear').addEventListener('change', updateReports);
-      
-      // Close modals when clicking outside
-      window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-          e.target.classList.remove('active');
-        }
-      });
-      
-      // Check for dark mode preference
-      if (appState.settings.darkMode) {
-        document.body.classList.add('dark-mode');
-        document.getElementById('darkModeToggle').classList.replace('fa-moon', 'fa-sun');
-      }
-      
-      // Add APK generation button
-      addAPKButton();
-      
-      // Register service worker for PWA
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => {
-          console.log('Service worker registration failed:', err);
-        });
-      }
+    // ==================== ALL FUNCTIONS HERE - GLOBAL ====================
+function openBillModal() { ... }
+function openAddModal(type) { ... }
+function switchTab(tabName) { ... }
+function closeModal(modalId) { ... }
+function saveBillToHistory() { ... }
+function showTransactionDetail(transactionId) { ... }
+
+// ==================== INITIALIZATION ====================
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  
+  // Set up event listeners
+  document.getElementById('reportMonth').addEventListener('change', updateReports);
+  document.getElementById('reportYear').addEventListener('change', updateReports);
+  
+  // Close modals when clicking outside
+  window.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal')) {
+      e.target.classList.remove('active');
+    }
+  });
+  
+  // Check for dark mode preference
+  if (appState.settings.darkMode) {
+    document.body.classList.add('dark-mode');
+    document.getElementById('darkModeToggle').classList.replace('fa-moon', 'fa-sun');
+  }
+  
+  // Add APK generation button
+  addAPKButton();
+  
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(err => {
+      console.log('Service worker registration failed:', err);
     });
-  </script>
-          
-</script>
+  }
+});
+</script> // <-- Yaha sirf 1 hi </script> hona chahiye
 
 </body>
-   
 </html>
