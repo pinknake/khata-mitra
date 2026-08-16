@@ -3077,16 +3077,24 @@ return `
     }
 
     function switchTab(tabName) {
-      // Update tab buttons
+      // 1. Saare tab button se active hatao
       document.querySelectorAll('.nav-tab').forEach(tab => {
         tab.classList.remove('active');
       });
-      event.currentTarget.classList.add('active');
       
-      // Show selected tab
+      // 2. Jis tab pe click kiya usko active karo - event ki jagah ye
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        if(tab.getAttribute('onclick').includes(tabName)) {
+            tab.classList.add('active');
+        }
+      });
+      
+      // 3. Saare page hide karo
       document.querySelectorAll('.tab-pane').forEach(pane => {
         pane.classList.remove('active');
       });
+      
+      // 4. Selected page show karo
       document.getElementById(tabName).classList.add('active');
       
       if (tabName === 'reports') {
@@ -3095,9 +3103,8 @@ return `
       
       if(tabName === 'settings'){
         loadCompanySettings();
-    }
-      
-    }
+      }
+}
       
     function toggleDarkMode() {
       document.body.classList.toggle('dark-mode');
