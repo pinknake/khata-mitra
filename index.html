@@ -1829,6 +1829,10 @@ function shareBillOnWhatsApp() {
 
 <script>
 let currentLanguage = 'hi'; 
+   let currentBillItems = [];
+let selectedCustomerId = null; 
+   let currentBillItems = []; // YE GLOBAL ADD KAR SABSE UPAR
+   
 let appState = {
   company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '', mobile: '', email: '' },
   customers: [],
@@ -1836,8 +1840,7 @@ let appState = {
   photos: [], 
   settings: { darkMode: false, language: 'hi', autoReminder: false }
 };
-let currentBillItems = [];
-let selectedCustomerId = null; 
+
 
 function setLanguage(lang) {
   currentLanguage = lang;
@@ -1855,7 +1858,45 @@ function setLanguage(lang) {
   saveData();
 }
 
+// Load data from localStorage
+function loadData() {
+  const saved = localStorage.getItem('khataMitraPro'); // PURANA WALA HI RAKHA
+  if (saved) {
+    try {
+      let loadedData = JSON.parse(saved);
+      // Agar company nahi hai to bana do
+      if(!loadedData.company) loadedData.company = { name: '', address: '', gst: '', pan: '', bank: '', upi: '' };
+      
+      // YE 2 SAFETY LINE ADD KAR DE
+      if(!Array.isArray(loadedData.customers)) loadedData.customers = [];
+      if(!Array.isArray(loadedData.transactions)) loadedData.transactions = [];
+      
+      appState = loadedData;
+    } catch (e) { console.error('Error loading data', e); }
+  }
+  
+  // YE CHECK BHI BADAL DE - warna error dega agar customers hi na ho
+  if (!appState.customers || appState.customers.length === 0) { initDemoData(); }
+  if (appState.settings.language) { setLanguage(appState.settings.language); }
+  
+  loadSettings(); // SETTINGS LOAD
+  updateUI();
+}
 
+// Save data to localStorage
+function saveData() {
+  localStorage.setItem('khataMitraPro', JSON.stringify(appState)); // PURANA WALA HI
+}
+
+function initDemoData() {
+  appState.customers = [
+    { id: '1', name: 'राहुल कुमार', phone: '9876543210', address: 'दिल्ली', balance: 500, gst:'', pan:'', vehicle:'', bank:'' },
+  ];
+  appState.transactions = [
+    { id: 't1', customerId: '1', type: 'udhar', amount: 500, note: 'पिज्जा के लिए', date: '2024-03-15', mode: 'cash' },
+  ];
+  saveData();
+}
    
 function openCustomerModal(customerId) {
     selectedCustomerId = customerId;
@@ -1942,11 +1983,60 @@ function filterTransactions(filterType) {
 }
 
 // ==================== MODAL CONTROL ====================
-function closeModal(id) {
+function openQuickMenu() {
+      document.getElementById('quickMenuModal').classList.add('active');
+    }
+
+function openBillModal(){
+  document.getElementById('billModal').classList.add('active');
+  // customer dropdown bhi bhar de yaha
+}
+   
+    function openAddModal(type) {
+      closeModal('quickMenuModal');
+       
+    if(type === 'bill') {
+        openBillModal(); // bill ka alag modal
+        return;
+    }
+    // ... baki ka purana code udhar/jama ke liye
+     if (type === 'customer') {
+        document.getElementById('addCustomerModal').classList.add('active');
+      } else if (type === 'udhar' || type === 'jama') {
+        const title = document.getElementById('transactionModalTitle');
+        title.textContent = type === 'udhar' 
+          ? (currentLanguage === 'hi' ? 'उधार दें' : 'Give Money')
+          : (currentLanguage === 'hi' ? 'जमा करें' : 'Receive Money');
+        
+        document.getElementById('saveTransactionBtn').setAttribute('data-type', type);
+        
+        // Populate customer dropdown
+        const select = document.getElementById('transactionCustomer');
+        select.innerHTML = '<option value="">' + 
+          (currentLanguage === 'hi' ? 'ग्राहक चुनें' : 'Select Customer') + 
+          '</option>' + 
+          appState.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        
+        // Set today's date
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('transactionDate').value = today;
+        
+        // Clear photo preview
+        document.getElementById('photoPreview').innerHTML = '';
+        
+        document.getElementById('addTransactionModal').classList.add('active');
+      }
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+   
+   function closeModal(id) {
     document.getElementById(id).style.display = 'none';
 }
 
-let currentBillItems = []; // YE GLOBAL ADD KAR SABSE UPAR
+
 
 function openBillModal() {
     currentBillItems = []; 
@@ -2113,45 +2203,7 @@ window.addEventListener('click', function(event) {
     showToast(currentLanguage === 'hi'? `बिल सेव हो गया ₹${grandTotal}` : `Bill Saved ₹${grandTotal}`);
     closeBillModal();
 }
-// Load data from localStorage
-function loadData() {
-  const saved = localStorage.getItem('khataMitraPro'); // PURANA WALA HI RAKHA
-  if (saved) {
-    try {
-      let loadedData = JSON.parse(saved);
-      // Agar company nahi hai to bana do
-      if(!loadedData.company) loadedData.company = { name: '', address: '', gst: '', pan: '', bank: '', upi: '' };
-      
-      // YE 2 SAFETY LINE ADD KAR DE
-      if(!Array.isArray(loadedData.customers)) loadedData.customers = [];
-      if(!Array.isArray(loadedData.transactions)) loadedData.transactions = [];
-      
-      appState = loadedData;
-    } catch (e) { console.error('Error loading data', e); }
-  }
-  
-  // YE CHECK BHI BADAL DE - warna error dega agar customers hi na ho
-  if (!appState.customers || appState.customers.length === 0) { initDemoData(); }
-  if (appState.settings.language) { setLanguage(appState.settings.language); }
-  
-  loadSettings(); // SETTINGS LOAD
-  updateUI();
-}
 
-// Save data to localStorage
-function saveData() {
-  localStorage.setItem('khataMitraPro', JSON.stringify(appState)); // PURANA WALA HI
-}
-
-function initDemoData() {
-  appState.customers = [
-    { id: '1', name: 'राहुल कुमार', phone: '9876543210', address: 'दिल्ली', balance: 500, gst:'', pan:'', vehicle:'', bank:'' },
-  ];
-  appState.transactions = [
-    { id: 't1', customerId: '1', type: 'udhar', amount: 500, note: 'पिज्जा के लिए', date: '2024-03-15', mode: 'cash' },
-  ];
-  saveData();
-}
   
 // ==================== SETTINGS FUNCTIONS ====================
 function loadSettings() {
@@ -2344,54 +2396,7 @@ function updateAllTransactions() {
 }
 
   // ==================== MODAL FUNCTIONS ====================
-    function openQuickMenu() {
-      document.getElementById('quickMenuModal').classList.add('active');
-    }
-
-function openBillModal(){
-  document.getElementById('billModal').classList.add('active');
-  // customer dropdown bhi bhar de yaha
-}
-   
-    function openAddModal(type) {
-      closeModal('quickMenuModal');
-       
-    if(type === 'bill') {
-        openBillModal(); // bill ka alag modal
-        return;
-    }
-    // ... baki ka purana code udhar/jama ke liye
-     if (type === 'customer') {
-        document.getElementById('addCustomerModal').classList.add('active');
-      } else if (type === 'udhar' || type === 'jama') {
-        const title = document.getElementById('transactionModalTitle');
-        title.textContent = type === 'udhar' 
-          ? (currentLanguage === 'hi' ? 'उधार दें' : 'Give Money')
-          : (currentLanguage === 'hi' ? 'जमा करें' : 'Receive Money');
-        
-        document.getElementById('saveTransactionBtn').setAttribute('data-type', type);
-        
-        // Populate customer dropdown
-        const select = document.getElementById('transactionCustomer');
-        select.innerHTML = '<option value="">' + 
-          (currentLanguage === 'hi' ? 'ग्राहक चुनें' : 'Select Customer') + 
-          '</option>' + 
-          appState.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        
-        // Set today's date
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('transactionDate').value = today;
-        
-        // Clear photo preview
-        document.getElementById('photoPreview').innerHTML = '';
-        
-        document.getElementById('addTransactionModal').classList.add('active');
-      }
-    }
-
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
+    
 
     // ==================== PHOTO FUNCTIONS ====================
     function previewTransactionPhoto(event) {
