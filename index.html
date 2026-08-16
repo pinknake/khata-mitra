@@ -2671,15 +2671,15 @@ document.addEventListener('DOMContentLoaded', loadData);
       
       // Show loading
       document.getElementById('loadingSpinner').style.display = 'block';
-      
-      const transaction = {
+
+         const transaction = {
         id: Date.now().toString(),
         customerId,
         type,
         amount,
         note,
         date,
-        mode,
+        paymentMode: mode, // <-- YAHAN mode ko paymentMode bana de
         createdAt: new Date().toISOString()
       };
       
@@ -2712,9 +2712,7 @@ document.addEventListener('DOMContentLoaded', loadData);
       document.getElementById('transactionNote').value = '';
       document.getElementById('transactionPhoto').value = '';
       document.getElementById('photoPreview').innerHTML = '';
-       paymentMode: document.getElementById('paymentMode')?.value || 'Cash' // agar dropdown hai to
-    
-    }
+ }
 
 
 
@@ -2805,24 +2803,26 @@ function renderCustomerTransactions(filter = 'all') {
 
         // VARNA UDHAR/JAMA WALA PURANA CARD
         return `
-            <div class="transaction-item">
-              <div class="transaction-info">
-                <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
-                  <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
-                </div>
-                <div class="transaction-details">
-                  <h4>${t.type === 'udhar'
-                   ? (currentLanguage === 'hi'? 'उधार दिया' : 'Gave')
-                    : (currentLanguage === 'hi'? 'जमा लिया' : 'Received')}
-                    ${hasPhoto? ' 📸' : ''}</h4>
-                  <p>${t.note || ''} • ${formatDate(t.date)}</p>
-                </div>
-              </div>
-              <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
-                ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
-              </div>
-            </div>
-          `;
+            // VARNA UDHAR/JAMA WALA CARD - ISME ONCLICK ADD KIYA
+return `
+    <div class="transaction-item" style="cursor:pointer;" onclick="showTransactionDetail('${t.id}')">
+      <div class="transaction-info">
+        <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
+          <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+        </div>
+        <div class="transaction-details">
+          <h4>${t.type === 'udhar'
+           ? (currentLanguage === 'hi'? 'उधार दिया' : 'Gave')
+            : (currentLanguage === 'hi'? 'जमा लिया' : 'Received')}
+            ${hasPhoto? ' 📸' : ''}</h4>
+          <p>${t.note || ''} • ${t.paymentMode || t.mode || 'Cash'} • ${formatDate(t.date)}</p>
+        </div>
+      </div>
+      <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
+        ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
+      </div>
+    </div>
+  `;
     }).join('');
 }
 
@@ -3228,8 +3228,9 @@ function filterCustomerTx(type) {
 // 3. Udhar Jama detail kholne wala
 function showTransactionDetail(transactionId) {
     const t = appState.transactions.find(tr => tr.id == transactionId);
-    const customer = appState.customers.find(c => c.id === t.customerId);
+    if(!t) return;
     
+    const customer = appState.customers.find(c => c.id === t.customerId);
     const isCredit = t.type === 'jama';
     
     document.getElementById('tdTitle').innerText = isCredit ? 'जमा विवरण' : 'उधार विवरण';
@@ -3242,7 +3243,7 @@ function showTransactionDetail(transactionId) {
       <p><b>विवरण:</b> ${t.note || '-'}</p>
     `;
     
-    document.getElementById('transactionDetailModal').style.display = 'flex';
+    document.getElementById('transactionDetailModal').classList.add('active');
 }
 
 
