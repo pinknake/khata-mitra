@@ -1828,10 +1828,9 @@ function shareBillOnWhatsApp() {
 
 
 <script>
-let currentLanguage = 'hi'; 
-   let currentBillItems = [];
-let selectedCustomerId = null; 
-   let currentBillItems = []; // YE GLOBAL ADD KAR SABSE UPAR
+let currentLanguage = 'hi';
+let currentBillItems = [];
+let selectedCustomerId = null;
    
 let appState = {
   company: { name: '', address: '', gst: '', pan: '', bank: '', upi: '', mobile: '', email: '' },
@@ -1840,7 +1839,6 @@ let appState = {
   photos: [], 
   settings: { darkMode: false, language: 'hi', autoReminder: false }
 };
-
 
 function setLanguage(lang) {
   currentLanguage = lang;
@@ -2047,8 +2045,6 @@ function openBillModal() {
 }
    
 // ==================== BILL FUNCTIONS ====================
-let currentBillItems = []; // Global array for bill items
-
 function addItemToBill() {
     const name = document.getElementById('itemName').value;
     const hsn = document.getElementById('itemHSN').value;
