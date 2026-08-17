@@ -1919,21 +1919,6 @@ function filterTransactions(filterType) {
 }
 
 
-// Click karne pe detail dikhane ke liye
-function showTransactionDetail(transactionId) {
-    const t = appState.transactions.find(tr => tr.id == transactionId);
-    if(!t) return;
-    
-    alert(`Detail:
-    Type: ${t.type}
-    Amount: ₹${t.amount}
-    Date: ${t.date}
-    Note: ${t.note}`);
-    // Yaha tu bill jaisa alag detail modal bhi khol sakta hai
-}
-
-   
-
 // ==================== MODAL CONTROL ====================
 function closeModal(id) {
     document.getElementById(id).style.display = 'none';
@@ -2777,27 +2762,26 @@ function renderCustomerTransactions(filter = 'all') {
     </div>
   `;
 }
-
-        // VARNA UDHAR/JAMA WALA PURANA CARD
-        return `
-            <div class="transaction-item">
-              <div class="transaction-info">
-                <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
-                  <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
-                </div>
-                <div class="transaction-details">
-                  <h4>${t.type === 'udhar'
-                   ? (currentLanguage === 'hi'? 'उधार दिया' : 'Gave')
-                    : (currentLanguage === 'hi'? 'जमा लिया' : 'Received')}
-                    ${hasPhoto? ' 📸' : ''}</h4>
-                  <p>${t.note || ''} • ${formatDate(t.date)}</p>
-                </div>
-              </div>
-              <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
-                ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
-              </div>
-            </div>
-          `;
+            // VARNA UDHAR/JAMA WALA CARD - ISME ONCLICK ADD KIYA
+return `
+    <div class="transaction-item" style="cursor:pointer;" onclick="showTransactionDetail('${t.id}')">
+      <div class="transaction-info">
+        <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
+          <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+        </div>
+        <div class="transaction-details">
+          <h4>${t.type === 'udhar'
+           ? (currentLanguage === 'hi'? 'उधार दिया' : 'Gave')
+            : (currentLanguage === 'hi'? 'जमा लिया' : 'Received')}
+            ${hasPhoto? ' 📸' : ''}</h4>
+          <p>${t.note || ''} • ${t.paymentMode || t.mode || 'Cash'} • ${formatDate(t.date)}</p>
+        </div>
+      </div>
+      <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
+        ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
+      </div>
+    </div>
+  `;
     }).join('');
 }
 
@@ -3040,9 +3024,7 @@ function renderCustomerTransactions(filter = 'all') {
       printWindow.print();
     }
 
-
-
-    // ==================== UTILITY FUNCTIONS ====================
+   // ==================== UTILITY FUNCTIONS ====================
     function formatDate(dateString) {
       if (!dateString) return '';
       const [year, month, day] = dateString.split('-');
@@ -3134,9 +3116,6 @@ function renderCustomerTransactions(filter = 'all') {
       switchTab('reports');
       document.querySelectorAll('.nav-tab')[3].click();
     }
-
-
-
 
 // ==================== BACKUP FUNCTIONS - APP CREATOR FIX ====================
 function exportBackup() {
@@ -3235,9 +3214,7 @@ function autoBackupToFile() {
         });
       }
     });
-  </script>
    
-       
 </script>
 
 </body>
