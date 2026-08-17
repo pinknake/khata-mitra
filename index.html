@@ -2937,9 +2937,10 @@ return `
       
       // 2. Jis tab pe click kiya usko active karo - event ki jagah ye
       document.querySelectorAll('.nav-tab').forEach(tab => {
-        if(tab.getAttribute('onclick').includes(tabName)) {
-            tab.classList.add('active');
-        }
+        const onclick = tab.getAttribute('onclick') || '';
+if (onclick.includes(tabName)) {
+    tab.classList.add('active');
+}
       });
       
       // 3. Saare page hide karo
@@ -3102,16 +3103,7 @@ function autoBackupToFile() {
   showToast(currentLanguage === 'hi'? 'Auto backup ho gaya' : 'Auto backup done');
 }
 
-    // ==================== INITIALIZATION ====================
-    // ==================== ALL FUNCTIONS HERE - GLOBAL ====================
-function openBillModal() { ... }
-function openAddModal(type) { ... }
-function switchTab(tabName) { ... }
-function closeModal(modalId) { ... }
-function saveBillToHistory() { ... }
-function showTransactionDetail(transactionId) { ... }
-
-// ==================== INITIALIZATION ====================
+   // ==================== INITIALIZATION ====================
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
   
