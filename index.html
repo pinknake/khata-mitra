@@ -2003,18 +2003,19 @@ function openBillModal() {
     document.getElementById('itemTableBody').innerHTML = '';
     renderBillItems(); 
     
-    openModal('billModal'); // <-- 1. ; lagaya aur getElementById hata diya
+    openModal('billModal'); 
     
-    // 2. Customer dropdown bharne ke liye
+    // 1. Customer dropdown bharne ke liye
     const billCustomerSelect = document.getElementById('billCustomerSelect');
 
-    // 3. SAFETY CHECK - appState.customers se check karo
+    // 2. SAFETY CHECK - localStorage se load karo
     if(!appState.customers || !Array.isArray(appState.customers)) {
-        appState.customers = []; // agar array nahi hai to khali array bana de
+        appState.customers = JSON.parse(localStorage.getItem('customers') || '[]'); // YE LINE ADD
+        if(!Array.isArray(appState.customers)) appState.customers = [];
     }
     
     // dropdown reset
-    billCustomerSelect.innerHTML = '<option value="cash">Cash Customer</option>'; // value="cash" add kiya
+    billCustomerSelect.innerHTML = '<option value="cash">Cash Customer</option>';
 
     // appState.customers se bharo
     appState.customers.forEach(c => {
@@ -2064,6 +2065,7 @@ function deleteItem(i) {
     generateBillPreview();
 }
 
+   
 function generateBillPreview(){
   // ===== YE 1 LINE SABSE UPAR DAL =====
   if(!document.getElementById('billContent')) return; 
@@ -2071,6 +2073,12 @@ function generateBillPreview(){
   let total = 0;
   let totalCGST = 0;
   let totalSGST = 0;
+
+   
+  // ===== YE LINE NAYI DAL =====
+   let customers = JSON.parse(localStorage.getItem('customers') || '[]');
+  if(!Array.isArray(customers)) customers = []; // Agar kuch gadbad hai to khali array
+  
   
   // Company data load kar
   let company = JSON.parse(localStorage.getItem('companyData') || '{}');
@@ -2185,7 +2193,18 @@ window.addEventListener('click', function(event) {
     showToast('Bill Saved! ₹' + grandTotal); // optional
     closeBillModal(); // optional: bill band ho jaye
 }
- 
+
+function loadCustomersForBill(){
+  let customers = JSON.parse(localStorage.getItem('customers') || '[]');
+  let select = document.getElementById('billCustomerSelect');
+  if(!select) return;
+  
+  select.innerHTML = `<option value="cash">Cash Customer</option>`;
+  customers.forEach(c => {
+    select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+  });
+}
+   
 // Load data from localStorage
 function loadData() {
   const saved = localStorage.getItem('khataMitraPro'); // PURANA WALA HI RAKHA
