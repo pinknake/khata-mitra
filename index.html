@@ -2001,16 +2001,16 @@ window.addEventListener('click', function(event) {
 function openBillModal() {
     currentBillItems = []; 
     document.getElementById('itemTableBody').innerHTML = '';
-    renderBillItems(); 
     
     openModal('billModal'); 
     
-    // 1. Customer dropdown bharne ke liye
+    // Customer dropdown bharne ke liye
     const billCustomerSelect = document.getElementById('billCustomerSelect');
+    if(!billCustomerSelect) return;
 
-    // 2. SAFETY CHECK - localStorage se load karo
+    // SAFETY CHECK
     if(!appState.customers || !Array.isArray(appState.customers)) {
-        appState.customers = JSON.parse(localStorage.getItem('customers') || '[]'); // YE LINE ADD
+        appState.customers = JSON.parse(localStorage.getItem('customers') || '[]');
         if(!Array.isArray(appState.customers)) appState.customers = [];
     }
     
