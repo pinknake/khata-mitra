@@ -24,36 +24,32 @@
       box-sizing: border-box;
     }
 
-    :root {
-      --primary: #6a1b9a;
-      --primary-dark: #4a0072;
-      --primary-light: #9c4dcc;
-      --secondary: #ff6b35;
-      --success: #2ec4b6;
-      --danger: #e53935;
-      --warning: #ffb74d;
-      --dark: #1e3d58;
-      --light: #f8f9fa;
-      --gray: #6c757d;
-             --bg: #f5f7fa;
-      --card-bg: #fff;
-      --text: #1e3d58;
-      --border: #e0e0e0;
-      --muted: #6c757d;         
-    }
-
 :root {
+  /* Purane App ke Color */
   --primary: #6a1b9a;
+  --primary-dark: #4a0072;
+  --primary-light: #9c4dcc;
+  --secondary: #ff6b35;
+  
+  /* Bill ke liye Naye Blue Color */
   --primary-blue: #2563eb; 
   --light-blue: #dbeafe;   
   --dark-blue: #1e40af;    
-  --success: #10b981;
-  --danger: #ef4444;
+
+  /* Common - Bill wale naye rakh liye */
+  --success: #10b981;   /* pehle #2ec4b6 tha */
+  --danger: #ef4444;    /* pehle #e53935 tha */
   --warning: #ffb74d;
+  --dark: #1e3d58;
+  --light: #f8f9fa;
+  --gray: #6c757d;
+  
+  /* Theme */
   --bg: #f5f7fa;
-  --card-bg: #ffffff;
+  --card-bg: #ffffff;   /* pehle #fff tha */
   --text: #1e3d58;
-  --border: #e5e7eb;
+  --border: #e5e7eb;    /* pehle #e0e0e0 tha */
+  --muted: #6c757d;
 }
      
     body {
@@ -68,14 +64,14 @@
 }
 
     body.dark-mode {
-      background: #121212;
-      color: #fff;
-       --bg: #121212;
-      --card-bg: #1e1e1e;
-      --text: #e0e0e0;
-      --border: #333;
-      --muted: #aaa;
-    }
+  --bg: #121212;
+  --card-bg: #1e1e1e;
+  --text: #e0e0e0;
+  --border: #333;
+  --muted: #aaa;
+  /* Bill ke blue same rahenge */
+}
+     
      .app-container {
   background: var(--card-bg);
   color: var(--text);
@@ -1036,6 +1032,31 @@ body.dark-mode .transaction-item {
   border-radius: 0 0 40px 40px;
   padding: 25px 20px 30px 20px;
 }
+
+     /* Modal thik */
+.modal {
+  width: 100% !important; /* 65px hata ke */
+  height: 100%;
+}
+
+/* Bill content ko scrollable banao */
+#billContent {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto; /* table bada hua to andar scroll */
+}
+
+/* Item add grid mobile me 2 line ho jaye */
+@media (max-width: 768px) {
+  .item-input-grid {
+    grid-template-columns: 1fr 1fr !important; /* Mobile me 2-2 karke */
+  }
+}
+
+/* Table border ko bhi responsive */
+#itemTable, #billContent table {
+  min-width: 600px; /* Itna to chahiye hi */
+}
      
   </style>
 
@@ -1202,9 +1223,13 @@ body.dark-mode .transaction-item {
       <div id="billItemsList"></div>
     </div>
     
-    <!-- BILL PREVIEW -->
-    <div id="billContent" style="padding: 15px; background: white; color: black; max-height: 400px; overflow-y: auto; font-size:12px;"> 
     
+    <!-- BILL PREVIEW -->
+<div style="overflow-x: auto;"> <!-- YE NAYA WRAPPER -->
+  <div id="billContent" style="padding: 15px; background: white; color: black; max-height: 400px; overflow-y: auto; font-size:12px; min-width:700px;"> 
+  ... pura bill ka code ...
+  </div>
+</div>
    
     <!-- HEADER TABLE -->
 <table style="width:100%; border-collapse:collapse; border:2px solid var(--primary-blue);">
@@ -1283,23 +1308,20 @@ body.dark-mode .transaction-item {
 <style>@media print {.no-print{display:none !important;}}</style>
     
 
-    <!-- BUTTONS -->
-    <div style="padding: 15px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; gap: 10px;">
-        <button class="btn btn-primary" onclick="downloadBillAsImage()" style="background: var(--primary-blue); border-color: var(--primary-blue);">
-    <i class="fas fa-download"></i> <span>Bill Save Kare</span>
-</button>
-      <button class="btn btn-success" onclick="openBillInBrowser()" style="background: var(--primary-blue); border-color: var(--primary-blue);">    
-    <i class="fas fa-external-link-alt"></i> <span>Browser me Print kare</span>
-</button>
-
-<button class="btn btn-whatsapp" onclick="shareBillOnWhatsApp()" style="background: var(--primary-blue); border-color: var(--primary-blue);">   
-    <i class="fab fa-whatsapp"></i> <span>WhatsApp pe Bheje</span>
-</button>
-      
-        <button class="btn btn-secondary" onclick="closeModal('billModal')" style="flex:1;">
-            <span data-hi="बंद करें" data-en="Close">बंद करें</span>
-        </button>
-    </div>
+<div style="padding: 15px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap;"> <!-- YE ADD KIYA -->
+    <button class="btn btn-primary" onclick="downloadBillAsImage()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">
+        <i class="fas fa-download"></i> <span>Bill Save Kare</span>
+    </button>
+    <button class="btn btn-success" onclick="openBillInBrowser()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">    
+        <i class="fas fa-external-link-alt"></i> <span>Browser me Print kare</span>
+    </button>
+    <button class="btn btn-whatsapp" onclick="shareBillOnWhatsApp()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">   
+        <i class="fab fa-whatsapp"></i> <span>WhatsApp pe Bheje</span>
+    </button>
+    <button class="btn btn-secondary" onclick="closeModal('billModal')" style="flex: 1 1 140px;">
+        <span data-hi="बंद करें" data-en="Close">बंद करें</span>
+    </button>
+</div>
   </div>
 </div>
     
