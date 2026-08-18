@@ -1206,55 +1206,47 @@ body.dark-mode .transaction-item {
           <!-- Will be populated by JS -->
         </div>
         </div>
-      
+
+             
 <!-- Bill Modal -->
 <div class="modal" id="billModal">
-  <div class="modal-content" style="max-width: 800px; width: 100%;">
+  <div class="modal-content">
     <div class="modal-header">
       <h3 data-hi="GST बिल" data-en="GST Bill">GST बिल</h3>
       <button class="close-btn" onclick="closeModal('billModal')">&times;</button>
     </div>
     
-    <!-- CUSTOMER SELECT -->
-    <div style="padding: 15px; background: #f5f5f5; border-bottom: 1px solid #ddd;">
-      <label data-hi="ग्राहक चुनें" data-en="Select Customer">ग्राहक चुनें</label>
-      <select id="billCustomerSelect" class="form-control" style="margin-top:5px;" onchange="generateBillPreview()">
-        <option value="cash" data-hi="Cash Customer" data-en="Cash Customer">Cash Customer</option>
-      </select>
-    </div>
-    <div style="padding: 15px; background: #fff; border-bottom: 1px solid #ddd;">
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-        <input type="text" id="billVehicleNo" placeholder="Vehicle No" class="form-control" onchange="generateBillPreview()">
-        <input type="text" id="billBuyerBank" placeholder="Buyer Bank Details" class="form-control" onchange="generateBillPreview()">
-    </div>
-</div>
-
-    <!-- ITEM ADD KARNE WALA -->
-    <div style="padding: 15px; background: #fff; border-bottom: 1px solid #ddd;">
-      <h4 data-hi="आइटम जोड़ें" data-en="Add Items">आइटम जोड़ें</h4>
-      <div class="item-input-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap:8px; margin-bottom:10px;">
-        <input type="text" id="itemName" placeholder="Item Name" class="form-control">
-        <input type="text" id="itemHSN" placeholder="HSN" class="form-control">
-        <input type="number" id="itemBags" placeholder="Bags" class="form-control" value="1">
-        <input type="number" id="itemQty" placeholder="Qty/Kg" class="form-control" value="50">
-        <input type="number" id="itemRate" placeholder="Rate" class="form-control">
-        <input type="number" id="itemGST" placeholder="GST%" class="form-control" value="18">
-        <button class="btn btn-primary" onclick="addItemToBill()" style="padding: 8px 12px;"><i class="fas fa-plus"></i></button>
+    <div class="bill-body"> <!-- NAYA WRAPPER -->
+      
+      <!-- CUSTOMER SELECT -->
+      <div style="padding: 15px; background: #f5f5f5; border-bottom: 1px solid #ddd;">
+        <label data-hi="ग्राहक चुनें" data-en="Select Customer">ग्राहक चुनें</label>
+        <select id="billCustomerSelect" class="form-control" style="margin-top:5px; width:100%;" onchange="generateBillPreview()">
+          <option value="cash">Cash Customer</option>
+        </select>
       </div>
-      <div id="billItemsList"></div>
-    </div>
+
+      <!-- ITEM ADD -->
+      <div style="padding: 15px; background: #fff; border-bottom: 1px solid #ddd;">
+        <h4 data-hi="आइटम जोड़ें" data-en="Add Items">आइटम जोड़ें</h4>
+        <div class="item-input-grid" style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr 1fr auto; gap:8px; margin-bottom:10px;">
+          <input type="text" id="itemName" placeholder="Item Name" class="form-control">
+          <input type="text" id="itemHSN" placeholder="HSN" class="form-control">
+          <input type="number" id="itemBags" placeholder="Bags" class="form-control" value="1">
+          <input type="number" id="itemQty" placeholder="Qty/Kg" class="form-control" value="50">
+          <input type="number" id="itemRate" placeholder="Rate" class="form-control">
+          <input type="number" id="itemGST" placeholder="GST%" class="form-control" value="18">
+          <button class="btn btn-primary" onclick="addItemToBill()" style="padding: 8px 12px;"><i class="fas fa-plus"></i></button>
+        </div>
+        <div id="billItemsList"></div>
+      </div>
     
     
-    <!-- BILL PREVIEW -->
-<div style="overflow-x: auto;"> <!-- YE NAYA WRAPPER -->
-  <div id="billContent" style="padding: 15px; background: white; color: black; max-height: 400px; overflow-y: auto; font-size:12px; min-width:700px;"> 
-  ... pura bill ka code ...
-  </div>
-</div>
-   
-    <!-- HEADER TABLE -->
-<table style="width:100%; border-collapse:collapse; border:2px solid var(--primary-blue);">
-    <tr style="background: var(--dark-blue); color: white;">
+<!-- BILL PREVIEW - SAB TABLE ISKE ANDAR -->
+      <div id="billContent"> 
+        <!-- HEADER TABLE -->
+        <table style="width:100%; border-collapse:collapse; border:2px solid var(--primary-blue);">
+     <tr style="background: var(--dark-blue); color: white;">
         <td colspan="2" style="text-align:center; border-bottom:2px solid var(--primary-blue); padding:8px;">
             <h2 style="margin:0; color:white;">TAX INVOICE</h2>
         </td>
@@ -1271,8 +1263,9 @@ body.dark-mode .transaction-item {
 </table>
 
     <!-- BUYER + INVOICE TABLE -->
-    <table style="width:100%; border-collapse:collapse; margin-top:5px; border:1px solid #000;">
-        <tr>
+    <!-- BUYER TABLE -->
+        <table style="width:100%; border-collapse:collapse; margin-top:5px; border:1px solid #000;">
+          <tr>
             <td style="width:50%; border-right:1px solid #000; padding:5px; vertical-align:top;">
                 <b>Buyer:</b> <span id="buyerName"></span><br>
                 <span id="buyerAddress"></span><br>
@@ -1290,8 +1283,9 @@ body.dark-mode .transaction-item {
     </table>
 
     <!-- ITEM TABLE - ye wala already thik hai -->
-    <table id="itemTable" style="width:100%; border-collapse:collapse; margin-top:5px; border:1px solid #000;">
-        <thead>
+    <!-- ITEM TABLE -->
+        <table id="itemTable" style="width:100%; border-collapse:collapse; margin-top:5px; border:1px solid #000;">
+          <thead>
     <tr style="background: var(--primary-blue); color: white;">
         <th style="border:1px solid var(--primary-blue); padding:4px;">#</th>
         <th style="border:1px solid var(--primary-blue); padding:4px;">Item</th>
@@ -1305,10 +1299,10 @@ body.dark-mode .transaction-item {
 </thead>
         <tbody id="itemTableBody"></tbody>
     </table>
-
-    <!-- TOTAL TABLE -->
-    <table style="width:100%; border-collapse:collapse; margin-top:5px;">
-        <tr>
+    
+        <!-- TOTAL TABLE -->
+        <table style="width:100%; border-collapse:collapse; margin-top:5px;">
+         <tr>
             <td style="width:60%; border:1px solid #000;"></td>
             <td style="width:40%;">
                 <table style="width:100%; border-collapse:collapse; border:1px solid #000;">
@@ -1325,26 +1319,29 @@ body.dark-mode .transaction-item {
     </table>
 
 </div>
+    </div>
 
 <style>@media print {.no-print{display:none !important;}}</style>
     
 
-<div style="padding: 15px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap;"> <!-- YE ADD KIYA -->
-    <button class="btn btn-primary" onclick="downloadBillAsImage()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">
+<!-- BUTTONS -->
+    <div class="no-print" style="padding: 15px; background: #f5f5f5; border-top: 1px solid #ddd; display: flex; gap: 10px; flex-wrap: wrap;">
+      <button class="btn btn-primary" onclick="downloadBillAsImage()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">
         <i class="fas fa-download"></i> <span>Bill Save Kare</span>
-    </button>
-    <button class="btn btn-success" onclick="openBillInBrowser()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">    
+      </button>
+      <button class="btn btn-success" onclick="openBillInBrowser()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">    
         <i class="fas fa-external-link-alt"></i> <span>Browser me Print kare</span>
-    </button>
-    <button class="btn btn-whatsapp" onclick="shareBillOnWhatsApp()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">   
+      </button>
+      <button class="btn btn-whatsapp" onclick="shareBillOnWhatsApp()" style="background: var(--primary-blue); border-color: var(--primary-blue); flex: 1 1 140px;">   
         <i class="fab fa-whatsapp"></i> <span>WhatsApp pe Bheje</span>
-    </button>
-    <button class="btn btn-secondary" onclick="closeModal('billModal')" style="flex: 1 1 140px;">
+      </button>
+      <button class="btn btn-secondary" onclick="closeModal('billModal')" style="flex: 1 1 140px;">
         <span data-hi="बंद करें" data-en="Close">बंद करें</span>
-    </button>
-</div>
+      </button>
+    </div>
   </div>
 </div>
+
     
 <!-- Reports Tab -->
 <div class="tab-pane" id="reports">
