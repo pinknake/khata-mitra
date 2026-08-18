@@ -2067,32 +2067,28 @@ function deleteItem(i) {
 
    
 function generateBillPreview(){
-  // ===== YE 1 LINE SABSE UPAR DAL =====
+  // 1. SABSE PEHLE CHECK
   if(!document.getElementById('billContent')) return; 
   
-  let total = 0;
-  let totalCGST = 0;
-  let totalSGST = 0;
-
-   
-  // ===== YE LINE NAYI DAL =====
-   let customers = JSON.parse(localStorage.getItem('customers') || '[]');
-  if(!Array.isArray(customers)) customers = []; // Agar kuch gadbad hai to khali array
+  let customers = appState.customers || JSON.parse(localStorage.getItem('customers') || '[]');
+  if(!Array.isArray(customers)) customers = [];
   
+  // 2. SAFE GET VALUE WALA FUNCTION
+  const getVal = (id) => {
+    let el = document.getElementById(id);
+    return el ? el.value : '';
+  }
   
-  // Company data load kar
-  let company = JSON.parse(localStorage.getItem('companyData') || '{}');
-  let customerSelect = document.getElementById('billCustomerSelect');
-  let customerId = customerSelect.value;
+  let customerId = getVal('billCustomerSelect'); // safe
   let customer = customers.find(c => c.id == customerId) || {};
   
-  // NAYA - SAFE TARIKA
-  let setText = (id, value) => {
+  // 3. COMPANY
+  let company = JSON.parse(localStorage.getItem('companyData') || '{}');
+  const setText = (id, value) => {
     let el = document.getElementById(id);
     if(el) el.innerText = value;
   }
   
-  // NAYA - COMPANY
   setText('billCompanyName', company.name || 'Khata Mitra');
   setText('billCompanyAddress', company.address || '');
   setText('billCompanyGST', company.gst || '');
@@ -2101,18 +2097,18 @@ function generateBillPreview(){
   setText('billCompanyEmail', company.email || '');
   setText('billCompanyBank', company.bank || '');
     
-  // 1. BUYER DETAIL
+  // 4. BUYER DETAIL
   setText('buyerName', customer.name || 'Cash Customer');
   setText('buyerAddress', customer.address || '');
   setText('buyerMobile', customer.phone || '');
   setText('buyerGSTIN', customer.gst || '');
   setText('buyerPAN', customer.pan || '');
-  setText('buyerBank', document.getElementById('billBuyerBank').value || customer.bank || '');
+  setText('buyerBank', getVal('billBuyerBank') || customer.bank || ''); // safe
 
-  // 2. INVOICE DETAIL
+  // 5. INVOICE DETAIL
   setText('invoiceNo', 'KM' + Date.now().toString().slice(-6));
   setText('invoiceDate', new Date().toLocaleDateString('en-IN'));
-  setText('vehicleNo', document.getElementById('billVehicleNo').value || customer.vehicle || '');
+  setText('vehicleNo', getVal('billVehicleNo') || customer.vehicle || ''); // safe
 
   // 3. ITEM TABLE
   let tbody = document.getElementById('itemTableBody');
