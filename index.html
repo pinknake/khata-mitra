@@ -24,53 +24,129 @@
       box-sizing: border-box;
     }
 
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
-  /* Purane App ke Color */
   --primary: #6a1b9a;
   --primary-dark: #4a0072;
   --primary-light: #9c4dcc;
   --secondary: #ff6b35;
-  
-  /* Bill ke liye Naye Blue Color */
   --primary-blue: #2563eb; 
   --light-blue: #dbeafe;   
   --dark-blue: #1e40af;    
-
-  /* Common - Bill wale naye rakh liye */
-  --success: #10b981;   /* pehle #2ec4b6 tha */
-  --danger: #ef4444;    /* pehle #e53935 tha */
+  --success: #10b981;
+  --danger: #ef4444;
   --warning: #ffb74d;
-  --dark: #1e3d58;
-  --light: #f8f9fa;
-  --gray: #6c757d;
-  
-  /* Theme */
   --bg: #f5f7fa;
-  --card-bg: #ffffff;   /* pehle #fff tha */
+  --card-bg: #ffffff;
   --text: #1e3d58;
-  --border: #e5e7eb;    /* pehle #e0e0e0 tha */
+  --border: #e5e7eb;
   --muted: #6c757d;
 }
-     
-    body {
+
+body {
   font-family: 'Poppins', sans-serif;
-  background: var(--bg); /* sirf ye 1 line */
+  background: var(--bg);
   color: var(--text);
-  margin: 0;
-  padding: 0;
   min-height: 100vh;
-  overflow-x: hidden; /* side scroll band */
+  overflow-x: hidden; /* Side scroll band */
   transition: all 0.3s ease;
 }
 
-    body.dark-mode {
+body.dark-mode {
   --bg: #121212;
   --card-bg: #1e1e1e;
   --text: #e0e0e0;
   --border: #333;
   --muted: #aaa;
-  /* Bill ke blue same rahenge */
 }
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  width: 100% !important; /* 65px hata diya */
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: var(--card-bg);
+  color: var(--text);
+  width: 95%;
+  max-width: 900px; /* Bill ke liye bada kiya */
+  border-radius: 15px;
+  padding: 0; /* padding hatayi kyunki andar alag hai */
+  max-height: 95vh;
+  overflow: hidden; /* Bahar scroll na aaye */
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+  font-size: 20px;
+  color: var(--primary);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--muted);
+}
+
+/* Bill content scroll */
+.bill-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+}
+
+#billContent {
+  padding: 15px;
+  background: white;
+  color: black;
+  overflow-x: auto; /* Table ke liye andar scroll */
+}
+
+#billContent table {
+  min-width: 700px; /* Table na phate */
+}
+
+/* Item grid mobile */
+@media (max-width: 768px) {
+  .item-input-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media print {.no-print{display:none !important;}}
      
      .app-container {
   background: var(--card-bg);
@@ -362,61 +438,6 @@ input, select, textarea {
 
     .fab-button:hover {
       transform: scale(1.1);
-    }
-
-    /* Modal */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  top: 0;
-  left: 0;
-  width: 100%;   /* 65px ki jagah 100% */
-  height: 100%;  /* 100% thik hai */
-  background: rgba(0,0,0,0.5);
-  align-items: center;
-  justify-content: center;
-  padding: 20px; /* Mobile me chipke na isliye */
-  box-sizing: border-box;
-}
-
-.modal.active {
-  display: flex;
-}
-
-.modal-content {
-  background: var(--card-bg); /* white ki jagah variable */
-  width: 90%;
-  max-width: 500px; /* 400 se 500 kar diya bill ke liye */
-  border-radius: 15px; /* 30px bahut zyada tha */
-  padding: 25px;
-  max-height: 90vh;
-  overflow-y: auto;
-  border: 1px solid var(--border);
-}
-     
-    body.dark-mode .modal-content {
-      background: #2d2d2d;
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .modal-header h3 {
-      font-size: 20px;
-      color: var(--primary);
-    }
-
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 24px;
-      cursor: pointer;
-      color: var(--gray);
     }
 
     /* Form Elements */
