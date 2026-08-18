@@ -2065,22 +2065,26 @@ function deleteItem(i) {
     generateBillPreview();
 }
 
-   
+
 function generateBillPreview(){
-  // 1. SABSE PEHLE CHECK
   if(!document.getElementById('billContent')) return; 
+  
+  // ===== YE 3 LINE ADD KAR =====
+  let total = 0;
+  let totalCGST = 0; 
+  let totalSGST = 0;
   
   let customers = appState.customers || JSON.parse(localStorage.getItem('customers') || '[]');
   if(!Array.isArray(customers)) customers = [];
   
-  // 2. SAFE GET VALUE WALA FUNCTION
   const getVal = (id) => {
     let el = document.getElementById(id);
     return el ? el.value : '';
   }
   
-  let customerId = getVal('billCustomerSelect'); // safe
+  let customerId = getVal('billCustomerSelect');
   let customer = customers.find(c => c.id == customerId) || {};
+  
   
   // 3. COMPANY
   let company = JSON.parse(localStorage.getItem('companyData') || '{}');
@@ -2110,9 +2114,10 @@ function generateBillPreview(){
   setText('invoiceDate', new Date().toLocaleDateString('en-IN'));
   setText('vehicleNo', getVal('billVehicleNo') || customer.vehicle || ''); // safe
 
+  
   // 3. ITEM TABLE
   let tbody = document.getElementById('itemTableBody');
-  if(tbody){ // YE BHI CHECK
+  if(tbody){
     tbody.innerHTML = '';
     currentBillItems.forEach((item, i) => {
         let amount = item.qty * item.rate;
@@ -2120,9 +2125,9 @@ function generateBillPreview(){
         let cgst = (amount * gstRate/2) / 100;
         let sgst = (amount * gstRate/2) / 100;
         
-        total += amount;
-        totalCGST += cgst;
-        totalSGST += sgst;
+        total += amount;        // ab ye chalega
+        totalCGST += cgst;      // ab ye chalega
+        totalSGST += sgst;      // ab ye chalega
         
         tbody.innerHTML += `<tr>
             <td style="border:1px solid #000; padding:4px;">${i+1}</td>
@@ -2138,6 +2143,10 @@ function generateBillPreview(){
   }
     
   // 4. TOTAL
+  const setText = (id, value) => {
+    let el = document.getElementById(id);
+    if(el) el.innerText = value;
+  }
   setText('subTotal', '₹' + total.toFixed(2));
   setText('totalCGST', '₹' + totalCGST.toFixed(2));
   setText('totalSGST', '₹' + totalSGST.toFixed(2));
