@@ -2064,36 +2064,51 @@ function deleteItem(i) {
     generateBillPreview();
 }
 
-function generateBillPreview() {
-    let customer = appState.customers.find(c => c.id == document.getElementById('billCustomerSelect').value) || {};
-    let company = appState.company || {}; // SETTING SE DATA
-    let total = 0, totalCGST = 0, totalSGST = 0;
-
-// NAYA
-document.getElementById('billCompanyName').innerText = company.name || 'Khata Mitra';
-document.getElementById('billCompanyAddress').innerText = company.address || '';
-document.getElementById('billCompanyGST').innerText = company.gst || '';
-document.getElementById('billCompanyPAN').innerText = company.pan || '';
-document.getElementById('billCompanyMobile').innerText = company.mobile || '';
-document.getElementById('billCompanyEmail').innerText = company.email || '';
-document.getElementById('billCompanyBank').innerText = company.bank || '';
-    
-    // 1. BUYER DETAIL - NAAM MAP KAR DIYA
-document.getElementById('buyerName').innerText = customer.name || 'Cash Customer';
-document.getElementById('buyerAddress').innerText = customer.address || '';
-document.getElementById('buyerMobile').innerText = customer.phone || '';        // phone -> mobile
-document.getElementById('buyerGSTIN').innerText = customer.gst || '';           // gst -> gstin
-document.getElementById('buyerPAN').innerText = customer.pan || '';
-document.getElementById('buyerBank').innerText = document.getElementById('billBuyerBank').value || customer.bank || '';
-
-// 2. INVOICE DETAIL
-document.getElementById('invoiceNo').innerText = 'KM' + Date.now().toString().slice(-6);
-document.getElementById('invoiceDate').innerText = new Date().toLocaleDateString('en-IN');
-document.getElementById('vehicleNo').innerText = document.getElementById('billVehicleNo').value || customer.vehicle || ''; // vehicle -> vehicleNo
-
+function generateBillPreview(){
+  // ===== YE 1 LINE SABSE UPAR DAL =====
+  if(!document.getElementById('billContent')) return; 
   
-    // 3. ITEM TABLE
-    let tbody = document.getElementById('itemTableBody');
+  let total = 0;
+  let totalCGST = 0;
+  let totalSGST = 0;
+  
+  // Company data load kar
+  let company = JSON.parse(localStorage.getItem('companyData') || '{}');
+  let customerSelect = document.getElementById('billCustomerSelect');
+  let customerId = customerSelect.value;
+  let customer = customers.find(c => c.id == customerId) || {};
+  
+  // NAYA - SAFE TARIKA
+  let setText = (id, value) => {
+    let el = document.getElementById(id);
+    if(el) el.innerText = value;
+  }
+  
+  // NAYA - COMPANY
+  setText('billCompanyName', company.name || 'Khata Mitra');
+  setText('billCompanyAddress', company.address || '');
+  setText('billCompanyGST', company.gst || '');
+  setText('billCompanyPAN', company.pan || '');
+  setText('billCompanyMobile', company.mobile || '');
+  setText('billCompanyEmail', company.email || '');
+  setText('billCompanyBank', company.bank || '');
+    
+  // 1. BUYER DETAIL
+  setText('buyerName', customer.name || 'Cash Customer');
+  setText('buyerAddress', customer.address || '');
+  setText('buyerMobile', customer.phone || '');
+  setText('buyerGSTIN', customer.gst || '');
+  setText('buyerPAN', customer.pan || '');
+  setText('buyerBank', document.getElementById('billBuyerBank').value || customer.bank || '');
+
+  // 2. INVOICE DETAIL
+  setText('invoiceNo', 'KM' + Date.now().toString().slice(-6));
+  setText('invoiceDate', new Date().toLocaleDateString('en-IN'));
+  setText('vehicleNo', document.getElementById('billVehicleNo').value || customer.vehicle || '');
+
+  // 3. ITEM TABLE
+  let tbody = document.getElementById('itemTableBody');
+  if(tbody){ // YE BHI CHECK
     tbody.innerHTML = '';
     currentBillItems.forEach((item, i) => {
         let amount = item.qty * item.rate;
@@ -2116,17 +2131,16 @@ document.getElementById('vehicleNo').innerText = document.getElementById('billVe
             <td style="border:1px solid #000; padding:4px;">₹${amount.toFixed(2)}</td>
         </tr>`;
     });
-    
-    // 4. TOTAL
-    document.getElementById('subTotal').innerText = '₹' + total.toFixed(2);
-    document.getElementById('totalCGST').innerText = '₹' + totalCGST.toFixed(2);
-    document.getElementById('totalSGST').innerText = '₹' + totalSGST.toFixed(2);
-    document.getElementById('grandTotal').innerText = '₹' + (total + totalCGST + totalSGST).toFixed(2);
-
-  
-    saveBillToHistory();
   }
+    
+  // 4. TOTAL
+  setText('subTotal', '₹' + total.toFixed(2));
+  setText('totalCGST', '₹' + totalCGST.toFixed(2));
+  setText('totalSGST', '₹' + totalSGST.toFixed(2));
+  setText('grandTotal', '₹' + (total + totalCGST + totalSGST).toFixed(2));
 
+  saveBillToHistory();
+}
 
 // YE BHI ZAROORI HAI
 window.addEventListener('click', function(event) {
