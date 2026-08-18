@@ -1935,10 +1935,10 @@ function showTransactionDetail(transactionId) {
 }
 
 function filterTransactions(filterType) {
-    // Saare transaction nikal jo is customer ke hain
+    if(!selectedCustomerId) return; // 1. Safety
+    
     let transactions = appState.transactions.filter(t => t.customerId === selectedCustomerId);
     
-    // Filter laga
     if(filterType === 'bill') {
         transactions = transactions.filter(t => t.type === 'bill');
     }
@@ -1949,34 +1949,35 @@ function filterTransactions(filterType) {
     let html = '';
     if(transactions.length === 0) {
         html = '<p style="text-align:center; color:#888;">कोई लेन-देन नहीं</p>';
+    } else {
+        transactions.reverse().forEach(t => {
+            let isCredit = t.type === 'jama' || t.type === 'receive';
+            let isBill = t.type === 'bill';
+            
+            let color = isCredit ? 'green' : 'red';
+            let sign = isCredit ? '+' : '-';
+            let icon = isCredit ? '↓' : '↑';
+            let title = isBill ? 'बिल' : (isCredit ? 'जमा किया' : 'उधार दिया');
+            
+            html += `
+            <div onclick="showTransactionDetail('${t.id}')" style="display:flex; align-items:center; padding:12px; background:white; border-radius:10px; margin-bottom:8px; cursor:pointer;">
+                <div style="background:${isCredit ? '#e8f5e9' : '#ffebee'}; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; margin-right:10px;">
+                    <span style="color:${color}; font-size:20px;">${icon}</span>
+                </div>
+                <div style="flex:1;">
+                    <b>${title}</b>
+                    <div style="font-size:12px; color:#666;">${t.note || ''} • ${t.date}</div>
+                </div>
+                <div style="color:${color}; font-weight:bold; font-size:16px;">
+                    ${sign} ₹${t.amount}
+                </div>
+            </div>
+            `;
+        });
     }
     
-    transactions.reverse().forEach(t => {
-        let isCredit = t.type === 'jama' || t.type === 'receive'; // Paisa aya
-        let isBill = t.type === 'bill';
-        
-        let color = isCredit ? 'green' : 'red';
-        let sign = isCredit ? '+' : '-';
-        let icon = isCredit ? '↓' : '↑';
-        let title = isBill ? 'बिल' : (isCredit ? 'जमा किया' : 'उधार दिया');
-        
-        html += `
-        <div onclick="showTransactionDetail('${t.id}')" style="display:flex; align-items:center; padding:12px; background:white; border-radius:10px; margin-bottom:8px; cursor:pointer;">
-            <div style="background:${isCredit ? '#e8f5e9' : '#ffebee'}; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; margin-right:10px;">
-                <span style="color:${color}; font-size:20px;">${icon}</span>
-            </div>
-            <div style="flex:1;">
-                <b>${title}</b>
-                <div style="font-size:12px; color:#666;">${t.note || ''} • ${t.date}</div>
-            </div>
-            <div style="color:${color}; font-weight:bold; font-size:16px;">
-                ${sign} ₹${t.amount}
-            </div>
-        </div>
-        `;
-    });
-    
-    document.getElementById('customerHistoryList').innerHTML = html;
+    let historyDiv = document.getElementById('customerHistoryList'); // 2. Safety
+    if(historyDiv) historyDiv.innerHTML = html;
 }
 
    
