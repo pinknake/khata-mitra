@@ -39,27 +39,33 @@
       --card-bg: #fff;
       --text: #1e3d58;
       --border: #e0e0e0;
-      --muted: #6c757d;
+      --muted: #6c757d;         
+    }
 
-         --primary-blue: #2563eb; /* Bill ka main blue */
-  --light-blue: #dbeafe;   /* Light background */
-  --dark-blue: #1e40af;    /* Dark header */
+:root {
+  --primary: #6a1b9a;
+  --primary-blue: #2563eb; 
+  --light-blue: #dbeafe;   
+  --dark-blue: #1e40af;    
   --success: #10b981;
   --danger: #ef4444;
+  --warning: #ffb74d;
+  --bg: #f5f7fa;
   --card-bg: #ffffff;
+  --text: #1e3d58;
   --border: #e5e7eb;
-    }
-
+}
+     
     body {
-      font-family: 'Poppins', sans-serif;
-      background: #f5f7fa;
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      transition: all 0.3s ease;
-       background: var(--bg);
-      color: var(--text);
-    }
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg); /* sirf ye 1 line */
+  color: var(--text);
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overflow-x: hidden; /* side scroll band */
+  transition: all 0.3s ease;
+}
 
     body.dark-mode {
       background: #121212;
@@ -363,35 +369,36 @@ input, select, textarea {
     }
 
     /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-    z-index: 2000;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-       width: 65px;
-       height: 100%;
-      background: rgba(0,0,0,0.5);
-      align-items: center;
-      justify-content: center;
-    }
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  width: 100%;   /* 65px ki jagah 100% */
+  height: 100%;  /* 100% thik hai */
+  background: rgba(0,0,0,0.5);
+  align-items: center;
+  justify-content: center;
+  padding: 20px; /* Mobile me chipke na isliye */
+  box-sizing: border-box;
+}
 
-    .modal.active {
-      display: flex;
-    }
+.modal.active {
+  display: flex;
+}
 
-    .modal-content {
-      background: white;
-      width: 90%;
-      max-width: 400px;
-      border-radius: 30px;
-      padding: 25px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
+.modal-content {
+  background: var(--card-bg); /* white ki jagah variable */
+  width: 90%;
+  max-width: 500px; /* 400 se 500 kar diya bill ke liye */
+  border-radius: 15px; /* 30px bahut zyada tha */
+  padding: 25px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+}
+     
     body.dark-mode .modal-content {
       background: #2d2d2d;
     }
