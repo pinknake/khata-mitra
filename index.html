@@ -24,21 +24,6 @@
       box-sizing: border-box;
     }
 
-:root {
-  --primary-blue: #2563eb; /* Bill ka main blue */
-  --light-blue: #dbeafe;   /* Light background */
-  --dark-blue: #1e40af;    /* Dark header */
-  --success: #10b981;
-  --danger: #ef4444;
-  --card-bg: #ffffff;
-  --border: #e5e7eb;
-}
-
-body.dark {
-  --card-bg: #1f2937;
-  --border: #374151;
-}
-     
     :root {
       --primary: #6a1b9a;
       --primary-dark: #4a0072;
@@ -55,6 +40,14 @@ body.dark {
       --text: #1e3d58;
       --border: #e0e0e0;
       --muted: #6c757d;
+
+         --primary-blue: #2563eb; /* Bill ka main blue */
+  --light-blue: #dbeafe;   /* Light background */
+  --dark-blue: #1e40af;    /* Dark header */
+  --success: #10b981;
+  --danger: #ef4444;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
     }
 
     body {
@@ -373,7 +366,7 @@ input, select, textarea {
     .modal {
       display: none;
       position: fixed;
-    z-index: 1000;
+    z-index: 2000;
       top: 0;
       left: 0;
       right: 0;
