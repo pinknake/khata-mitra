@@ -1876,7 +1876,6 @@ function shareBillOnWhatsApp() {
 
 <script>
 
-
 let currentLanguage = 'hi'; 
 let currentBillItems = [];
 let selectedCustomerId = null; // sabse upar global bana de
@@ -1987,11 +1986,6 @@ function openModal(modalId) {
   if(modal) modal.classList.add('active');
 }
 
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if(modal) modal.classList.remove('active');
-}
-
 // BAHAR CLICK SE BAND
 window.addEventListener('click', function(event) {
     if (event.target.classList.contains('modal')) {
@@ -2000,30 +1994,25 @@ window.addEventListener('click', function(event) {
 });
 
 function openBillModal() {
-    currentBillItems = []; 
+    currentBillItems = [];
     document.getElementById('itemTableBody').innerHTML = '';
-    
-    openModal('billModal'); 
-    
-    // Customer dropdown bharne ke liye
+
     const billCustomerSelect = document.getElementById('billCustomerSelect');
     if(!billCustomerSelect) return;
 
-    // SAFETY CHECK
-    if(!appState.customers || !Array.isArray(appState.customers)) {
-        appState.customers = JSON.parse(localStorage.getItem('customers') || '[]');
-        if(!Array.isArray(appState.customers)) appState.customers = [];
+    billCustomerSelect.innerHTML = '<option value="cash">Cash Customer</option>'; // value="cash" rakh
+
+    if(appState.customers && Array.isArray(appState.customers)){ // Array check bhi
+        appState.customers.forEach(c => {
+            billCustomerSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+        });
     }
-    
-    // dropdown reset
-    billCustomerSelect.innerHTML = '<option value="cash">Cash Customer</option>';
 
-    // appState.customers se bharo
-    appState.customers.forEach(c => {
-        billCustomerSelect.innerHTML += `<option value="${c.id}">${c.name}</option>`;
-    });
-
+   loadCustomersForBill(); // YE ADD KAR
+   
+    renderBillItems();
     generateBillPreview();
+    openModal('billModal'); // <-- YE BADAL DE
 }
    
 // ==================== BILL FUNCTIONS ====================
@@ -2202,6 +2191,8 @@ window.addEventListener('click', function(event) {
 
 function loadCustomersForBill(){
   let customers = JSON.parse(localStorage.getItem('customers') || '[]');
+  if(!Array.isArray(customers)) customers = []; // YE ADD
+  
   let select = document.getElementById('billCustomerSelect');
   if(!select) return;
   
@@ -2544,57 +2535,50 @@ document.addEventListener('DOMContentLoaded', loadData);
       });
     }
 
-
-
-
-
-
-
-
-    // ==================== MODAL FUNCTIONS ====================
+   // ==================== MODAL FUNCTIONS ====================
     function openQuickMenu() {
-      document.getElementById('quickMenuModal').classList.add('active');
-    }
+  document.getElementById('quickMenuModal').classList.add('active');
+}
 
-    function openAddModal(type) {
-      closeModal('quickMenuModal');
-       
-    if(type === 'bill') {
-        openBillModal(); // bill ka alag modal
-        return;
-    }
-    // ... baki ka purana code udhar/jama ke liye
-     if (type === 'customer') {
-        document.getElementById('addCustomerModal').classList.add('active');
-      } else if (type === 'udhar' || type === 'jama') {
-        const title = document.getElementById('transactionModalTitle');
-        title.textContent = type === 'udhar' 
-          ? (currentLanguage === 'hi' ? 'उधार दें' : 'Give Money')
-          : (currentLanguage === 'hi' ? 'जमा करें' : 'Receive Money');
-        
-        document.getElementById('saveTransactionBtn').setAttribute('data-type', type);
-        
-        // Populate customer dropdown
-        const select = document.getElementById('transactionCustomer');
-        select.innerHTML = '<option value="">' + 
-          (currentLanguage === 'hi' ? 'ग्राहक चुनें' : 'Select Customer') + 
-          '</option>' + 
-          appState.customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-        
-        // Set today's date
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('transactionDate').value = today;
-        
-        // Clear photo preview
-        document.getElementById('photoPreview').innerHTML = '';
-        
-        document.getElementById('addTransactionModal').classList.add('active');
-      }
-    }
+function openAddModal(type) {
+  closeModal('quickMenuModal');
+   
+  if(type === 'bill') {
+    openBillModal(); // bill ka alag modal
+    return;
+  }
 
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
+  if (type === 'customer') {
+    document.getElementById('addCustomerModal').classList.add('active');
+  } else if (type === 'udhar' || type === 'jama') {
+    const title = document.getElementById('transactionModalTitle');
+    title.textContent = type === 'udhar' 
+     ? (currentLanguage === 'hi'? 'उधार दें' : 'Give Money')
+      : (currentLanguage === 'hi'? 'जमा करें' : 'Receive Money');
+    
+    document.getElementById('saveTransactionBtn').setAttribute('data-type', type);
+    
+    // ===== YE 2 LINE BADAL DE =====
+    const customers = appState.customers || []; // safety
+    const select = document.getElementById('transactionCustomer');
+    select.innerHTML = '<option value="">' + 
+      (currentLanguage === 'hi'? 'ग्राहक चुनें' : 'Select Customer') + 
+      '</option>' + 
+      customers.map(c => `<option value="${c.id}">${c.name}</option>`).join(''); // customers use karo
+    
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('transactionDate').value = today;
+    document.getElementById('photoPreview').innerHTML = '';
+    
+    document.getElementById('addTransactionModal').classList.add('active');
+  }
+}
+
+// SAFETY KE SAATH
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if(modal) modal.classList.remove('active'); // if laga de
+}
 
     // ==================== PHOTO FUNCTIONS ====================
     function previewTransactionPhoto(event) {
