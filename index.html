@@ -2286,6 +2286,26 @@ function filterCustomerTx(type) {
     renderCustomerTransactions(type);
 }
 
+
+
+  function printPaymentReceipt() {
+  let content = document.getElementById('paymentViewContent').innerHTML;
+  let w = window.open('', '', 'height=600,width=400');
+  w.document.write('<html><head><title>Payment Receipt</title></head><body>');
+  w.document.write(content);
+  w.document.write('</body></html>');
+  w.document.close();
+  w.print();
+}
+
+function sharePaymentWhatsApp() {
+  const txId = document.getElementById('paymentViewModal').getAttribute('data-tx-id');
+  const t = appState.transactions.find(x => x.id === txId);
+  const customer = appState.customers.find(c => c.id === t.customerId);
+  let msg = `*KhataMitra Receipt*\n\n${t.type === 'udhar' ? 'उधार दिया' : 'जमा लिया'}: ₹${t.amount}\nCustomer: ${customer.name}\nDate: ${formatDate(t.date)}\nNote: ${t.note || '-'}`;
+  window.open(`https://wa.me/91${customer.phone}?text=${encodeURIComponent(msg)}`);
+}
+
 function renderCustomerTransactions(filter = 'all') {
   const customerId = window.currentCustomerId;
   let transactions = appState.transactions.filter(t => t.customerId === customerId);
