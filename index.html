@@ -2377,51 +2377,48 @@ function renderCustomerTransactions(filter = 'all') {
 
 // 1. Udhar/Jama ko click karne par ye chalega
 function viewPayment(transactionId) {
-  const t = appState.transactions.find(x => x.id === transactionId);
-  const customer = appState.customers.find(c => c.id === t.customerId);
-  if(!t || !customer) {
-    showToast('Transaction nahi mili', 'error');
-    return;
-  }
-  
-  let isUdhar = t.type === 'udhar';
-  
-  let html = `
-    <div style="padding:20px; border:2px dashed #ddd; border-radius:12px; background:#fff;">
-      <div style="text-align:center; margin-bottom:20px;">
-        <h2 style="color:var(--primary); margin:0;">${appState.settings.companyName || 'KhataMitra'}</h2>
-        <p style="margin:5px 0; color:#666; font-size:12px;">${appState.settings.companyAddress || ''}</p>
-      </div>
-      
-      <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:20px;">
-        <div style="font-size:14px; color:#666;">${isUdhar ? 'उधार दिया' : 'जमा लिया'}</div>
-        <div style="font-size:32px; font-weight:bold; color:${isUdhar ? 'red' : 'green'};">
-          ${isUdhar ? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
+  try {
+    console.log("Clicked TX ID:", transactionId);
+    
+    const t = appState.transactions.find(x => x.id === transactionId);
+    console.log("Transaction mila:", t);
+    if(!t) throw new Error("Transaction nahi mili: " + transactionId);
+    
+    const customer = appState.customers.find(c => c.id === t.customerId);
+    console.log("Customer mila:", customer);
+    if(!customer) throw new Error("Customer nahi mila");
+    
+    let isUdhar = t.type === 'udhar';
+    
+    let html = `
+      <div style="padding:20px;">
+        <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center;">
+          <div>${isUdhar ? 'उधार दिया' : 'जमा लिया'}</div>
+          <div style="font-size:32px; font-weight:bold; color:${isUdhar ? 'red' : 'green'};">
+            ${isUdhar ? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
+          </div>
         </div>
+        <p><b>Customer:</b> ${customer.name}</p>
+        <p><b>Date:</b> ${formatDate(t.date)}</p>
+        <p><b>Note:</b> ${t.note || '-'}</p>
       </div>
-      
-      <table style="width:100%; font-size:14px; border-collapse:collapse;">
-        <tr><td style="padding:6px 0;"><b>Receipt No:</b></td><td>${t.id.slice(0,8)}</td></tr>
-        <tr><td style="padding:6px 0;"><b>Customer:</b></td><td>${customer.name}</td></tr>
-        <tr><td style="padding:6px 0;"><b>Phone:</b></td><td>${customer.phone || '-'}</td></tr>
-        <tr><td style="padding:6px 0;"><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
-        <tr><td style="padding:6px 0;"><b>Mode:</b></td><td>${t.paymentMode || 'Cash'}</td></tr>
-        <tr><td style="padding:6px 0;"><b>Note:</b></td><td>${t.note || '-'}</td></tr>
-      </table>
-      
-      ${t.photo ? `<div style="margin-top:15px;"><img src="${t.photo}" style="width:100%; border-radius:8px;"></div>` : ''}
-      
-      <div style="text-align:center; margin-top:20px; font-size:12px; color:#999;">
-        Thank you - KhataMitra
-      </div>
-    </div>
-  `;
-  
-  document.getElementById('paymentViewContent').innerHTML = html;
-  document.getElementById('paymentViewModal').setAttribute('data-tx-id', transactionId);
-  openModal('paymentViewModal'); // Yahi line modal kholegi
+    `;
+    
+    let contentDiv = document.getElementById('paymentViewContent');
+    console.log("paymentViewContent div:", contentDiv);
+    if(!contentDiv) throw new Error("paymentViewContent div nahi mila HTML me");
+    
+    contentDiv.innerHTML = html;
+    
+    console.log("Modal khol raha hu...");
+    openModal('paymentViewModal'); 
+    
+  } catch(e) {
+    console.error("ERROR in viewPayment:", e);
+    alert("Error: " + e.message); // Phone me bhi dikh jayega
+    showToast("Receipt nahi khul rahi: " + e.message, "error");
+  }
 }
-
   
     // ==================== PDF EXPORT ====================
     function exportCustomerPDF() {
