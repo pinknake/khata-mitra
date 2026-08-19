@@ -1434,23 +1434,11 @@
       <h3 data-hi="पेमेंट रसीद" data-en="Payment Receipt">पेमेंट रसीद</h3>
       <button class="close-btn" onclick="closeModal('paymentViewModal')">&times;</button>
     </div>
-    <div id="paymentViewContent">
-      <!-- JS se bhar jayega -->
-    </div>
-    
-    <div style="display:flex; gap:10px; margin-top:15px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="printPaymentReceipt()">
-        <i class="fas fa-print"></i> <span data-hi="प्रिंट" data-en="Print">प्रिंट</span>
-      </button>
-      <button class="btn btn-outline" style="flex:1;" onclick="sharePaymentWhatsApp()">
-        <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
-      </button>
-    </div>
+    <div id="paymentViewContent"></div>
   </div>
 </div>
-
-      
-    <!-- Zoom Modal -->
+    
+      <!-- Zoom Modal -->
     <div id="zoomModal">
       <img id="zoomImage" src="" alt="">
       <div class="zoom-caption" id="zoomCaption"></div>
@@ -2361,7 +2349,10 @@ function renderCustomerTransactions(filter = 'all') {
 function viewPayment(transactionId) {
   const t = appState.transactions.find(x => x.id === transactionId);
   const customer = appState.customers.find(c => c.id === t.customerId);
-  if(!t || !customer) return;
+  if(!t || !customer) {
+    showToast('Transaction nahi mili', 'error');
+    return;
+  }
   
   let isUdhar = t.type === 'udhar';
   
@@ -2369,23 +2360,23 @@ function viewPayment(transactionId) {
     <div style="padding:20px; border:2px dashed #ddd; border-radius:12px; background:#fff;">
       <div style="text-align:center; margin-bottom:20px;">
         <h2 style="color:var(--primary); margin:0;">${appState.settings.companyName || 'KhataMitra'}</h2>
-        <p style="margin:5px 0; color:#666;">${appState.settings.companyAddress || ''}</p>
+        <p style="margin:5px 0; color:#666; font-size:12px;">${appState.settings.companyAddress || ''}</p>
       </div>
       
       <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:20px;">
         <div style="font-size:14px; color:#666;">${isUdhar ? 'उधार दिया' : 'जमा लिया'}</div>
         <div style="font-size:32px; font-weight:bold; color:${isUdhar ? 'red' : 'green'};">
-          ${isUdhar ? '-' : '+'} ₹${t.amount.toFixed(2)}
+          ${isUdhar ? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
         </div>
       </div>
       
-      <table style="width:100%; font-size:14px;">
-        <tr><td><b>Receipt No:</b></td><td>${t.id.slice(0,8)}</td></tr>
-        <tr><td><b>Customer:</b></td><td>${customer.name}</td></tr>
-        <tr><td><b>Phone:</b></td><td>${customer.phone || '-'}</td></tr>
-        <tr><td><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
-        <tr><td><b>Mode:</b></td><td>${t.paymentMode || 'Cash'}</td></tr>
-        <tr><td><b>Note:</b></td><td>${t.note || '-'}</td></tr>
+      <table style="width:100%; font-size:14px; border-collapse:collapse;">
+        <tr><td style="padding:6px 0;"><b>Receipt No:</b></td><td>${t.id.slice(0,8)}</td></tr>
+        <tr><td style="padding:6px 0;"><b>Customer:</b></td><td>${customer.name}</td></tr>
+        <tr><td style="padding:6px 0;"><b>Phone:</b></td><td>${customer.phone || '-'}</td></tr>
+        <tr><td style="padding:6px 0;"><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
+        <tr><td style="padding:6px 0;"><b>Mode:</b></td><td>${t.paymentMode || 'Cash'}</td></tr>
+        <tr><td style="padding:6px 0;"><b>Note:</b></td><td>${t.note || '-'}</td></tr>
       </table>
       
       ${t.photo ? `<div style="margin-top:15px;"><img src="${t.photo}" style="width:100%; border-radius:8px;"></div>` : ''}
@@ -2398,9 +2389,8 @@ function viewPayment(transactionId) {
   
   document.getElementById('paymentViewContent').innerHTML = html;
   document.getElementById('paymentViewModal').setAttribute('data-tx-id', transactionId);
-  openModal('paymentViewModal');
+  openModal('paymentViewModal'); // Yahi line modal kholegi
 }
-
 
   
     // ==================== PDF EXPORT ====================
