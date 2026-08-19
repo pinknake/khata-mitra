@@ -2288,55 +2288,55 @@ function filterCustomerTx(type) {
     renderCustomerTransactions(type);
 }
 
-// 2. RENDER KE LIYE - BILL + UDHAR DONO
 function renderCustomerTransactions(filter = 'all') {
-   
   const customerId = window.currentCustomerId;
   let transactions = appState.transactions.filter(t => t.customerId === customerId);
-  
-  if(filter !== 'all') transactions = transactions.filter(t => t.type === filter);
-  
-  document.getElementById('customerTransactions').innerHTML = transactions.map(t => {
-    const hasPhoto = t.photo ? true : false;
 
-  let transactions = appState.transactions.filter(t => t.customerId === window.currentCustomerId);
+  // FILTER LAGA
+  if(filter === 'payment') {
+    transactions = transactions.filter(t => t.type === 'udhar' || t.type === 'jama');
+  }
+  if(filter === 'bill') {
+    transactions = transactions.filter(t => t.type === 'bill');
+  }
+  // 'all' me kuch nahi karna
 
-    if(filter === 'payment') transactions = transactions.filter(t => t.type === 'udhar' || t.type === 'jama');
-    if(filter === 'bill') transactions = transactions.filter(t => t.type === 'bill');
+  transactions.reverse(); // Naya upar
 
-    transactions.reverse(); // Naya upar
+  const container = document.getElementById('customerTransactions');
 
-    const container = document.getElementById('customerTransactions');
+  if (transactions.length === 0) {
+    container.innerHTML = `<div class="empty-state"><i class="fas fa-exchange-alt"></i><p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p></div>`;
+    return;
+  }
 
-    if (transactions.length === 0) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-exchange-alt"></i><p data-hi="कोई लेन-देन नहीं" data-en="No transactions">कोई लेन-देन नहीं</p></div>`;
-        return;
+  // MAP CHALAO
+  container.innerHTML = transactions.map(t => {
+    const hasPhoto = getTransactionPhotos(t.id).length > 0;
+
+    // AGAR BILL HAI TO ALAG CARD
+    if(t.type === 'bill') {
+      return `
+        <div class="transaction-item" style="border-left: 4px solid #2196F3; cursor:pointer;" onclick="showBillDetail('${t.id}')">
+          <div class="transaction-info">
+            <div class="transaction-icon" style="background: #E3F2FD; color: #2196F3;">
+              <i class="fas fa-file-invoice"></i>
+            </div>
+            <div class="transaction-details">
+              <h4>🧾 Bill No: ${t.invoiceNo || t.id.slice(-6)}</h4>
+              <p>${t.items ? t.items.length : 0} Items • ${t.vehicleNo || '-'} • ${formatDate(t.date)}</p>
+            </div>
+          </div>
+          <div class="transaction-amount balance-negative">
+            ₹${t.amount.toFixed(2)}
+          </div>
+        </div>
+      `;
     }
 
-    container.innerHTML = transactions.map(t => {
-        const hasPhoto = getTransactionPhotos(t.id).length > 0;
-
-        // AGAR BILL HAI TO ALAG CARD
-        if(t.type === 'bill') {
+    // VARNA UDHAR/JAMA WALA CARD
     return `
-    <div class="transaction-item" style="border-left: 4px solid #2196F3; cursor:pointer;" onclick="showBillDetail('${t.id}')">
-      <div class="transaction-info">
-        <div class="transaction-icon" style="background: #E3F2FD; color: #2196F3;">
-          <i class="fas fa-file-invoice"></i>
-        </div>
-        <div class="transaction-details">
-          <h4>🧾 Bill No: ${t.invoiceNo || t.id.slice(-6)}</h4>
-          <p>${t.items.length} Items • ${t.vehicleNo} • ${formatDate(t.date)}</p>
-        </div>
-      </div>
-      <div class="transaction-amount balance-negative">
-        ₹${t.amount.toFixed(2)}
-      </div>
-    </div>
-  `;
-}
-      return `
-      <div class="transaction-item" onclick="viewPayment('${t.id}')" style="cursor:pointer;"> <!-- Yaha onclick add kiya -->
+      <div class="transaction-item" onclick="viewPayment('${t.id}')" style="cursor:pointer;">
         <div class="transaction-info">
           <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
             <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
@@ -2350,7 +2350,7 @@ function renderCustomerTransactions(filter = 'all') {
           </div>
         </div>
         <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
-          ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
+          ${t.type === 'udhar'? '-' : '+'} ₹${t.amount.toFixed(2)}
         </div>
       </div>
     `;
