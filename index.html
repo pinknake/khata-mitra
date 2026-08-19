@@ -2933,20 +2933,24 @@ function buyPro() {  // <-- yaha f add kiya
   closeModal('subscriptionModal');
   updateProUI();
 }
+   
     function closeModal(id) {
   let modal = document.getElementById(id);
   if(modal) {
-    modal.remove(); // modal ko DOM se hata do
+    modal.style.display = 'none'; // hide kar do, remove mat karna
   }
 }
 
-// Bahar click karne pe bhi band ho jaye
+// Bahar click karne pe band
 document.addEventListener('click', function(e) {
   if(e.target.id === 'subscriptionModal') {
     closeModal('subscriptionModal');
   }
+  if(e.target.id === 'billModal') {  // ye nayi line
+    closeModal('billModal');
+  }
 });
-
+    
 function adminActivatePro() {
   let pass = document.getElementById('adminPass').value;
   if(pass === ADMIN_PASSWORD) {
