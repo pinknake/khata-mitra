@@ -1427,6 +1427,28 @@
   </div>
 </div>
 
+      <!-- UDHAAR/JAMA RECEIPT VIEW MODAL -->
+<div class="modal" id="paymentViewModal">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3 data-hi="पेमेंट रसीद" data-en="Payment Receipt">पेमेंट रसीद</h3>
+      <button class="close-btn" onclick="closeModal('paymentViewModal')">&times;</button>
+    </div>
+    <div id="paymentViewContent">
+      <!-- JS se bhar jayega -->
+    </div>
+    
+    <div style="display:flex; gap:10px; margin-top:15px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="printPaymentReceipt()">
+        <i class="fas fa-print"></i> <span data-hi="प्रिंट" data-en="Print">प्रिंट</span>
+      </button>
+      <button class="btn btn-outline" style="flex:1;" onclick="sharePaymentWhatsApp()">
+        <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
+      </button>
+    </div>
+  </div>
+</div>
+
       
     <!-- Zoom Modal -->
     <div id="zoomModal">
@@ -2268,7 +2290,16 @@ function filterCustomerTx(type) {
 
 // 2. RENDER KE LIYE - BILL + UDHAR DONO
 function renderCustomerTransactions(filter = 'all') {
-    let transactions = appState.transactions.filter(t => t.customerId === window.currentCustomerId);
+   
+  const customerId = window.currentCustomerId;
+  let transactions = appState.transactions.filter(t => t.customerId === customerId);
+  
+  if(filter !== 'all') transactions = transactions.filter(t => t.type === filter);
+  
+  document.getElementById('customerTransactions').innerHTML = transactions.map(t => {
+    const hasPhoto = t.photo ? true : false;
+
+  let transactions = appState.transactions.filter(t => t.customerId === window.currentCustomerId);
 
     if(filter === 'payment') transactions = transactions.filter(t => t.type === 'udhar' || t.type === 'jama');
     if(filter === 'bill') transactions = transactions.filter(t => t.type === 'bill');
@@ -2304,29 +2335,74 @@ function renderCustomerTransactions(filter = 'all') {
     </div>
   `;
 }
-
-        // VARNA UDHAR/JAMA WALA PURANA CARD
-        return `
-            <div class="transaction-item">
-              <div class="transaction-info">
-                <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
-                  <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
-                </div>
-                <div class="transaction-details">
-                  <h4>${t.type === 'udhar'
-                   ? (currentLanguage === 'hi'? 'उधार दिया' : 'Gave')
-                    : (currentLanguage === 'hi'? 'जमा लिया' : 'Received')}
-                    ${hasPhoto? ' 📸' : ''}</h4>
-                  <p>${t.note || ''} • ${formatDate(t.date)}</p>
-                </div>
-              </div>
-              <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
-                ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
-              </div>
-            </div>
-          `;
-    }).join('');
+      return `
+      <div class="transaction-item" onclick="viewPayment('${t.id}')" style="cursor:pointer;"> <!-- Yaha onclick add kiya -->
+        <div class="transaction-info">
+          <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
+            <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
+          </div>
+          <div class="transaction-details">
+            <h4>${t.type === 'udhar'
+             ? (currentLanguage === 'hi'? 'उधार दिया' : 'Gave')
+              : (currentLanguage === 'hi'? 'जमा लिया' : 'Received')}
+              ${hasPhoto? ' 📸' : ''}</h4>
+            <p>${t.note || ''} • ${formatDate(t.date)}</p>
+          </div>
+        </div>
+        <div class="transaction-amount ${t.type === 'udhar'? 'balance-negative' : 'balance-positive'}">
+          ${t.type === 'udhar'? '-' : '+'} ₹${t.amount}
+        </div>
+      </div>
+    `;
+  }).join('');
 }
+
+// 1. Udhar/Jama ko click karne par ye chalega
+function viewPayment(transactionId) {
+  const t = appState.transactions.find(x => x.id === transactionId);
+  const customer = appState.customers.find(c => c.id === t.customerId);
+  if(!t || !customer) return;
+  
+  let isUdhar = t.type === 'udhar';
+  
+  let html = `
+    <div style="padding:20px; border:2px dashed #ddd; border-radius:12px; background:#fff;">
+      <div style="text-align:center; margin-bottom:20px;">
+        <h2 style="color:var(--primary); margin:0;">${appState.settings.companyName || 'KhataMitra'}</h2>
+        <p style="margin:5px 0; color:#666;">${appState.settings.companyAddress || ''}</p>
+      </div>
+      
+      <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:20px;">
+        <div style="font-size:14px; color:#666;">${isUdhar ? 'उधार दिया' : 'जमा लिया'}</div>
+        <div style="font-size:32px; font-weight:bold; color:${isUdhar ? 'red' : 'green'};">
+          ${isUdhar ? '-' : '+'} ₹${t.amount.toFixed(2)}
+        </div>
+      </div>
+      
+      <table style="width:100%; font-size:14px;">
+        <tr><td><b>Receipt No:</b></td><td>${t.id.slice(0,8)}</td></tr>
+        <tr><td><b>Customer:</b></td><td>${customer.name}</td></tr>
+        <tr><td><b>Phone:</b></td><td>${customer.phone || '-'}</td></tr>
+        <tr><td><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
+        <tr><td><b>Mode:</b></td><td>${t.paymentMode || 'Cash'}</td></tr>
+        <tr><td><b>Note:</b></td><td>${t.note || '-'}</td></tr>
+      </table>
+      
+      ${t.photo ? `<div style="margin-top:15px;"><img src="${t.photo}" style="width:100%; border-radius:8px;"></div>` : ''}
+      
+      <div style="text-align:center; margin-top:20px; font-size:12px; color:#999;">
+        Thank you - KhataMitra
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('paymentViewContent').innerHTML = html;
+  document.getElementById('paymentViewModal').setAttribute('data-tx-id', transactionId);
+  openModal('paymentViewModal');
+}
+
+
+  
     // ==================== PDF EXPORT ====================
     function exportCustomerPDF() {
       const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
