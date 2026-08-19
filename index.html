@@ -2894,14 +2894,28 @@ function openSubscriptionModal() {
   </div>`;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
-
 function buyPro() {
-  // Yaha apna UPI ID daal de
-  let upi = '8708986767@ybl'; 
+  // Tera PhonePe UPI
+  let upi = '8708986767@ybl';  
   let amount = 99;
-  window.open(`upi://pay?pa=${upi}&pn=KhataMitra&am=${amount}&cu=INR`);
-  showToast(currentLanguage === 'hi'? 'Payment ke baad Pro activate ho jayega' : 'Pro will activate after payment');
+  let note = 'KhataMitra Pro Subscription';
+  
+  window.open(`upi://pay?pa=${upi}&pn=KhataMitra&am=${amount}&cu=INR&tn=${note}`);
+  
+  showToast(currentLanguage === 'hi'? 
+    'PhonePe khul gaya. Payment karke screenshot WhatsApp karo. Fir Pro on kar denge' : 
+    'PhonePe opened. Pay & send screenshot. We will activate Pro');
+    
   closeModal('subscriptionModal');
+}
+
+// Manual Pro ON karne ke liye ye function - Console me chalana
+function activatePro() {
+  appState.settings.isPro = true;
+  saveData();
+  updateProUI();
+  showToast('Pro Activated ✅');
+  console.log('Pro ON ho gaya. Ab customer unlimited bill bana sakta hai');
 }
 
 function updateProUI() {
