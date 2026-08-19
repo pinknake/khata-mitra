@@ -1173,6 +1173,11 @@
       <div>
         <h3 style="margin:0; color:white;">🚀 <span data-hi="Pro Membership" data-en="Pro Membership">Pro Membership</span></h3>
         <p id="proStatus" style="margin:5px 0 0 0; font-size:13px;" data-hi="Free Plan - 10 Bill Limit" data-en="Free Plan - 10 Bill Limit">Free Plan - 10 Bill Limit</p>
+     <p style="margin-top:15px; font-size:14px;">
+  <span data-hi="Payment ke baad screenshot ispe bhejo:" data-en="Send screenshot here after payment:">Payment ke baad screenshot ispe bhejo:</span><br>
+  <a href="https://wa.me/918708986767" style="color:#25D366; font-weight:bold;">8708986767</a>
+</p>
+      
       </div>
       <button onclick="openSubscriptionModal()" id="upgradeBtn" class="btn" style="background:white; color:#2ec4b6; font-weight:bold;">
         <span data-hi="Upgrade ₹99" data-en="Upgrade ₹99">Upgrade ₹99</span>
@@ -1224,6 +1229,20 @@
   <button class="btn btn-primary" onclick="saveSettings()">
     <i class="fas fa-save"></i> <span data-hi="सेव करें" data-en="Save">सेव करें</span>
   </button>
+
+  <!-- ===== ADMIN PANEL ===== -->
+<hr style="margin:20px 0;">
+<h4 style="color:#dc3545;" data-hi="Admin Panel" data-en="Admin Panel">Admin Panel</h4>
+<div class="form-group">
+  <input type="password" id="adminPass" class="form-control" placeholder="Admin Password" data-hi="Admin Password" data-en="Admin Password">
+</div>
+<button class="btn btn-danger" onclick="adminActivatePro()" style="background:#dc3545;">
+  <i class="fas fa-crown"></i> <span data-hi="Pro Activate Kare" data-en="Activate Pro">Pro Activate Kare</span>
+</button>
+<button class="btn btn-secondary" onclick="adminDeactivatePro()" style="background:#6c757d; margin-left:10px;">
+  <span data-hi="Pro Band Kare" data-en="Deactivate Pro">Pro Band Kare</span>
+</button>
+  
 </div>
 
       
@@ -2873,6 +2892,35 @@ function shareBillOnWhatsApp() {
     
     let whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
+}
+
+    const ADMIN_PASSWORD = 'khata123'; // <--- Yaha apna password rakh le
+
+function adminActivatePro() {
+  let pass = document.getElementById('adminPass').value;
+  if(pass === ADMIN_PASSWORD) {
+    appState.settings.isPro = true;
+    saveData();
+    updateProUI();
+    showToast(currentLanguage === 'hi'? 'Pro Activated ✅' : 'Pro Activated ✅');
+    document.getElementById('adminPass').value = '';
+  } else {
+    showToast(currentLanguage === 'hi'? 'Galat Password' : 'Wrong Password', 'error');
+  }
+}
+
+function adminDeactivatePro() {
+  let pass = document.getElementById('adminPass').value;
+  if(pass === ADMIN_PASSWORD) {
+    appState.settings.isPro = false;
+    appState.billsGenerated = 0;
+    saveData();
+    updateProUI();
+    showToast(currentLanguage === 'hi'? 'Pro Band ho gaya' : 'Pro Deactivated');
+    document.getElementById('adminPass').value = '';
+  } else {
+    showToast(currentLanguage === 'hi'? 'Galat Password' : 'Wrong Password', 'error');
+  }
 }
 
     // ========= SUBSCRIPTION FUNCTIONS =========
