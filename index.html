@@ -1427,6 +1427,7 @@
   </div>
 </div>
 
+
       <!-- UDHAAR/JAMA RECEIPT VIEW MODAL -->
 <div class="modal" id="paymentViewModal" onclick="closeModal('paymentViewModal')">
   <div class="modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
@@ -1446,6 +1447,7 @@
     </div>
   </div>
 </div>
+    
     
       <!-- Zoom Modal -->
     <div id="zoomModal">
@@ -2374,6 +2376,7 @@ function sharePaymentWhatsApp() {
 }
 
 // UPDATED RECEIPT FUNCTION
+// UPDATED RECEIPT FUNCTION
 function viewPayment(transactionId) {
   const t = appState.transactions.find(x => x.id === transactionId);
   const customer = appState.customers.find(c => c.id === t.customerId);
@@ -2415,6 +2418,16 @@ function viewPayment(transactionId) {
       <!-- PHOTO -->
       ${t.photo ? `<div style="margin-top:15px;"><b>Photo:</b><br><img src="${t.photo}" style="width:100%; border-radius:8px; border:1px solid #ddd; margin-top:5px;"></div>` : ''}
       
+      <!-- BUTTONS -->
+      <div style="display:flex; gap:10px; margin-top:20px;">
+        <button class="btn" style="flex:1; background:var(--primary); color:#fff;" onclick="printPaymentReceipt()">
+          <i class="fas fa-print"></i> Print
+        </button>
+        <button class="btn btn-outline" style="flex:1;" onclick="sharePaymentWhatsApp()">
+          <i class="fab fa-whatsapp"></i> WhatsApp
+        </button>
+      </div>
+
       <!-- FOOTER -->
       <div style="text-align:center; margin-top:20px; padding-top:10px; border-top:1px dashed #ccc; font-size:12px; color:#666;">
         Thank you - Visit Again<br><br>
@@ -3066,7 +3079,20 @@ function buyPro() {
   closeSubscriptionModal(); // yaha bhi sahi function naam
   updateProUI();
 }
-   
+
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+function printPaymentReceipt() {
+  window.print(); // Seedha browser ka print khul jayega
+}
+
+function sharePaymentWhatsApp() {
+  const text = document.getElementById('paymentViewContent').innerText;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+    
     // Subscription modal band karne ke liye - ye DOM se delete karta hai
 function closeSubscriptionModal() {
   let modal = document.getElementById('subscriptionModal');
