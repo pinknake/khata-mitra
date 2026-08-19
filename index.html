@@ -2897,8 +2897,29 @@ function shareBillOnWhatsApp() {
 
     const ADMIN_PASSWORD = 'khata123'; // Password yahi rahega
 
-// Jab customer Buy karega tab payment time save hoga
-function buyPro() {
+
+    function openSubscriptionModal() {
+  let modalHTML = `
+  <div id="subscriptionModal" class="modal active">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('subscriptionModal')">&times;</span>
+      <h2>🚀 KhataMitra Pro</h2>
+      <ul style="text-align:left; line-height:2;">
+        <li>✅ <span data-hi="Unlimited Customers & Bills" data-en="Unlimited Customers & Bills">Unlimited Customers & Bills</span></li>
+        <li>✅ <span data-hi="GST Bill + PDF Export" data-en="GST Bill + PDF Export">GST Bill + PDF Export</span></li>
+        <li>✅ <span data-hi="Cloud Backup" data-en="Cloud Backup">Cloud Backup</span></li>
+        <li>✅ <span data-hi="No Ads" data-en="No Ads">No Ads</span></li>
+      </ul>
+      <h3>₹99 / <span data-hi="Month" data-en="Month">Month</span></h3>
+      <button onclick="buyPro()" class="btn-primary" style="width:100%; padding:15px; font-size:16px;">Buy Now with UPI</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+    
+    // Jab customer Buy karega tab payment time save hoga
+
+  unction buyPro() {
   let upi = '8708986767@ybl';  
   let amount = 99;
   let note = 'KhataMitra Pro Subscription';
