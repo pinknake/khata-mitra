@@ -2922,21 +2922,20 @@ function openSubscriptionModal() {
 function buyPro() { 
   let upi = '870898986767@ybl';  
   let amount = 99;
-  let note = 'KhataMitra Pro Subscription';
+  let name = 'KhataMitra'; // pn me space mat rakhna
+  let note = 'KhataMitra Pro'; // tn short rakh
   
   // 1. Payment time save
   appState.settings.paymentRequestedAt = new Date().toISOString();
   saveData();
   
-  // 2. UPI Link banaya - space ko %20 kiya
-  let upiLink = `upi://pay?pa=${upi}&pn=KhataMitra&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  // 2. UPI Link - sabko encode karna zaroori hai
+  let upiLink = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
   
-  // 3. Link se kholo - ye sabse reliable tareeka hai
-  let a = document.createElement('a');
-  a.href = upiLink;
-  a.click(); // PhonePe/GPay/PhonePe auto open ho jayega
+  // 3. Link se kholo
+  window.location.href = upiLink; // a.click() se better hai ye
   
-  showToast('PhonePe khul gaya. Payment karke screenshot bhejo. 48 ghante me Pro ON hoga');
+  showToast('UPI App khul gayi. Payment karke screenshot bhejo');
   closeSubscriptionModal();
   updateProUI();
 }
