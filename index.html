@@ -2919,24 +2919,26 @@ function openSubscriptionModal() {
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-function buyPro() { 
-  let upi = '870898986767@ybl';  
+function buyPro() {
+  // Tera PhonePe UPI - Yahi wala sahi hai
+  let upi = '8708986767@ybl';  
   let amount = 99;
-  let name = 'KhataMitra'; // pn me space mat rakhna
-  let note = 'KhataMitra Pro'; // tn short rakh
+  let note = 'KhataMitra Pro';
   
-  // 1. Payment time save
+  // Payment time save karna mat bhoolna
   appState.settings.paymentRequestedAt = new Date().toISOString();
   saveData();
   
-  // 2. UPI Link - sabko encode karna zaroori hai
-  let upiLink = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
+  // UPI Link - encode zaroor karna
+  let upiLink = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent('KhataMitra')}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
   
-  // 3. Link se kholo
-  window.location.href = upiLink; // a.click() se better hai ye
+  window.location.href = upiLink; // window.open se better hai mobile me
   
-  showToast('UPI App khul gayi. Payment karke screenshot bhejo');
-  closeSubscriptionModal();
+  showToast(currentLanguage === 'hi'? 
+    'PhonePe khul gaya. Payment karke screenshot WhatsApp karo. 48 ghante me Pro ON hoga' : 
+    'PhonePe opened. Pay & send screenshot. Pro will activate in 48hrs');
+    
+  closeSubscriptionModal(); // yaha bhi sahi function naam
   updateProUI();
 }
    
