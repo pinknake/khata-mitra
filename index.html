@@ -924,29 +924,8 @@
           <!-- Will be populated by JS -->
         </div>
         </div>
-
-<!-- UDHAAR/JAMA RECEIPT VIEW MODAL -->
-<div class="modal" id="paymentViewModal">
-  <div class="modal-content" style="max-width: 500px;">
-    <div class="modal-header">
-      <h3 data-hi="पेमेंट रसीद" data-en="Payment Receipt">पेमेंट रसीद</h3>
-      <button class="close-btn" onclick="closeModal('paymentViewModal')">&times;</button>
-    </div>
-    <div id="paymentViewContent"></div>
-    
-    <div style="display:flex; gap:10px; padding:0 20px 20px 20px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="printPaymentReceipt()">
-        <i class="fas fa-print"></i> प्रिंट
-      </button>
-      <button class="btn btn-outline" style="flex:1;" onclick="sharePaymentWhatsApp()">
-        <i class="fab fa-whatsapp"></i> WhatsApp
-      </button>
-    </div>
-  </div>
-</div>
       
-      
-<!-- Bill Modal -->
+    <!-- Bill Modal -->
 <div class="modal" id="billModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999;">
   <div class="modal-content" style="background:white; padding:20px; border-radius:15px; max-width: 800px; width: 90%;">
     <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
@@ -1444,6 +1423,26 @@
     </div>
     <div id="billViewContent">
       <!-- JS se bhar jayega -->
+    </div>
+  </div>
+</div>
+
+      <!-- UDHAAR/JAMA RECEIPT VIEW MODAL -->
+<div class="modal" id="paymentViewModal" onclick="closeModal('paymentViewModal')">
+  <div class="modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 data-hi="पेमेंट रसीद" data-en="Payment Receipt">पेमेंट रसीद</h3>
+      <button class="close-btn" onclick="closeModal('paymentViewModal')">&times;</button>
+    </div>
+    <div id="paymentViewContent"></div>
+    
+    <div style="display:flex; gap:10px; padding:0 20px 20px 20px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="printPaymentReceipt()">
+        <i class="fas fa-print"></i> Print
+      </button>
+      <button class="btn btn-outline" style="flex:1;" onclick="sharePaymentWhatsApp()">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+      </button>
     </div>
   </div>
 </div>
@@ -2288,24 +2287,6 @@ function filterCustomerTx(type) {
 
 
 
-  function printPaymentReceipt() {
-  let content = document.getElementById('paymentViewContent').innerHTML;
-  let w = window.open('', '', 'height=600,width=400');
-  w.document.write('<html><head><title>Payment Receipt</title></head><body>');
-  w.document.write(content);
-  w.document.write('</body></html>');
-  w.document.close();
-  w.print();
-}
-
-function sharePaymentWhatsApp() {
-  const txId = document.getElementById('paymentViewModal').getAttribute('data-tx-id');
-  const t = appState.transactions.find(x => x.id === txId);
-  const customer = appState.customers.find(c => c.id === t.customerId);
-  let msg = `*KhataMitra Receipt*\n\n${t.type === 'udhar' ? 'उधार दिया' : 'जमा लिया'}: ₹${t.amount}\nCustomer: ${customer.name}\nDate: ${formatDate(t.date)}\nNote: ${t.note || '-'}`;
-  window.open(`https://wa.me/91${customer.phone}?text=${encodeURIComponent(msg)}`);
-}
-
 function renderCustomerTransactions(filter = 'all') {
   const customerId = window.currentCustomerId;
   let transactions = appState.transactions.filter(t => t.customerId === customerId);
@@ -2375,35 +2356,54 @@ function renderCustomerTransactions(filter = 'all') {
   }).join('');
 }
   
+// Print function
+function printPaymentReceipt() {
+  const printContent = document.getElementById('paymentViewContent').innerHTML;
+  const win = window.open('', '', 'height=700,width=500');
+  win.document.write(`<html><head><title>Receipt</title>`);
+  win.document.write(`<style>body{font-family:Arial} @media print{button{display:none}}</style>`);
+  win.document.write(`</head><body>${printContent}</body></html>`);
+  win.document.close();
+  win.print();
+}
+
+// WhatsApp Share
+function sharePaymentWhatsApp() {
+  const text = document.getElementById('paymentViewContent').innerText;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+// UPDATED RECEIPT FUNCTION
 function viewPayment(transactionId) {
   const t = appState.transactions.find(x => x.id === transactionId);
   const customer = appState.customers.find(c => c.id === t.customerId);
   if(!t || !customer) return;
   
   let isUdhar = t.type === 'udhar';
+  let companyName = appState.settings.companyName || 'KhataMitra'; // Default KhataMitra
   
   document.getElementById('paymentViewContent').innerHTML = `
     <div style="padding:20px; font-family:Arial; border:2px dashed #ddd;">
       
       <!-- HEADER -->
       <div style="text-align:center; margin-bottom:15px; border-bottom:2px solid #000; padding-bottom:10px;">
-        <h2 style="margin:0; color:var(--primary);">${appState.settings.companyName || 'KhataMitra'}</h2>
+        <h2 style="margin:0; color:var(--primary);">${companyName}</h2>
         <p style="margin:3px 0; font-size:12px;">${appState.settings.companyAddress || ''}</p>
         <p style="margin:3px 0; font-size:12px;"><b>GST:</b> ${appState.settings.gstNo || '-'} | <b>PAN:</b> ${appState.settings.panNo || '-'}</p>
         <h3 style="margin:10px 0 0 0;">${isUdhar ? 'UDHAAR RECEIPT' : 'PAYMENT RECEIPT'}</h3>
       </div>
       
       <!-- AMOUNT BOX -->
-      <div style="background:${isUdhar ? '#ffeaea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:15px;">
+      <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:15px;">
         <div style="font-size:14px; color:#666;">${isUdhar ? 'उधार दिया' : 'जमा लिया'}</div>
         <div style="font-size:32px; font-weight:700; color:${isUdhar ? '#f44336' : '#4CAF50'};">
           ${isUdhar ? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
         </div>
       </div>
       
-      <!-- DETAILS TABLE -->
-      <table style="width:100%; font-size:14px; border-collapse:collapse;">
-        <tr><td style="padding:6px 0; width:40%;"><b>Receipt No:</b></td><td>#${t.id.slice(0,8)}</td></tr>
+      <!-- DETAILS -->
+      <table style="width:100%; font-size:14px;">
+        <tr><td style="padding:6px 0;"><b>Receipt No:</b></td><td>#${t.id.slice(0,8)}</td></tr>
         <tr><td style="padding:6px 0;"><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
         <tr><td style="padding:6px 0;"><b>Customer:</b></td><td>${customer.name}</td></tr>
         <tr><td style="padding:6px 0;"><b>Phone:</b></td><td>${customer.phone || '-'}</td></tr>
@@ -2412,19 +2412,20 @@ function viewPayment(transactionId) {
         <tr><td style="padding:6px 0;"><b>Note:</b></td><td>${t.note || '-'}</td></tr>
       </table>
       
-      ${t.photo ? `<div style="margin-top:15px;"><img src="${t.photo}" style="width:100%; border-radius:8px; border:1px solid #ddd;"></div>` : ''}
+      <!-- PHOTO -->
+      ${t.photo ? `<div style="margin-top:15px;"><b>Photo:</b><br><img src="${t.photo}" style="width:100%; border-radius:8px; border:1px solid #ddd; margin-top:5px;"></div>` : ''}
       
       <!-- FOOTER -->
       <div style="text-align:center; margin-top:20px; padding-top:10px; border-top:1px dashed #ccc; font-size:12px; color:#666;">
-        Thank you - Visit Again<br>
-        <b>Signature</b>
+        Thank you - Visit Again<br><br>
+        <b>Signature</b><br><br>
+        <div style="font-size:10px; color:#999;">Made with ❤️ KhataMitra</div>
       </div>
     </div>
   `;
   
   document.getElementById('paymentViewModal').style.display = 'flex';
 }
-  
     // ==================== PDF EXPORT ====================
     function exportCustomerPDF() {
       const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
