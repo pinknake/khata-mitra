@@ -1244,6 +1244,7 @@
 </button>
   
 </div>
+      <p id="proWaitStatus" style="font-size:12px; color:#ffc107; margin-top:10px;"></p>
 
       
       <!-- Add Customer Modal -->
@@ -2894,15 +2895,45 @@ function shareBillOnWhatsApp() {
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
 
-    const ADMIN_PASSWORD = 'khata123'; // <--- Yaha apna password rakh le
+    const ADMIN_PASSWORD = 'khata123'; // Password yahi rahega
 
+// Jab customer Buy karega tab payment time save hoga
+function buyPro() {
+  let upi = '8708986767@ybl';  
+  let amount = 99;
+  let note = 'KhataMitra Pro Subscription';
+  
+  // Payment request ka time save kar do
+  appState.settings.paymentRequestedAt = new Date().toISOString();
+  saveData();
+  
+  window.open(`upi://pay?pa=${upi}&pn=KhataMitra&am=${amount}&cu=INR&tn=${note}`);
+  
+  showToast(currentLanguage === 'hi'? 
+    'PhonePe khul gaya. Payment karke screenshot bhejo. 48 ghante me Pro ON hoga' : 
+    'PhonePe opened. Pay & send screenshot. Pro will activate in 48 hours');
+    
+  closeModal('subscriptionModal');
+  updateProUI();
+}
+
+// Admin password dalke Pro ON karega
 function adminActivatePro() {
   let pass = document.getElementById('adminPass').value;
   if(pass === ADMIN_PASSWORD) {
     appState.settings.isPro = true;
+    
+    // Aaj se 30 din ki expiry set
+    let expiryDate = new Date();
+    expiryDate.setDate(expiryDate.getDate() + 30); 
+    appState.settings.proExpiry = expiryDate.toISOString();
+    
+    // Payment wala wait khatam
+    appState.settings.paymentRequestedAt = null;
+    
     saveData();
     updateProUI();
-    showToast(currentLanguage === 'hi'? 'Pro Activated ✅' : 'Pro Activated ✅');
+    showToast(currentLanguage === 'hi'? 'Pro 30 Din ke liye Activated ✅' : 'Pro Activated for 30 Days ✅');
     document.getElementById('adminPass').value = '';
   } else {
     showToast(currentLanguage === 'hi'? 'Galat Password' : 'Wrong Password', 'error');
@@ -2913,6 +2944,7 @@ function adminDeactivatePro() {
   let pass = document.getElementById('adminPass').value;
   if(pass === ADMIN_PASSWORD) {
     appState.settings.isPro = false;
+    appState.settings.proExpiry = null;
     appState.billsGenerated = 0;
     saveData();
     updateProUI();
@@ -2923,59 +2955,45 @@ function adminDeactivatePro() {
   }
 }
 
-    // ========= SUBSCRIPTION FUNCTIONS =========
-function openSubscriptionModal() {
-  let modalHTML = `
-  <div id="subscriptionModal" class="modal active">
-    <div class="modal-content">
-      <span class="close" onclick="closeModal('subscriptionModal')">&times;</span>
-      <h2>🚀 KhataMitra Pro</h2>
-      <ul style="text-align:left; line-height:2;">
-        <li>✅ <span data-hi="Unlimited Customers & Bills" data-en="Unlimited Customers & Bills">Unlimited Customers & Bills</span></li>
-        <li>✅ <span data-hi="GST Bill + PDF Export" data-en="GST Bill + PDF Export">GST Bill + PDF Export</span></li>
-        <li>✅ <span data-hi="Cloud Backup" data-en="Cloud Backup">Cloud Backup</span></li>
-        <li>✅ <span data-hi="No Ads" data-en="No Ads">No Ads</span></li>
-      </ul>
-      <h3>₹99 / <span data-hi="Month" data-en="Month">Month</span></h3>
-      <button onclick="buyPro()" class="btn-primary" style="width:100%; padding:15px; font-size:16px;">Buy Now with UPI</button>
-    </div>
-  </div>`;
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
-}
-function buyPro() {
-  // Tera PhonePe UPI
-  let upi = '8708986767@ybl';  
-  let amount = 99;
-  let note = 'KhataMitra Pro Subscription';
-  
-  window.open(`upi://pay?pa=${upi}&pn=KhataMitra&am=${amount}&cu=INR&tn=${note}`);
-  
-  showToast(currentLanguage === 'hi'? 
-    'PhonePe khul gaya. Payment karke screenshot WhatsApp karo. Fir Pro on kar denge' : 
-    'PhonePe opened. Pay & send screenshot. We will activate Pro');
-    
-  closeModal('subscriptionModal');
-}
-
-// Manual Pro ON karne ke liye ye function - Console me chalana
-function activatePro() {
-  appState.settings.isPro = true;
-  saveData();
-  updateProUI();
-  showToast('Pro Activated ✅');
-  console.log('Pro ON ho gaya. Ab customer unlimited bill bana sakta hai');
-}
-
 function updateProUI() {
   let isPro = appState.settings.isPro || false;
-  let bills = appState.billsGenerated || 0;
+  let expiry = appState.settings.proExpiry ? new Date(appState.settings.proExpiry) : null;
+  let paymentTime = appState.settings.paymentRequestedAt ? new Date(appState.settings.paymentRequestedAt) : null;
+  let today = new Date();
   
+  // 1. CHECK: Pro expire to nahi hua
+  if(isPro && expiry && today > expiry) {
+    appState.settings.isPro = false;
+    appState.settings.proExpiry = null;
+    saveData();
+    isPro = false;
+    showToast(currentLanguage === 'hi'? 'Pro Expire ho gaya' : 'Pro Expired', 'error');
+  }
+  
+  // 2. CHECK: 48 ghante ka wait
+  let waitHTML = '';
+  if(paymentTime && !isPro) {
+    let hoursPassed = (today - paymentTime) / (1000*60*60);
+    let hoursLeft = 48 - hoursPassed;
+    if(hoursLeft > 0) {
+      waitHTML = currentLanguage === 'hi'? 
+        `⏳ Payment hui hai. ${Math.ceil(hoursLeft)} ghante baad Pro active kar sakte ho` : 
+        `⏳ Payment done. Activate Pro after ${Math.ceil(hoursLeft)} hours`;
+    }
+  }
+  document.getElementById('proWaitStatus').innerHTML = waitHTML;
+  
+  // 3. UI UPDATE
   if(isPro) {
-    document.getElementById('proStatus').innerText = currentLanguage === 'hi'? 'Pro Active' : 'Pro Active';
+    let daysLeft = Math.ceil((expiry - today) / (1000*60*60*24));
+    document.getElementById('proStatus').innerText = currentLanguage === 'hi'? `Pro Active - ${daysLeft} din baki` : `Pro Active - ${daysLeft} days left`;
     document.getElementById('upgradeBtn').style.display = 'none';
     document.getElementById('subscriptionCard').style.background = 'linear-gradient(135deg,#28a745,#20c997)';
   } else {
+    let bills = appState.billsGenerated || 0;
     document.getElementById('proStatus').innerText = currentLanguage === 'hi'? `Free Plan - ${bills}/10 Bills` : `Free Plan - ${bills}/10 Bills`;
+    document.getElementById('upgradeBtn').style.display = 'block';
+    document.getElementById('subscriptionCard').style.background = 'linear-gradient(135deg,#2ec4b6,#20a39e)';
   }
 }
 
