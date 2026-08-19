@@ -1416,39 +1416,37 @@
 
       <!-- BILL VIEW MODAL -->
 <div class="modal" id="billViewModal">
-  <div class="modal-content" style="max-width: 700px;">
+  <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
-      <h3 data-hi="बिल विवरण" data-en="Bill Details">बिल विवरण</h3>
-      <button class="close-btn" onclick="closeModal('billViewModal')">&times;</button>
+      <h3>Bill Details</h3>
+      <button class="close-btn" onclick="closeBillViewModal()">&times;</button> <!-- YE CHANGE -->
     </div>
-    <div id="billViewContent">
-      <!-- JS se bhar jayega -->
-    </div>
+    <div id="billViewContent"></div>
   </div>
 </div>
 
 
-      <!-- UDHAAR/JAMA RECEIPT VIEW MODAL -->
-<div class="modal" id="paymentViewModal" onclick="closeModal('paymentViewModal')">
-  <div class="modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
+<div class="modal" id="paymentViewModal">
+  <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
-      <h3 data-hi="पेमेंट रसीद" data-en="Payment Receipt">पेमेंट रसीद</h3>
-      <button class="close-btn" onclick="closeModal('paymentViewModal')">&times;</button>
+      <h3>Payment Receipt</h3>
+      <button class="close-btn" onclick="closePaymentViewModal()">&times;</button> <!-- YE CHANGE -->
     </div>
     <div id="paymentViewContent"></div>
-    
-    <div style="display:flex; gap:10px; padding:0 20px 20px 20px;">
-      <button class="btn btn-outline" style="flex:1;" onclick="printPaymentReceipt()">
-        <i class="fas fa-print"></i> Print
-      </button>
-      <button class="btn btn-outline" style="flex:1;" onclick="sharePaymentWhatsApp()">
-        <i class="fab fa-whatsapp"></i> WhatsApp
-      </button>
-    </div>
   </div>
 </div>
-    
-    
+
+
+      <div class="modal" id="printViewModal">
+  <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-header">
+      <h3>Print Preview</h3>
+      <button class="close-btn" onclick="closePrintViewModal()">&times;</button> <!-- YE CHANGE -->
+    </div>
+    <div id="printViewContent"></div>
+  </div>
+</div>
+      
       <!-- Zoom Modal -->
     <div id="zoomModal">
       <img id="zoomImage" src="" alt="">
@@ -3098,6 +3096,31 @@ function closeBillModal() {
   if(modal) {
     modal.style.display = 'none';
   }
+}
+
+    // 1. PAYMENT RECEIPT BAND KARNE KE LIYE
+function closePaymentViewModal() {
+  document.getElementById('paymentViewModal').style.display = 'none';
+}
+
+// 2. BILL VIEW BAND KARNE KE LIYE  
+function closeBillViewModal() {
+  document.getElementById('billViewModal').style.display = 'none';
+}
+
+// 3. PRINT PREVIEW BAND KARNE KE LIYE
+function closePrintViewModal() {
+  document.getElementById('printViewModal').style.display = 'none';
+}
+
+// 4. CUSTOMER ADD/EDIT MODAL
+function closeCustomerModal() {
+  document.getElementById('customerModal').style.display = 'none';
+}
+
+// 5. TRANSACTION MODAL
+function closeTransactionModal() {
+  document.getElementById('transactionModal').style.display = 'none';
 }
 
 // Bahar click pe band
