@@ -1163,9 +1163,24 @@
     </div>
 
 <!-- Settings Tab -->
+<!-- Settings Tab -->
 <div class="tab-pane" id="settings">
   <h3 data-hi="कंपनी सेटिंग" data-en="Company Settings">कंपनी सेटिंग</h3>
   
+  <!-- ===== SUBSCRIPTION CARD NEW ===== -->
+  <div id="subscriptionCard" class="settings-card" style="background: linear-gradient(135deg,#2ec4b6,#20a39e); color:white; padding:20px; border-radius:15px; margin-bottom:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <h3 style="margin:0; color:white;">🚀 <span data-hi="Pro Membership" data-en="Pro Membership">Pro Membership</span></h3>
+        <p id="proStatus" style="margin:5px 0 0 0; font-size:13px;" data-hi="Free Plan - 10 Bill Limit" data-en="Free Plan - 10 Bill Limit">Free Plan - 10 Bill Limit</p>
+      </div>
+      <button onclick="openSubscriptionModal()" id="upgradeBtn" class="btn" style="background:white; color:#2ec4b6; font-weight:bold;">
+        <span data-hi="Upgrade ₹99" data-en="Upgrade ₹99">Upgrade ₹99</span>
+      </button>
+    </div>
+  </div>
+  <!-- ===== SUBSCRIPTION CARD END ===== -->
+
   <div class="form-group">
     <label data-hi="दुकान का नाम" data-en="Shop Name">दुकान का नाम</label>
     <input type="text" id="companyName" class="form-control" placeholder="Khata Mitra">
@@ -1199,12 +1214,12 @@
   <div class="form-group">
     <label>Company Mobile</label>
     <input type="text" id="companyMobile" class="form-control" placeholder="98123XXXXX">
-</div>
+  </div>
 
-<div class="form-group">
+  <div class="form-group">
     <label>Company Email</label>
     <input type="email" id="companyEmail" class="form-control" placeholder="khata@gmail.com">
-</div>
+  </div>
   
   <button class="btn btn-primary" onclick="saveSettings()">
     <i class="fas fa-save"></i> <span data-hi="सेव करें" data-en="Save">सेव करें</span>
@@ -1472,6 +1487,14 @@ function generateBillPreview() {
     let company = appState.company || {}; // SETTING SE DATA
     let total = 0, totalCGST = 0, totalSGST = 0;
 
+  if((appState.billsGenerated || 0) >= 10 && !appState.settings.isPro) {
+  showToast(currentLanguage === 'hi'? 'Free limit khatam. Pro lelo' : 'Free limit over. Buy Pro', 'error');
+  openSubscriptionModal();
+  return;
+}
+appState.billsGenerated = (appState.billsGenerated || 0) + 1;
+saveData();
+  
 // NAYA
 document.getElementById('billCompanyName').innerText = company.name || 'Khata Mitra';
 document.getElementById('billCompanyAddress').innerText = company.address || '';
@@ -2851,6 +2874,51 @@ function shareBillOnWhatsApp() {
     let whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
+
+    // ========= SUBSCRIPTION FUNCTIONS =========
+function openSubscriptionModal() {
+  let modalHTML = `
+  <div id="subscriptionModal" class="modal active">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal('subscriptionModal')">&times;</span>
+      <h2>🚀 KhataMitra Pro</h2>
+      <ul style="text-align:left; line-height:2;">
+        <li>✅ <span data-hi="Unlimited Customers & Bills" data-en="Unlimited Customers & Bills">Unlimited Customers & Bills</span></li>
+        <li>✅ <span data-hi="GST Bill + PDF Export" data-en="GST Bill + PDF Export">GST Bill + PDF Export</span></li>
+        <li>✅ <span data-hi="Cloud Backup" data-en="Cloud Backup">Cloud Backup</span></li>
+        <li>✅ <span data-hi="No Ads" data-en="No Ads">No Ads</span></li>
+      </ul>
+      <h3>₹99 / <span data-hi="Month" data-en="Month">Month</span></h3>
+      <button onclick="buyPro()" class="btn-primary" style="width:100%; padding:15px; font-size:16px;">Buy Now with UPI</button>
+    </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+}
+
+function buyPro() {
+  // Yaha apna UPI ID daal de
+  let upi = 'yourupi@paytm'; 
+  let amount = 99;
+  window.open(`upi://pay?pa=${upi}&pn=KhataMitra&am=${amount}&cu=INR`);
+  showToast(currentLanguage === 'hi'? 'Payment ke baad Pro activate ho jayega' : 'Pro will activate after payment');
+  closeModal('subscriptionModal');
+}
+
+function updateProUI() {
+  let isPro = appState.settings.isPro || false;
+  let bills = appState.billsGenerated || 0;
+  
+  if(isPro) {
+    document.getElementById('proStatus').innerText = currentLanguage === 'hi'? 'Pro Active' : 'Pro Active';
+    document.getElementById('upgradeBtn').style.display = 'none';
+    document.getElementById('subscriptionCard').style.background = 'linear-gradient(135deg,#28a745,#20c997)';
+  } else {
+    document.getElementById('proStatus').innerText = currentLanguage === 'hi'? `Free Plan - ${bills}/10 Bills` : `Free Plan - ${bills}/10 Bills`;
+  }
+}
+
+// loadData ke baad call karna hai
+setTimeout(updateProUI, 500);
 
   </script>
 
