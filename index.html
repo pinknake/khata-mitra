@@ -3031,23 +3031,6 @@ function shareBillOnWhatsApp() {
     let whatsappURL = `https://wa.me/?text=${encodeURIComponent(message)}`;
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
-
-// SABHI MODAL BAND KARNE KA MASTER FUNCTION
-function closeModal(modalId) {
-  let modal = document.getElementById(modalId);
-  if(modal) {
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto'; // Scroll wapas
-  }
-}
-
-// Bahar click pe bhi band
-window.onclick = function(event) {
-  if (event.target.classList.contains('modal')) {
-    event.target.style.display = "none";
-    document.body.style.overflow = 'auto';
-  }
-}
     
 const ADMIN_PASSWORD = 'khata123';
 
@@ -3145,6 +3128,38 @@ function updateProUI() {
 }
 
 setTimeout(updateProUI, 500);
+
+    // PAGE LOAD HOTE HI YE CHAL JAYEGA
+document.addEventListener('DOMContentLoaded', function() {
+
+  // 1. SABHI .close-btn pe click
+  document.querySelectorAll('.close-btn').forEach(btn => {
+    btn.onclick = function() {
+      let modal = this.closest('.modal'); // Jiske andar button hai wahi modal band
+      if(modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    }
+  });
+
+  // 2. BAHAR CLICK PE BAND
+  window.onclick = function(event) {
+    if (event.target.classList.contains('modal')) {
+      event.target.style.display = "none";
+      document.body.style.overflow = 'auto';
+    }
+  }
+
+  // 3. ESC SE BAND
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+      document.body.style.overflow = 'auto';
+    }
+  });
+
+});
 
   </script>
 
