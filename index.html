@@ -1349,8 +1349,8 @@
       <div class="modal-content" style="max-width: 500px;">
         <div class="modal-header">
           <h3 id="detailCustomerName">ग्राहक विवरण</h3>
-          <button class="close-btn" onclick="closeModal('customerDetailModal')">&times;</button>
-        </div>
+          <button class="close-btn" onclick="closeModal('customerModal')">&times;</button>
+ </div>
         
         <div style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 20px; border-radius: 16px; margin-bottom: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -1419,8 +1419,8 @@
   <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
       <h3>Bill Details</h3>
-      <button class="close-btn" onclick="closeBillViewModal()">&times;</button> <!-- YE CHANGE -->
-    </div>
+      <button class="close-btn" onclick="closeModal('billViewModal')">&times;</button>
+ </div>
     <div id="billViewContent"></div>
   </div>
 </div>
@@ -1430,18 +1430,17 @@
   <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
       <h3>Payment Receipt</h3>
-      <button class="close-btn" onclick="closePaymentViewModal()">&times;</button> <!-- YE CHANGE -->
+      <button class="close-btn" onclick="closeModal('printViewModal')">&times;</button>
     </div>
     <div id="paymentViewContent"></div>
   </div>
 </div>
 
-
       <div class="modal" id="printViewModal">
   <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
       <h3>Print Preview</h3>
-      <button class="close-btn" onclick="closePrintViewModal()">&times;</button> <!-- YE CHANGE -->
+      <button class="close-btn" onclick="closeModal('paymentViewModal')">&times;</button>
     </div>
     <div id="printViewContent"></div>
   </div>
@@ -2040,9 +2039,6 @@ document.addEventListener('DOMContentLoaded', loadData);
       }
     }
 
-    function closeModal(modalId) {
-      document.getElementById(modalId).classList.remove('active');
-    }
 
     // ==================== PHOTO FUNCTIONS ====================
     function previewTransactionPhoto(event) {
@@ -2382,6 +2378,9 @@ function viewPayment(transactionId) {
   
   let isUdhar = t.type === 'udhar';
   let companyName = appState.settings.companyName || 'KhataMitra'; // Default KhataMitra
+  
+ document.getElementById('paymentViewModal').style.display = 'flex';
+document.body.style.overflow = 'hidden'; // YE NAYI LINE
   
   document.getElementById('paymentViewContent').innerHTML = `
     <div style="padding:20px; font-family:Arial; border:2px dashed #ddd;">
@@ -3033,7 +3032,14 @@ function shareBillOnWhatsApp() {
     window.open(whatsappURL, '_blank'); // AppCreator me ye bahar khol dega
 }
 
-      
+      // Bahar click pe koi bhi modal band ho jaye
+window.onclick = function(event) {
+  if (event.target.classList.contains('modal')) {
+    event.target.style.display = "none";
+    document.body.style.overflow = 'auto';
+  }
+}
+    
 const ADMIN_PASSWORD = 'khata123';
 
 function openSubscriptionModal() {
@@ -3078,8 +3084,13 @@ function buyPro() {
   updateProUI();
 }
 
+// SABHI MODAL BAND KARNE KA 1 HI FUNCTION
 function closeModal(modalId) {
-  document.getElementById(modalId).style.display = 'none';
+  let modal = document.getElementById(modalId);
+  if(modal) {
+    modal.style.display = 'none'; // Sirf hide karo, remove mat karo
+    document.body.style.overflow = 'auto'; // Scroll wapas on
+  }
 }
     
     // Subscription modal band karne ke liye - ye DOM se delete karta hai
@@ -3090,48 +3101,6 @@ function closeSubscriptionModal() {
   }
 }
 
-// Bill modal band karne ke liye - ye sirf hide karta hai
-function closeBillModal() {
-  let modal = document.getElementById('billModal');
-  if(modal) {
-    modal.style.display = 'none';
-  }
-}
-
-    // 1. PAYMENT RECEIPT BAND KARNE KE LIYE
-function closePaymentViewModal() {
-  document.getElementById('paymentViewModal').style.display = 'none';
-}
-
-// 2. BILL VIEW BAND KARNE KE LIYE  
-function closeBillViewModal() {
-  document.getElementById('billViewModal').style.display = 'none';
-}
-
-// 3. PRINT PREVIEW BAND KARNE KE LIYE
-function closePrintViewModal() {
-  document.getElementById('printViewModal').style.display = 'none';
-}
-
-// 4. CUSTOMER ADD/EDIT MODAL
-function closeCustomerModal() {
-  document.getElementById('customerModal').style.display = 'none';
-}
-
-// 5. TRANSACTION MODAL
-function closeTransactionModal() {
-  document.getElementById('transactionModal').style.display = 'none';
-}
-
-// Bahar click pe band
-document.addEventListener('click', function(e) {
-  if(e.target.id === 'subscriptionModal') {
-    closeSubscriptionModal();
-  }
-  if(e.target.id === 'billModal') {
-    closeBillModal();
-  }
-});
     
 function adminActivatePro() {
   let pass = document.getElementById('adminPass').value;
