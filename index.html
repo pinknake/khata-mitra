@@ -1244,7 +1244,7 @@
   
 </div> <!-- Bas 1 hi closing div -->
 
-      
+
       <!-- Add Customer Modal -->
 <div class="modal" id="addCustomerModal">
   <div class="modal-content" style="max-width:500px;">
@@ -1364,7 +1364,24 @@
             </div>
           </div>
         </div>
-        
+
+
+
+    <!-- ===== NEW: CUSTOMER BUSINESS DETAILS ===== -->
+    <div style="background:#f8f9fa; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #e9ecef;">
+      <h4 style="margin:0 0 12px 0; font-size:14px; color:#666;" data-hi="व्यापार विवरण" data-en="Business Details">व्यापार विवरण</h4>
+      
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px;">
+        <div><b data-hi="GST:" data-en="GST:">GST:</b> <span id="detailGST">-</span></div>
+        <div><b data-hi="PAN:" data-en="PAN:">PAN:</b> <span id="detailPAN">-</span></div>
+        <div><b data-hi="ईमेल:" data-en="Email:">ईमेल:</b> <span id="detailEmail">-</span></div>
+        <div><b data-hi="बैंक:" data-en="Bank:">बैंक:</b> <span id="detailBank">-</span></div>
+        <div><b data-hi="वाहन:" data-en="Vehicle:">वाहन:</b> <span id="detailVehicle">-</span></div>
+        <div><b>Payment Mode:</b> <span id="detailPaymentMode">-</span></div>
+      </div>
+    </div>
+    <!-- ===== END ===== -->
+
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
           <button class="btn btn-outline" style="flex: 1;" onclick="exportCustomerPDF()">
             <i class="fas fa-file-pdf"></i> <span data-hi="PDF" data-en="PDF">PDF</span>
@@ -2207,7 +2224,16 @@ document.addEventListener('DOMContentLoaded', loadData);
     document.getElementById('detailBalance').textContent = '₹' + Math.abs(customer.balance || 0);
     document.getElementById('detailPhone').textContent = customer.phone || '-';
 
-    // Show customer photos
+        // ===== NEW: Business Details =====
+    document.getElementById('detailGST').textContent = customer.gst || '-';
+    document.getElementById('detailPAN').textContent = customer.pan || '-';
+    document.getElementById('detailEmail').textContent = customer.email || '-';
+    document.getElementById('detailBank').textContent = customer.bank || '-';
+    document.getElementById('detailVehicle').textContent = customer.vehicle || '-';
+    document.getElementById('detailPaymentMode').textContent = customer.paymentMode || '-';
+    // =================================
+
+      // Show customer photos
     const photos = getCustomerPhotos(customerId);
     const photosContainer = document.getElementById('customerPhotos');
     if (photos.length > 0) {
