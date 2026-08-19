@@ -2419,6 +2419,21 @@ function viewPayment(transactionId) {
     showToast("Receipt nahi khul rahi: " + e.message, "error");
   }
 }
+
+  function openModal(modalId) {
+  document.getElementById(modalId).style.display = 'flex';
+}
+
+function closeModal(modalId) {
+  document.getElementById(modalId).style.display = 'none';
+}
+
+// Bahar click karne se band ho jaye
+window.onclick = function(event) {
+  if (event.target.classList.contains('modal')) {
+    event.target.style.display = 'none';
+  }
+}
   
     // ==================== PDF EXPORT ====================
     function exportCustomerPDF() {
