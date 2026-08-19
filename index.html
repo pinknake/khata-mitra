@@ -3083,15 +3083,6 @@ function buyPro() {
 function closeModal(modalId) {
   document.getElementById(modalId).style.display = 'none';
 }
-
-function printPaymentReceipt() {
-  window.print(); // Seedha browser ka print khul jayega
-}
-
-function sharePaymentWhatsApp() {
-  const text = document.getElementById('paymentViewContent').innerText;
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-}
     
     // Subscription modal band karne ke liye - ye DOM se delete karta hai
 function closeSubscriptionModal() {
