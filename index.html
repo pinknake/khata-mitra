@@ -2374,65 +2374,29 @@ function renderCustomerTransactions(filter = 'all') {
     `;
   }).join('');
 }
-
-// 1. Udhar/Jama ko click karne par ye chalega
+  
 function viewPayment(transactionId) {
-  try {
-    console.log("Clicked TX ID:", transactionId);
-    
-    const t = appState.transactions.find(x => x.id === transactionId);
-    console.log("Transaction mila:", t);
-    if(!t) throw new Error("Transaction nahi mili: " + transactionId);
-    
-    const customer = appState.customers.find(c => c.id === t.customerId);
-    console.log("Customer mila:", customer);
-    if(!customer) throw new Error("Customer nahi mila");
-    
-    let isUdhar = t.type === 'udhar';
-    
-    let html = `
-      <div style="padding:20px;">
-        <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center;">
-          <div>${isUdhar ? 'उधार दिया' : 'जमा लिया'}</div>
-          <div style="font-size:32px; font-weight:bold; color:${isUdhar ? 'red' : 'green'};">
-            ${isUdhar ? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
-          </div>
+  const t = appState.transactions.find(x => x.id === transactionId);
+  const customer = appState.customers.find(c => c.id === t.customerId);
+  if(!t || !customer) return;
+  
+  let isUdhar = t.type === 'udhar';
+  
+  document.getElementById('paymentViewContent').innerHTML = `
+    <div style="padding:20px;">
+      <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center;">
+        <div>${isUdhar ? 'उधार दिया' : 'जमा लिया'}</div>
+        <div style="font-size:32px; font-weight:bold; color:${isUdhar ? 'red' : 'green'};">
+          ${isUdhar ? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
         </div>
-        <p><b>Customer:</b> ${customer.name}</p>
-        <p><b>Date:</b> ${formatDate(t.date)}</p>
-        <p><b>Note:</b> ${t.note || '-'}</p>
       </div>
-    `;
-    
-    let contentDiv = document.getElementById('paymentViewContent');
-    console.log("paymentViewContent div:", contentDiv);
-    if(!contentDiv) throw new Error("paymentViewContent div nahi mila HTML me");
-    
-    contentDiv.innerHTML = html;
-    
-    console.log("Modal khol raha hu...");
-    openModal('paymentViewModal'); 
-    
-  } catch(e) {
-    console.error("ERROR in viewPayment:", e);
-    alert("Error: " + e.message); // Phone me bhi dikh jayega
-    showToast("Receipt nahi khul rahi: " + e.message, "error");
-  }
-}
-
-  function openModal(modalId) {
-  document.getElementById(modalId).style.display = 'flex';
-}
-
-function closeModal(modalId) {
-  document.getElementById(modalId).style.display = 'none';
-}
-
-// Bahar click karne se band ho jaye
-window.onclick = function(event) {
-  if (event.target.classList.contains('modal')) {
-    event.target.style.display = 'none';
-  }
+      <p><b>Customer:</b> ${customer.name}</p>
+      <p><b>Date:</b> ${formatDate(t.date)}</p>
+      <p><b>Note:</b> ${t.note || '-'}</p>
+    </div>
+  `;
+  
+  document.getElementById('paymentViewModal').style.display = 'flex'; // DIRECT KHOLO
 }
   
     // ==================== PDF EXPORT ====================
