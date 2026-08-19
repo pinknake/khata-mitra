@@ -2919,7 +2919,14 @@ function openSubscriptionModal() {
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
-function buyPro() {  // <-- yaha f add kiya
+
+    
+function buyPro() {   ✅    // <-- yaha f add kiya
+  
+  let upi = '870898986767@ybl';  
+  let amount = 99;
+  let note = 'KhataMitra Pro Subscription';
+  
   appState.settings.paymentRequestedAt = new Date().toISOString();
   saveData();
   window.open(`upi://pay?pa=870898986767@ybl&pn=KhataMitra&am=99&cu=INR&tn=KhataMitra Pro`);
