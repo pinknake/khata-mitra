@@ -17,7 +17,7 @@
   
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
-  <style>
+   <style>
     * {
       margin: 0;
       padding: 0;
@@ -2322,38 +2322,26 @@ function filterCustomerTx(type) {
 }
 
 
-
   function printPaymentReceipt() {
-  let content = document.getElementById('paymentViewContent').innerHTML;
+  const element = document.getElementById('paymentViewContent');
   
-  // COMPANY LOGO/CSS BHI SAATH ME DALNA HAI
-  let printHTML = `
-    <html>
-    <head>
-      <title>Payment Receipt</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        body { font-family: 'Poppins', sans-serif; margin:0; padding:20px; background:#fff; }
-        * { box-sizing: border-box; }
-        @media print {
-          body { padding: 0; }
-        }
-      </style>
-    </head>
-    <body onload="window.print();">
-      ${content}
-    </body>
-    </html>
-  `;
-
-  // NAYA TAB KHOL
-  let w = window.open('', '_blank');
-  if(!w){
-    showToast('Popup Blocked hai. Isko allow kar do', 'error');
-    return;
-  }
-  w.document.write(printHTML);
-  w.document.close();
+  showToast('Receipt bana raha hu...', 'info');
+  
+  html2canvas(element, { 
+    scale: 2,
+    backgroundColor: '#ffffff'
+  }).then(canvas => {
+    // Image download kar do
+    let link = document.createElement('a');
+    link.download = `Receipt_${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    
+    showToast('Receipt Download ho gaya. Gallery se Print/Share kar lo', 'success');
+  }).catch(err => {
+    showErrorPopup('Error', 'Receipt nahi ban paya');
+    console.log(err);
+  });
 }
 
 function sharePaymentWhatsApp() {
@@ -2361,8 +2349,8 @@ function sharePaymentWhatsApp() {
   const t = appState.transactions.find(x => x.id === txId);
   const customer = appState.customers.find(c => c.id === t.customerId);
   
-  let phone = (customer.phone || '').replace(/\D/g,''); // sirf number rakho
-  if(phone.length === 10) phone = '91' + phone; // +91 add
+  let phone = (customer.phone || '').replace(/\D/g,'');
+  if(phone.length === 10) phone = '91' + phone;
 
   let typeText = t.type === 'udhar' ? 'उधार दिया' : 'जमा लिया';
   
@@ -2372,12 +2360,20 @@ function sharePaymentWhatsApp() {
   msg += `*Mobile:* ${customer.phone}\n`;
   msg += `*Date:* ${formatDate(t.date)}\n`;
   msg += `*Note:* ${t.note || '-'}\n`;
-  msg += `*Current Balance:* ₹${Number(customer.balance).toFixed(2)}\n\n`;
-  msg += `_Powered by Khata Mitra Pro_`;
+  msg += `*Current Balance:* ₹${Number(customer.balance).toFixed(2)}`;
 
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+  let whatsappURL = `whatsapp://send?phone=${phone}&text=${encodeURIComponent(msg)}`;
+  let webURL = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+
+  // AppCrater ke liye trick
+  window.location.href = whatsappURL; 
+  
+  // Agar 2 sec me app nahi khula to web pe bhej do
+  setTimeout(() => {
+    window.open(webURL, '_blank');
+  }, 2000);
 }
-
+  
 function renderCustomerTransactions(filter = 'all') {
   const customerId = window.currentCustomerId;
   let transactions = appState.transactions.filter(t => t.customerId === customerId);
