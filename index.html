@@ -3368,69 +3368,59 @@ const ADMIN_PASSWORD = 'khata123';
 function openSubscriptionModal() {
   let modalHTML = `
   <div id="subscriptionModal" class="modal active" style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999;">
-    <div class="modal-content" style="background:white; padding:20px; border-radius:15px; max-width:400px; width:90%;">
-      <span class="close" onclick="closeSubscriptionModal()" style="float:right; font-size:28px; cursor:pointer;">&times;</span>  <!-- Yaha change -->
+    <div class="modal-content" style="background:white; padding:20px; border-radius:15px; max-width:400px; width:90%; text-align:center;">
+      <span class="close" onclick="closeSubscriptionModal()" style="float:right; font-size:28px; cursor:pointer; line-height:1;">&times;</span>
       <h2>🚀 KhataMitra Pro</h2>
-      <ul style="text-align:left; line-height:2;">
+      <ul style="text-align:left; line-height:2; padding-left:20px; margin:15px 0;">
         <li>✅ Unlimited Customers & Bills</li>
         <li>✅ GST Bill + PDF Export</li>
         <li>✅ Cloud Backup</li>
         <li>✅ No Ads</li>
       </ul>
-      <h3>₹99 / Month</h3>
-      <button onclick="buyPro()" class="btn-primary" style="width:100%; padding:15px; font-size:16px;">Buy Now with UPI</button>
+      <h3 style="color:#4CAF50;">₹99 / Month</h3>
+      <button onclick="buyPro()" class="btn-primary" style="width:100%; padding:15px; font-size:16px; background:#4CAF50; color:white; border:none; border-radius:8px; font-weight:bold;">Buy Now with UPI</button>
+      <p style="font-size:11px; color:#666; margin-top:10px;">Payment ke baad screenshot WhatsApp karo</p>
     </div>
   </div>`;
   document.body.insertAdjacentHTML('beforeend', modalHTML);
 }
 
 function buyPro() {
-  // Tera PhonePe UPI - Yahi wala sahi hai
+  // Tera PhonePe UPI
   let upi = '8708986767@ybl';  
   let amount = 99;
   let note = 'KhataMitra Pro';
   
-  // Payment time save karna mat bhoolna
+  // Payment request time save
   appState.settings.paymentRequestedAt = new Date().toISOString();
+  appState.settings.isPro = false; // Pehle band rahega
   saveData();
   
-  // UPI Link - encode zaroor karna
+  // UPI Link - AppCrater me _system se kholo
   let upiLink = `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent('KhataMitra')}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;
   
-  window.location.href = upiLink; // window.open se better hai mobile me
+  window.open(upiLink, '_system'); // _system IMPORTANT HAI
   
-  showToast(currentLanguage === 'hi'? 
-    'PhonePe khul gaya. Payment karke screenshot WhatsApp karo. 48 ghante me Pro ON hoga' : 
-    'PhonePe opened. Pay & send screenshot. Pro will activate in 48hrs');
+  showToast('PhonePe khul gaya. Payment karke screenshot bhejo. 48 ghante me Pro ON hoga', 'info');
     
-  closeSubscriptionModal(); // yaha bhi sahi function naam
+  closeSubscriptionModal();
   updateProUI();
 }
    
-    // Subscription modal band karne ke liye - ye DOM se delete karta hai
 function closeSubscriptionModal() {
   let modal = document.getElementById('subscriptionModal');
-  if(modal) {
-    modal.remove(); 
-  }
+  if(modal) modal.remove(); 
 }
 
-// Bill modal band karne ke liye - ye sirf hide karta hai
 function closeBillModal() {
   let modal = document.getElementById('billModal');
-  if(modal) {
-    modal.style.display = 'none';
-  }
+  if(modal) modal.style.display = 'none';
 }
 
 // Bahar click pe band
 document.addEventListener('click', function(e) {
-  if(e.target.id === 'subscriptionModal') {
-    closeSubscriptionModal();
-  }
-  if(e.target.id === 'billModal') {
-    closeBillModal();
-  }
+  if(e.target.id === 'subscriptionModal') closeSubscriptionModal();
+  if(e.target.id === 'billModal') closeBillModal();
 });
     
 function adminActivatePro() {
@@ -3440,8 +3430,9 @@ function adminActivatePro() {
     let expiryDate = new Date(); expiryDate.setDate(expiryDate.getDate() + 30); 
     appState.settings.proExpiry = expiryDate.toISOString();
     appState.settings.paymentRequestedAt = null;
+    appState.billsGenerated = 0; // Reset kar do
     saveData(); updateProUI();
-    showToast('Pro 30 Din ke liye Activated ✅');
+    showToast('Pro 30 Din ke liye Activated ✅', 'success');
     document.getElementById('adminPass').value = '';
   } else { showToast('Galat Password', 'error'); }
 }
@@ -3449,23 +3440,79 @@ function adminActivatePro() {
 function adminDeactivatePro() {
   let pass = document.getElementById('adminPass').value;
   if(pass === ADMIN_PASSWORD) {
-    appState.settings.isPro = false; appState.settings.proExpiry = null;
-    appState.billsGenerated = 0; saveData(); updateProUI();
-    showToast('Pro Band ho gaya'); document.getElementById('adminPass').value = '';
+    appState.settings.isPro = false; 
+    appState.settings.proExpiry = null;
+    appState.settings.paymentRequestedAt = null;
+    appState.billsGenerated = 0; 
+    saveData(); updateProUI();
+    showToast('Pro Band ho gaya', 'warning'); 
+    document.getElementById('adminPass').value = '';
   } else { showToast('Galat Password', 'error'); }
 }
 
-function updateProUI() {
+// function updateProUI() {
+//  let isPro = appState.settings.isPro || false;
+//  let expiry = appState.settings.proExpiry ? new Date(appState.settings.proExpiry) : null;
+//  let paymentTime = appState.settings.paymentRequestedAt ? new Date(appState.settings.paymentRequestedAt) : null;
+//  let today = new Date();
+  
+  // EXPIRY CHECK
+//  if(isPro && expiry && today > expiry) {
+   // appState.settings.isPro = false; 
+ //   appState.settings.proExpiry = null; 
+ //   saveData(); 
+ //   isPro = false;
+ //   showToast('Pro Expire ho gaya', 'error');
+//  }
+  
+  // 48 GHANTE KA WAIT CHECK
+//  let waitHTML = '';
+//  let canActivate = true;
+//  if(paymentTime && !isPro) {
+ //   let hoursPassed = (today - paymentTime) / (1000*60*60);
+ //   let hoursLeft = 48 - hoursPassed;
+ //   if(hoursLeft > 0) {
+  //    canActivate = false;
+  //    waitHTML = `⏳ ${Math.ceil(hoursLeft)} ghante baad Pro active kar sakte ho`;
+   //   document.getElementById('adminActivateBtn').disabled = true; // button band
+    //  document.getElementById('adminActivateBtn').style.opacity = '0.5';
+  //  } else {
+  //    document.getElementById('adminActivateBtn').disabled = false;
+ //     document.getElementById('adminActivateBtn').style.opacity = '1';
+//    }
+ //   }
+//  if(document.getElementById('proWaitStatus')) {
+//    document.getElementById('proWaitStatus').innerHTML = waitHTML;
+//  }
+    
+  // UI UPDATE
+//  if(isPro) {
+  //  let daysLeft = Math.ceil((expiry - today) / (1000*60*60*24));
+ //   document.getElementById('proStatus').innerText = `Pro Active - ${daysLeft} din baki`;
+  //  if(document.getElementById('upgradeBtn')) document.getElementById('upgradeBtn').style.display = 'none';
+ // } else {
+  //  let bills = appState.billsGenerated || 0;
+  //  document.getElementById('proStatus').innerText = `Free Plan - ${bills}/10 Bills`;
+  //  if(document.getElementById('upgradeBtn')) document.getElementById('upgradeBtn').style.display = 'block';
+//  }
+// }
+
+    function updateProUI() {
   let isPro = appState.settings.isPro || false;
   let expiry = appState.settings.proExpiry ? new Date(appState.settings.proExpiry) : null;
   let paymentTime = appState.settings.paymentRequestedAt ? new Date(appState.settings.paymentRequestedAt) : null;
   let today = new Date();
   
+  // EXPIRY CHECK
   if(isPro && expiry && today > expiry) {
-    appState.settings.isPro = false; appState.settings.proExpiry = null; saveData(); isPro = false;
+    appState.settings.isPro = false; 
+    appState.settings.proExpiry = null; 
+    saveData(); 
+    isPro = false;
     showToast('Pro Expire ho gaya', 'error');
   }
   
+  // 48 GHANTE WALI SIRF LINE - KOI LOCK NAHI
   let waitHTML = '';
   if(paymentTime && !isPro) {
     let hoursLeft = 48 - ((today - paymentTime) / (1000*60*60));
@@ -3473,18 +3520,20 @@ function updateProUI() {
   }
   document.getElementById('proWaitStatus').innerHTML = waitHTML;
   
+  // UI UPDATE
   if(isPro) {
     let daysLeft = Math.ceil((expiry - today) / (1000*60*60*24));
     document.getElementById('proStatus').innerText = `Pro Active - ${daysLeft} din baki`;
     document.getElementById('upgradeBtn').style.display = 'none';
   } else {
     let bills = appState.billsGenerated || 0;
-    document.getElementById('proStatus').innerText = `Free Plan - ${bills}/10 Bills`;
+    document.getElementById('proStatus').innerText = `Free Plan - ${bills}/10 Bills`; // YAHI BADALNA HAI
     document.getElementById('upgradeBtn').style.display = 'block';
   }
 }
 
 setTimeout(updateProUI, 500);
+
 
   </script>
 
