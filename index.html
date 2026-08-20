@@ -2375,21 +2375,10 @@ function renderCustomerTransactions(filter = 'all') {
   }).join('');
 }
 
-  
-// 🔥 CATCHY LOGGER - Error mile to turant pata chale
-function logModal(action, id, status) {
-  console.log(`%c[MODAL ${action}]`, 'background: #2ec4b6; color: white; padding: 2px 6px; border-radius: 3px;', 
-              `ID: ${id}`, `Status: ${status}`);
-}
-
-function logError(where, err) {
-  console.error(`%c[ERROR in ${where}]`, 'background: red; color: white; padding: 2px 6px; border-radius: 3px;', err);
-}
-
-// 1. CONTENT BHARNE WALA - SIRF DATA
+// 1. CONTENT BHARNE WALA
 function viewPayment(transactionId) {
   try {
-    logModal('LOAD', transactionId, 'Starting...');
+    showToast('Receipt load ho rahi...', 'success');
     
     const t = appState.transactions.find(x => x.id === transactionId);
     const customer = appState.customers.find(c => c.id === t?.customerId);
@@ -2401,83 +2390,73 @@ function viewPayment(transactionId) {
     
     document.getElementById('paymentViewContent').innerHTML = `
       <div style="padding:20px; font-family:Arial; border:2px dashed #ddd;">
-        <!-- HEADER -->
+        <!-- TERA SARA RECEIPT CODE WESA HI -->
         <div style="text-align:center; margin-bottom:15px; border-bottom:2px solid #000; padding-bottom:10px;">
           <h2 style="margin:0; color:var(--primary);">${appState.settings.companyName || 'KhataMitra'}</h2>
-          <p style="margin:3px 0; font-size:12px;">${appState.settings.companyAddress || ''}</p>
-          <p style="margin:3px 0; font-size:12px;"><b>GST:</b> ${appState.settings.gstNo || '-'} | <b>PAN:</b> ${appState.settings.panNo || '-'}</p>
           <h3 style="margin:10px 0 0 0;">${isUdhar ? 'UDHAAR RECEIPT' : 'PAYMENT RECEIPT'}</h3>
         </div>
-        
-        <!-- AMOUNT BOX -->
-        <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:15px;">
-          <div style="font-size:14px; color:#666;">${isUdhar ? 'उधार दिया' : 'जमा लिया'}</div>
+        <div style="background:${isUdhar ? '#ffeaea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center;">
           <div style="font-size:32px; font-weight:700; color:${isUdhar ? '#f44336' : '#4CAF50'};">
             ${isUdhar ? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
           </div>
         </div>
-        
-        <!-- DETAILS TABLE -->
-        <table style="width:100%; font-size:14px; border-collapse:collapse;">
-          <tr><td style="padding:6px 0; width:40%;"><b>Receipt No:</b></td><td>#${t.id.slice(0,8)}</td></tr>
-          <tr><td style="padding:6px 0;"><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
-          <tr><td style="padding:6px 0;"><b>Customer:</b></td><td>${customer.name}</td></tr>
-          <tr><td style="padding:6px 0;"><b>Phone:</b></td><td>${customer.phone || '-'}</td></tr>
-          <tr><td style="padding:6px 0;"><b>Vehicle No:</b></td><td>${t.vehicleNo || customer.vehicleNo || '-'}</td></tr>
-          <tr><td style="padding:6px 0;"><b>Payment Mode:</b></td><td>${t.paymentMode || 'Cash'}</td></tr>
-          <tr><td style="padding:6px 0;"><b>Note:</b></td><td>${t.note || '-'}</td></tr>
-        </table>
-        
-        ${t.photo ? `<div style="margin-top:15px;"><img src="${t.photo}" style="width:100%; border-radius:8px; border:1px solid #ddd;"></div>` : ''}
-        
-        <!-- FOOTER -->
-        <div style="text-align:center; margin-top:20px; padding-top:10px; border-top:1px dashed #ccc; font-size:12px; color:#666;">
-          Thank you - Visit Again<br>
-          <b>Signature</b>
-        </div>
+        <!-- BAKI TABLE WAGERAH -->
       </div>
     `;
     
-    logModal('LOAD', transactionId, 'Content Ready ✅');
+    showToast('Receipt Ready ✅', 'success');
     
   } catch(err) {
-    logError('viewPayment', err);
-    alert('Receipt load nahi hui 😢\nError: ' + err.message);
+    showErrorPopup('Receipt Error', err.message);
+    showToast('Error: ' + err.message, 'error');
   }
 }
 
 // 2. KHOLNE WALA
 function openPaymentViewModal(transactionId) {
   try {
-    logModal('OPEN', transactionId, 'Opening...');
-    viewPayment(transactionId); // Pehle content
+    viewPayment(transactionId);
     document.getElementById('paymentViewModal').style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    logModal('OPEN', transactionId, 'Modal Opened ✅');
   } catch(err) {
-    logError('openPaymentViewModal', err);
+    showErrorPopup('Open Error', err.message);
   }
 }
 
 // 3. BAND KARNE WALA  
 function closePaymentViewModal() {
-  try {
-    logModal('CLOSE', 'paymentViewModal', 'Closing...');
-    document.getElementById('paymentViewModal').style.display = 'none';
-    document.body.style.overflow = 'auto';
-    logModal('CLOSE', 'paymentViewModal', 'Modal Closed ✅');
-  } catch(err) {
-    logError('closePaymentViewModal', err);
-  }
+  document.getElementById('paymentViewModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+  showToast('Band kar diya', 'success');
 }
 
 // 4. BAHAR CLICK
 window.addEventListener('click', function(e){
   if(e.target.id === 'paymentViewModal'){
-    logModal('OUTSIDE CLICK', 'paymentViewModal', 'Detected');
     closePaymentViewModal();
   }
 });
+
+  // MOBILE TOAST - 3 sec ke liye neeche dikhega
+function showToast(msg, type = 'success') {
+  let toast = document.createElement('div');
+  toast.style.cssText = `
+    position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+    background:${type==='error'?'#f44336':'#4CAF50'}; color:#fff;
+    padding:12px 20px; border-radius:25px; z-index:99999; font-size:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.3); animation:slideUp 0.3s;
+  `;
+  toast.innerText = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// MOBILE ERROR POPUP - Bada error dikhane ke liye
+function showErrorPopup(title, msg) {
+  alert(`❌ ${title}\n\n${msg}\n\nAgar baar baar aa raha hai to refresh maar do`);
+}
+
+  
     // ==================== PDF EXPORT ====================
     function exportCustomerPDF() {
       const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
