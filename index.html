@@ -1398,6 +1398,18 @@
         <div><b data-hi="ईमेल:" data-en="Email:">ईमेल:</b> <span id="detailEmail">-</span></div>
         <div><b data-hi="बैंक:" data-en="Bank:">बैंक:</b> <span id="detailBank">-</span></div>
         <div><b data-hi="वाहन:" data-en="Vehicle:">वाहन:</b> <span id="detailVehicle">-</span></div>
+        <div class="form-group">
+  <label>Customer Email</label>
+  <input type="email" id="newCustomerEmail" class="form-control" placeholder="customer@gmail.com">
+</div>
+<div class="form-group">
+  <label>Preferred Payment Mode</label>
+  <select id="newCustomerPaymentMode" class="form-control">
+    <option value="cash">नकद Cash</option>
+    <option value="upi">UPI</option>
+    <option value="bank">Bank Transfer</option>
+  </select>
+</div>
         <div><b>Payment Mode:</b> <span id="detailPaymentMode">-</span></div>
       </div>
     </div>
@@ -2176,7 +2188,9 @@ document.addEventListener('DOMContentLoaded', loadData);
       const mode = document.getElementById('transactionMode').value;
       const type = document.getElementById('saveTransactionBtn').getAttribute('data-type');
       const photoFile = document.getElementById('transactionPhoto').files[0];
-      
+      const email = document.getElementById('newCustomerEmail').value.trim(); // NAYA
+const paymentMode = document.getElementById('newCustomerPaymentMode').value; // NAYA
+
       if (!customerId) {
         showToast(currentLanguage === 'hi' ? 'ग्राहक चुनें' : 'Select customer', 'error');
         return;
@@ -2190,17 +2204,22 @@ document.addEventListener('DOMContentLoaded', loadData);
       // Show loading
       document.getElementById('loadingSpinner').style.display = 'block';
       
-      const transaction = {
-        id: Date.now().toString(),
-        customerId,
-        type,
-        amount,
-        note,
-        date,
-        mode,
-        createdAt: new Date().toISOString()
-      };
       
+const newCustomer = {
+  id: Date.now().toString(),
+  name,
+  phone,
+  address,
+  gst,
+  pan,
+  vehicle,
+  bank,
+  email,        // <-- NAYA ADD
+  paymentMode,  // <-- NAYA ADD
+  balance: 0,
+  createdAt: new Date().toISOString()
+};
+   
       // Update customer balance
       const customer = appState.customers.find(c => c.id === customerId);
       if (type === 'udhar') {
@@ -2230,6 +2249,11 @@ document.addEventListener('DOMContentLoaded', loadData);
       document.getElementById('transactionNote').value = '';
       document.getElementById('transactionPhoto').value = '';
       document.getElementById('photoPreview').innerHTML = '';
+  
+document.getElementById('newCustomerEmail').value = '';
+document.getElementById('newCustomerPaymentMode').value = 'cash';
+   
+    
     }
 
     // ==================== CUSTOMER DETAILS ====================
@@ -2244,15 +2268,17 @@ document.addEventListener('DOMContentLoaded', loadData);
     document.getElementById('detailBalance').textContent = '₹' + Math.abs(customer.balance || 0);
     document.getElementById('detailPhone').textContent = customer.phone || '-';
 
-        // ===== NEW: Business Details =====
-    document.getElementById('detailGST').textContent = customer.gst || '-';
-    document.getElementById('detailPAN').textContent = customer.pan || '-';
-    document.getElementById('detailEmail').textContent = customer.email || '-';
-    document.getElementById('detailBank').textContent = customer.bank || '-';
-    document.getElementById('detailVehicle').textContent = customer.vehicle || '-';
-    document.getElementById('detailPaymentMode').textContent = customer.paymentMode || '-';
+    
     // =================================
-
+document.getElementById('detailGST').textContent = customer.gst || '-';
+document.getElementById('detailPAN').textContent = customer.pan || '-';
+document.getElementById('detailEmail').textContent = customer.email || '-'; // NAYA
+document.getElementById('detailBank').textContent = customer.bank || '-';
+document.getElementById('detailVehicle').textContent = customer.vehicle || '-';
+document.getElementById('detailPaymentMode').textContent = 
+  customer.paymentMode === 'upi' ? 'UPI' : 
+  customer.paymentMode === 'bank' ? 'Bank' : 'Cash'; // NAYA
+      
       // Show customer photos
     const photos = getCustomerPhotos(customerId);
     const photosContainer = document.getElementById('customerPhotos');
@@ -2429,6 +2455,10 @@ function viewPayment(transactionId) {
           <tr><td style="padding:4px 0;"><b>Address:</b></td><td>${customer.address || '-'}</td></tr>
           <tr><td style="padding:4px 0;"><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
           <tr><td style="padding:4px 0;"><b>Receipt No:</b></td><td>#${t.id.slice(-8).toUpperCase()}</td></tr>
+          <tr><td><b>Email:</b></td><td>${customer.email || '-'}</td></tr>
+<tr><td><b>GST:</b></td><td>${customer.gst || '-'}</td></tr>
+<tr><td><b>Vehicle:</b></td><td>${customer.vehicle || '-'}</td></tr>
+<tr><td><b>Pay Mode:</b></td><td>${customer.paymentMode === 'upi' ? 'UPI' : customer.paymentMode === 'bank' ? 'Bank' : 'Cash'}</td></tr>
           ${t.note ? `<tr><td style="padding:4px 0;"><b>Note:</b></td><td>${t.note}</td></tr>` : ''}
         </table>
 
