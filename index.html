@@ -2483,7 +2483,9 @@ function renderCustomerTransactions(filter = 'all') {
 
 function viewPayment(transactionId) {
   try {
-    const t = appState.transactions.find(x => x.id === transactionId);
+  document.getElementById('paymentViewModal').setAttribute('data-tx-id', transactionId); // YE LINE ADD KAR
+  
+      const t = appState.transactions.find(x => x.id === transactionId);
     const customer = appState.customers.find(c => c.id === t?.customerId);
 
     if(!t || !customer) throw new Error('Data nahi mila');
