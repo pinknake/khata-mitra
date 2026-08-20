@@ -1265,8 +1265,7 @@
   
 </div> <!-- Bas 1 hi closing div -->
 
-
-      <!-- Add Customer Modal -->
+<!-- Add Customer Modal -->
 <div class="modal" id="addCustomerModal">
   <div class="modal-content" style="max-width:500px;">
     <div class="modal-header">
@@ -1304,6 +1303,20 @@
     <div class="form-group">
       <label>Bank A/C No.</label>
       <input type="text" id="newCustomerBank" class="form-control" placeholder="1234567890">
+    </div>
+
+    <!-- 🔥 YE 2 NAYE FIELD ADD KAR -->
+    <div class="form-group">
+      <label>Customer Email</label>
+      <input type="email" id="newCustomerEmail" class="form-control" placeholder="customer@gmail.com">
+    </div>
+    <div class="form-group">
+      <label>Preferred Payment Mode</label>
+      <select id="newCustomerPaymentMode" class="form-control">
+        <option value="cash" data-hi="नकद" data-en="Cash">नकद Cash</option>
+        <option value="upi" data-hi="UPI" data-en="UPI">UPI</option>
+        <option value="bank" data-hi="बैंक ट्रांसफर" data-en="Bank Transfer">बैंक ट्रांसफर</option>
+      </select>
     </div>
     
     <button class="btn btn-primary" onclick="addCustomer()" data-hi="ग्राहक जोड़ें" data-en="Add Customer">ग्राहक जोड़ें</button>
@@ -2150,6 +2163,8 @@ document.addEventListener('DOMContentLoaded', loadData);
         pan,        // <-- Naya add kiya  
         vehicle,    // <-- Naya add kiya
         bank,       // <-- Naya add kiya
+      email,
+        paymentMode,
         balance: 0,
         createdAt: new Date().toISOString()
       };
@@ -2169,6 +2184,8 @@ document.addEventListener('DOMContentLoaded', loadData);
       document.getElementById('newCustomerPAN').value = '';
       document.getElementById('newCustomerVehicle').value = '';
       document.getElementById('newCustomerBank').value = '';
+      document.getElementById('newCustomerEmail').value = '';
+document.getElementById('newCustomerPaymentMode').value = 'cash';
     }
 
     
