@@ -2385,55 +2385,56 @@ function renderCustomerTransactions(filter = 'all') {
   
 } // FUNCTION BAND
   
-    
-// 1. CONTENT BHARNE WALA
 function viewPayment(transactionId) {
   try {
-    showToast('Receipt load ho rahi...', 'success');
-
-  showToast('Company: ' + (appState.settings?.companyName || 'Nahi Mila'), 'success');
-    
     const t = appState.transactions.find(x => x.id === transactionId);
     const customer = appState.customers.find(c => c.id === t?.customerId);
-    
+    const settings = appState.settings || {}; // Fallback 1
+
     if(!t) throw new Error(`Transaction nahi mila: ${transactionId}`);
     if(!customer) throw new Error(`Customer nahi mila: ${t.customerId}`);
-    
+
     let isUdhar = t.type === 'udhar';
-    let settings = appState.settings || {};
-    
-    // COMPANY LOGO HAI TO WOH, VARNA TEXT
-    let companyLogo = settings.companyLogo 
-      ? `<img src="${settings.companyLogo}" style="max-height:50px; margin-bottom:5px;">`
-      : '';
-    
+
+    // FALLBACK 2: AGAR SETTINGS ME NAHI HAI TO DEFAULT
+    let companyName = settings.companyName || localStorage.getItem('companyName') || 'KhataMitra';
+    let companyPhone = settings.companyPhone || localStorage.getItem('companyPhone') || '9999';
+    let companyAddress = settings.companyAddress || localStorage.getItem('companyAddress') || 'Panipat, Haryana';
+    let primaryColor = settings.primaryColor || '#2196F3';
+    let companyLogo = settings.companyLogo || localStorage.getItem('companyLogo') || '';
+
+    let logoHtml = companyLogo
+     ? `<img src="${companyLogo}" style="max-height:50px; margin-bottom:5px;">`
+      : `<div style="font-size:30px; margin-bottom:5px;">📒</div>`; // Logo nahi to icon
+
     document.getElementById('paymentViewContent').innerHTML = `
       <div style="padding:20px; font-family: 'Arial', sans-serif; color:#333; max-width:400px; margin:auto; background:#fff; border:1px dashed #ccc;">
-        
+
         <!-- HEADER - COMPANY BRANDING -->
         <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:15px;">
-          ${companyLogo}
-          <h2 style="margin:5px 0; font-size:22px; color:${settings.primaryColor || '#2196F3'};">${settings.companyName || 'KhataMitra'}</h2>
-          <p style="margin:0; font-size:12px;">${settings.companyAddress || 'Panipat, Haryana'}</p>
-          <p style="margin:0; font-size:12px;">Mob: ${settings.companyPhone || ''}</p>
-          <h3 style="margin:10px 0 0 0; font-size:16px; letter-spacing:1px;">${isUdhar ? 'UDHAAR RECEIPT' : 'PAYMENT RECEIPT'}</h3>
+          ${logoHtml}
+          <h2 style="margin:5px 0; font-size:22px; color:${primaryColor};">${companyName}</h2>
+          <p style="margin:0; font-size:12px;">${companyAddress}</p>
+          <p style="margin:0; font-size:12px;">Mob: ${companyPhone}</p>
+          <h3 style="margin:10px 0 0 0; font-size:16px; letter-spacing:1px;">${isUdhar? 'UDHAAR RECEIPT' : 'PAYMENT RECEIPT'}</h3>
         </div>
 
         <!-- AMOUNT BOX -->
-        <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:15px; border:1px solid ${isUdhar ? '#f44336' : '#4CAF50'};">
-          <div style="font-size:12px;">${isUdhar ? 'UDHAAR DIYA' : 'PAYMENT MILA'}</div>
-          <div style="font-size:32px; font-weight:700; color:${isUdhar ? '#f44336' : '#4CAF50'};">
-            ${isUdhar ? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
+        <div style="background:${isUdhar? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:15px; border:1px solid ${isUdhar? '#f44336' : '#4CAF50'};">
+          <div style="font-size:12px;">${isUdhar? 'UDHAAR DIYA' : 'PAYMENT MILA'}</div>
+          <div style="font-size:32px; font-weight:700; color:${isUdhar? '#f44336' : '#4CAF50'};">
+            ${isUdhar? '-' : '+'} ₹${Number(t.amount).toFixed(2)}
           </div>
         </div>
 
         <!-- CUSTOMER DETAIL -->
         <table style="width:100%; font-size:14px; margin-bottom:15px;">
-          <tr><td style="padding:4px 0;"><b>Customer:</b></td><td>${customer.name}</td></tr>
+          <tr><td style="padding:4px 0; width:120px;"><b>Customer:</b></td><td>${customer.name}</td></tr>
           <tr><td style="padding:4px 0;"><b>Mobile:</b></td><td>${customer.phone || '-'}</td></tr>
           <tr><td style="padding:4px 0;"><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
           <tr><td style="padding:4px 0;"><b>Receipt No:</b></td><td>#${t.id.slice(-8).toUpperCase()}</td></tr>
-          ${t.note ? `<tr><td style="padding:4px 0;"><b>Note:</b></td><td>${t.note}</td></tr>` : ''}
+          ${t.note? `<tr><td style="padding:4px 0;"><b>Note:</b></td><td>${t.note}</td></tr>` : ''}
+          ${t.vehicleNo? `<tr><td style="padding:4px 0;"><b>Vehicle:</b></td><td>${t.vehicleNo}</td></tr>` : ''}
         </table>
 
         <!-- CURRENT BALANCE -->
@@ -2442,11 +2443,18 @@ function viewPayment(transactionId) {
             <span><b>Previous Balance:</b></span>
             <span>₹${Number(t.previousBalance || 0).toFixed(2)}</span>
           </div>
-          <div style="display:flex; justify-content:space-between;">
+          <div style="display:flex; justify-content:space-between; font-size:16px;">
             <span><b>Current Balance:</b></span>
-            <span style="color:${customer.balance < 0 ? '#f44336' : '#4CAF50'}; font-weight:700;">₹${Number(customer.balance || 0).toFixed(2)}</span>
+            <span style="color:${customer.balance < 0? '#f44336' : '#4CAF50'}; font-weight:700;">₹${Number(customer.balance || 0).toFixed(2)}</span>
           </div>
         </div>
+
+        <!-- PHOTO AGAR HAI -->
+        ${getTransactionPhotos(t.id).length > 0? `
+        <div style="margin-top:15px; text-align:center;">
+          <b>Attached Photo:</b><br>
+          <img src="${getTransactionPhotos(t.id)[0]}" style="max-width:100%; margin-top:5px; border-radius:8px;">
+        </div>` : ''}
 
         <!-- FOOTER -->
         <div style="text-align:center; margin-top:20px; padding-top:10px; border-top:1px dashed #999; font-size:11px;">
@@ -2456,9 +2464,9 @@ function viewPayment(transactionId) {
 
       </div>
     `;
-    
+
     showToast('Receipt Ready ✅', 'success');
-    
+
   } catch(err) {
     showErrorPopup('Receipt Error', err.message);
     showToast('Error: ' + err.message, 'error');
