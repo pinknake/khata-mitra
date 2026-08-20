@@ -2126,15 +2126,17 @@ document.addEventListener('DOMContentLoaded', loadData);
 
     // ==================== CRUD OPERATIONS ====================
     function addCustomer() {
-      const name = document.getElementById('newCustomerName').value.trim();
-      const phone = document.getElementById('newCustomerPhone').value.trim();
-      const address = document.getElementById('newCustomerAddress').value.trim();
-      const gst = document.getElementById('newCustomerGST').value.trim().toUpperCase();
-      const pan = document.getElementById('newCustomerPAN').value.trim().toUpperCase();
-      const vehicle = document.getElementById('newCustomerVehicle').value.trim().toUpperCase();
-      const bank = document.getElementById('newCustomerBank').value.trim();
-      
-      if (!name) {
+  const name = document.getElementById('newCustomerName').value.trim();
+  const phone = document.getElementById('newCustomerPhone').value.trim();
+  const address = document.getElementById('newCustomerAddress').value.trim();
+  const gst = document.getElementById('newCustomerGST').value.trim().toUpperCase();
+  const pan = document.getElementById('newCustomerPAN').value.trim().toUpperCase();
+  const vehicle = document.getElementById('newCustomerVehicle').value.trim().toUpperCase();
+  const bank = document.getElementById('newCustomerBank').value.trim();
+  const email = document.getElementById('newCustomerEmail').value.trim(); // NAYA
+  const paymentMode = document.getElementById('newCustomerPaymentMode').value; // NAYA
+
+     if (!name) {
         showToast(currentLanguage === 'hi' ? 'नाम दर्ज करें' : 'Enter name', 'error');
         return;
       }
@@ -2169,81 +2171,82 @@ document.addEventListener('DOMContentLoaded', loadData);
       document.getElementById('newCustomerBank').value = '';
     }
 
-    async function saveTransaction() {
-      const customerId = document.getElementById('transactionCustomer').value;
-      const amount = parseFloat(document.getElementById('transactionAmount').value);
-      const note = document.getElementById('transactionNote').value.trim();
-      const date = document.getElementById('transactionDate').value;
-      const mode = document.getElementById('transactionMode').value;
-      const type = document.getElementById('saveTransactionBtn').getAttribute('data-type');
-      const photoFile = document.getElementById('transactionPhoto').files[0];
-      const email = document.getElementById('newCustomerEmail').value.trim(); // NAYA
-const paymentMode = document.getElementById('newCustomerPaymentMode').value; // NAYA
-
-      if (!customerId) {
-        showToast(currentLanguage === 'hi' ? 'ग्राहक चुनें' : 'Select customer', 'error');
-        return;
-      }
-      
-      if (!amount || amount <= 0) {
-        showToast(currentLanguage === 'hi' ? 'सही राशि दर्ज करें' : 'Enter valid amount', 'error');
-        return;
-      }
-      
-      // Show loading
-      document.getElementById('loadingSpinner').style.display = 'block';
-      
-      
-const newCustomer = {
-  id: Date.now().toString(),
-  name,
-  phone,
-  address,
-  gst,
-  pan,
-  vehicle,
-  bank,
-  email,        // <-- NAYA ADD
-  paymentMode,  // <-- NAYA ADD
-  balance: 0,
-  createdAt: new Date().toISOString()
-};
-   
-      // Update customer balance
-      const customer = appState.customers.find(c => c.id === customerId);
-      if (type === 'udhar') {
-        customer.balance += amount;
-      } else {
-        customer.balance -= amount;
-      }
-      
-      appState.transactions.push(transaction);
-      
-      // Save photo if uploaded
-      if (photoFile) {
-        await savePhoto(transaction.id, photoFile, note);
-      }
-      
-      saveData();
-      updateUI();
-      
-      // Hide loading
-      document.getElementById('loadingSpinner').style.display = 'none';
-      
-      closeModal('addTransactionModal');
-      showToast(currentLanguage === 'hi' ? 'लेन-देन सेव हो गया' : 'Transaction saved');
-      
-      // Clear form
-      document.getElementById('transactionAmount').value = '';
-      document.getElementById('transactionNote').value = '';
-      document.getElementById('transactionPhoto').value = '';
-      document.getElementById('photoPreview').innerHTML = '';
-  
-document.getElementById('newCustomerEmail').value = '';
-document.getElementById('newCustomerPaymentMode').value = 'cash';
-   
     
-    }
+   
+  async function saveTransaction() {
+  const customerId = document.getElementById('transactionCustomer').value;
+  const amount = parseFloat(document.getElementById('transactionAmount').value);
+  const note = document.getElementById('transactionNote').value.trim();
+  const date = document.getElementById('transactionDate').value;
+  const mode = document.getElementById('transactionMode').value;
+  const type = document.getElementById('saveTransactionBtn').getAttribute('data-type');
+  const photoFile = document.getElementById('transactionPhoto').files[0];
+
+  // YAHAN SE EMAIL WALA HATA DE - YE TRANSACTION ME NAHI AATA
+
+  if (!customerId) {
+    showToast(currentLanguage === 'hi'? 'ग्राहक चुनें' : 'Select customer', 'error');
+    return;
+  }
+
+  if (!amount || amount <= 0) {
+    showToast(currentLanguage === 'hi'? 'सही राशि दर्ज करें' : 'Enter valid amount', 'error');
+    return;
+  }
+
+  document.getElementById('loadingSpinner').style.display = 'block';
+
+  // 1. PEHLE CUSTOMER UTHAO
+  const customer = appState.customers.find(c => c.id === customerId);
+  if(!customer){
+    showToast('Customer nahi mila', 'error');
+    return;
+  }
+
+  // 2. PREVIOUS BALANCE SAVE KAR LO
+  const previousBalance = customer.balance;
+
+  // 3. BALANCE UPDATE KARO
+  if (type === 'udhar') {
+    customer.balance += amount;
+  } else {
+    customer.balance -= amount;
+  }
+
+  // 4. TRANSACTION OBJECT BANAO 🔥 YE MISSING THA
+  const transaction = {
+    id: Date.now().toString(),
+    customerId,
+    type,
+    amount,
+    note,
+    date,
+    mode,
+    previousBalance, // RECEIPT KE LIYE ZARURI
+    createdAt: new Date().toISOString()
+  };
+
+  appState.transactions.push(transaction);
+
+  // 5. PHOTO SAVE
+  if (photoFile) {
+    await savePhoto(transaction.id, photoFile, note);
+  }
+
+  saveData();
+  updateUI();
+
+  document.getElementById('loadingSpinner').style.display = 'none';
+
+  closeModal('addTransactionModal');
+  showToast(currentLanguage === 'hi'? 'लेन-देन सेव हो गया' : 'Transaction saved');
+
+  // 6. FORM CLEAR
+  document.getElementById('transactionAmount').value = '';
+  document.getElementById('transactionNote').value = '';
+  document.getElementById('transactionPhoto').value = '';
+  document.getElementById('photoPreview').innerHTML = '';
+}
 
     // ==================== CUSTOMER DETAILS ====================
     function viewCustomer(customerId) {
