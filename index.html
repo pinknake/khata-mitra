@@ -2352,9 +2352,9 @@ function renderCustomerTransactions(filter = 'all') {
       `;
     }
 
-    // VARNA UDHAR/JAMA WALA CARD
+    // VARNA UDHAR/JAMA WALA CARD - ONCLICK HATA DIYA
     return `
-      <div class="transaction-item" onclick="openPaymentViewModal('${t.id}')" style="cursor:pointer;">
+      <div class="transaction-item payment-open-btn" data-id="${t.id}" style="cursor:pointer;">
         <div class="transaction-info">
           <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
             <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
@@ -2372,6 +2372,20 @@ function renderCustomerTransactions(filter = 'all') {
         </div>
       </div>
     `;
+  }).join(''); // 🔥 YE JOIN ZAROORI HAI
+
+  // CLICK LISTENER LAGAO - JOIN KE BAAD
+  document.querySelectorAll('.payment-open-btn').forEach(btn => {
+    btn.onclick = function() {
+      const id = this.getAttribute('data-id');
+      showToast('Khul rahi...', 'success'); // Test toast
+      openPaymentViewModal(id);
+    };
+  });
+  
+} // FUNCTION BAND
+  
+    
 // 1. CONTENT BHARNE WALA
 function viewPayment(transactionId) {
   try {
