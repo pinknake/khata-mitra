@@ -3008,29 +3008,83 @@ function exportCustomerPDF() {
     }
 
     function shareOnWhatsApp() {
-      const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
-      const customer = appState.customers.find(c => c.id === customerId);
-      
-      if (!customer) return;
-      
-      const transactions = appState.transactions
-        .filter(t => t.customerId === customerId)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-      
-      let message = `*${customer.name}* का खाता विवरण\n`;
-      message += `📞 ${customer.phone || 'नंबर नहीं'}\n`;
-      message += `💰 बैलेंस: ₹${Math.abs(customer.balance)} ${customer.balance >= 0 ? '(लेना है)' : '(देना है)'}\n\n`;
-      message += `📝 लेन-देन:\n`;
-      
-      transactions.forEach(t => {
-        message += `${formatDate(t.date)}: ${t.type === 'udhar' ? 'उधार दिया' : 'जमा लिया'} ₹${t.amount}`;
-        if (t.note) message += ` (${t.note})`;
-        message += '\n';
+  try {
+    const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
+    const customer = appState.customers.find(c => c.id === customerId);
+    
+    if (!customer) throw new Error('Customer nahi mila');
+
+    const companyName = document.getElementById('companyName')?.value || 'Khata Mitra';
+    
+    const transactions = appState.transactions
+      .filter(t => t.customerId === customerId)
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    let totalGiven = 0, totalReceived = 0;
+    transactions.forEach(t => {
+      if (t.type === 'udhar') totalGiven += Number(t.amount);
+      else totalReceived += Number(t.amount);
+    });
+
+    // 1. HEADER
+    let message = `*${companyName}*\n`;
+    message += `*${customer.name}* का खाता विवरण\n`;
+    message += `━━━━━━━━━━━━━━━━━━\n\n`;
+    
+    // 2. CUSTOMER FULL DETAILS
+    message += `👤 *नाम:* ${customer.name}\n`;
+    if(customer.phone) message += `📞 *मोबाइल:* ${customer.phone}\n`;
+    if(customer.address) message += `🏠 *पता:* ${customer.address}\n`;
+    if(customer.email) message += `📧 *Email:* ${customer.email}\n`;
+    if(customer.gst) message += `📄 *GST:* ${customer.gst}\n`;
+    if(customer.pan) message += `🪪 *PAN:* ${customer.pan}\n`;
+    if(customer.vehicle) message += `🚗 *Vehicle:* ${customer.vehicle}\n`;
+    message += `\n`;
+
+    // 3. BALANCE BOX
+    let balanceText = customer.balance >= 0? 'लेना है' : 'देना है';
+    let balanceEmoji = customer.balance >= 0? '🔴' : '🟢';
+    message += `${balanceEmoji} *वर्तमान बैलेंस:* ₹${Math.abs(Number(customer.balance || 0)).toFixed(2)} (${balanceText})\n`;
+    message += `💸 *कुल उधार दिया:* ₹${totalGiven.toFixed(2)}\n`;
+    message += `💰 *कुल जमा मिला:* ₹${totalReceived.toFixed(2)}\n\n`;
+    message += `━━━━━━━━━━━━━━━━━━\n\n`;
+
+    // 4. TRANSACTION HISTORY
+    message += `📝 *लेन-देन का विवरण:*\n\n`;
+    
+    if(transactions.length === 0){
+      message += `कोई लेन-देन नहीं है\n`;
+    } else {
+      // Last 15 transactions only, warna WhatsApp me bahut lamba ho jayega
+      transactions.slice(0, 15).forEach(t => {
+        let typeText = t.type === 'udhar'? '🔴 उधार दिया' : '🟢 जमा लिया';
+        message += `${formatDate(t.date)} | ${typeText}\n`;
+        message += `राशि: ₹${Number(t.amount).toFixed(2)}`;
+        if (t.note) message += ` | नोट: ${t.note}`;
+        message += '\n\n';
       });
       
-      const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
-      window.open(url, '_blank');
+      if(transactions.length > 15){
+        message += `...और ${transactions.length - 15} लेन-देन\n`;
+      }
     }
+    
+    // 5. FOOTER
+    message += `━━━━━━━━━━━━━━━━━━\n`;
+    message += `रिपोर्ट दिनांक: ${new Date().toLocaleDateString('en-IN')}\n`;
+    message += `Powered by ${companyName}`;
+    
+    // APP CRATER KE LIYE _system USE KARO
+    const url = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(url, '_system'); // _blank ki jagah _system
+    
+    showToast('WhatsApp khul raha hai...', 'success');
+
+  } catch(err) {
+    console.error(err);
+    showErrorPopup('Error', err.message);
+  }
+}
 
     function showNotifications() {
       showToast(currentLanguage === 'hi' ? 'कोई नई सूचना नहीं' : 'No new notifications', 'info');
