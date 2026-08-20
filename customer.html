@@ -930,7 +930,7 @@
   <div class="modal-content" style="max-width: 500px;">
     <div class="modal-header">
       <h3 data-hi="पेमेंट रसीद" data-en="Payment Receipt">पेमेंट रसीद</h3>
-      <button class="close-btn" onclick="closeModal('paymentViewModal')">&times;</button>
+      <button class="close-btn" onclick="closePaymentViewModal()">&times;</button> <!-- YE CHANGE -->
     </div>
     <div id="paymentViewContent"></div>
     
@@ -2354,7 +2354,7 @@ function renderCustomerTransactions(filter = 'all') {
 
     // VARNA UDHAR/JAMA WALA CARD
     return `
-      <div class="transaction-item" onclick="viewPayment('${t.id}')" style="cursor:pointer;">
+      <div class="transaction-item" onclick="openPaymentViewModal(t.id)" style="cursor:pointer;">
         <div class="transaction-info">
           <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
             <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
@@ -2374,6 +2374,7 @@ function renderCustomerTransactions(filter = 'all') {
     `;
   }).join('');
 }
+
   
 function viewPayment(transactionId) {
   const t = appState.transactions.find(x => x.id === transactionId);
@@ -2424,6 +2425,26 @@ function viewPayment(transactionId) {
   
   document.getElementById('paymentViewModal').style.display = 'flex';
 }
+
+// PAYMENT RECEIPT KHOLNE KE LIYE
+function openPaymentViewModal(transactionId) {
+  viewPayment(transactionId); // Tera purana function call hoga
+  document.getElementById('paymentViewModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden'; // Scroll band
+}
+
+// PAYMENT RECEIPT BAND KARNE KE LIYE
+function closePaymentViewModal() {
+  document.getElementById('paymentViewModal').style.display = 'none';
+  document.body.style.overflow = 'auto'; // Scroll wapas
+}
+  
+  // Bahar click pe payment modal band
+window.addEventListener('click', function(e){
+  if(e.target.id === 'paymentViewModal'){
+    closePaymentViewModal();
+  }
+});
   
     // ==================== PDF EXPORT ====================
     function exportCustomerPDF() {
