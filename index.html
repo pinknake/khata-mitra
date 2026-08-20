@@ -2632,168 +2632,173 @@ function showErrorPopup(title, msg) {
 }
 
   
-    // ==================== PDF EXPORT ====================
-    function exportCustomerPDF() {
-      const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
-      const customer = appState.customers.find(c => c.id === customerId);
-      
-      if (!customer) return;
-      
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      
-      // Colors
-      const primaryColor = [106, 27, 154]; // #6a1b9a
-      const successColor = [46, 196, 182]; // #2ec4b6
-      const dangerColor = [229, 57, 53]; // #e53935
-      
-      // Header
-      doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-      doc.rect(0, 0, 210, 40, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(22);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Khata Statement', 105, 20, { align: 'center' });
-      
-      // Customer Info
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(16);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Customer Details', 20, 55);
-      
-      doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Name: ${customer.name}`, 20, 65);
-      doc.text(`Phone: ${customer.phone || 'N/A'}`, 20, 72);
-      doc.text(`Address: ${customer.address || 'N/A'}`, 20, 79);
-      
-      // Balance
-      const balanceY = 95;
-      doc.setFillColor(customer.balance >= 0 ? dangerColor[0] : successColor[0], 
-                      customer.balance >= 0 ? dangerColor[1] : successColor[1], 
-                      customer.balance >= 0 ? dangerColor[2] : successColor[2]);
-      doc.roundedRect(20, balanceY - 5, 170, 25, 5, 5, 'F');
-      
-      doc.setTextColor(255, 255, 255);
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`Current Balance: ₹${Math.abs(customer.balance)} ${customer.balance >= 0 ? '(To Receive)' : '(To Pay)'}`, 105, balanceY + 10, { align: 'center' });
-      
-      // Transactions Table
-      doc.setTextColor(0, 0, 0);
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Transaction History', 20, 135);
-      
-      const transactions = appState.transactions
-        .filter(t => t.customerId === customerId)
-        .sort((a, b) => new Date(b.date) - new Date(a.date));
-      
-      let y = 150;
-      
-      // Table Header
-      doc.setFillColor(240, 240, 240);
-      doc.rect(20, y - 5, 170, 10, 'F');
-      
-      doc.setFontSize(10);
-      doc.setFont('helvetica', 'bold');
-      doc.text('Date', 25, y);
-      doc.text('Type', 55, y);
-      doc.text('Description', 85, y);
-      doc.text('Amount', 160, y);
-      
-      y += 10;
-      
-      // Table Rows
-      doc.setFont('helvetica', 'normal');
-      let totalGiven = 0, totalReceived = 0;
-      
-      transactions.forEach((t, index) => {
-        if (y > 270) {
-          doc.addPage();
-          y = 30;
-          
-          // Header on new page
-          doc.setFillColor(240, 240, 240);
-          doc.rect(20, y - 5, 170, 10, 'F');
-          
-          doc.setFont('helvetica', 'bold');
-          doc.text('Date', 25, y);
-          doc.text('Type', 55, y);
-          doc.text('Description', 85, y);
-          doc.text('Amount', 160, y);
-          
-          y += 10;
-          doc.setFont('helvetica', 'normal');
-        }
-        
-        const amount = t.amount;
-        if (t.type === 'udhar') {
-          totalGiven += amount;
-          doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
-        } else {
-          totalReceived += amount;
-          doc.setTextColor(successColor[0], successColor[1], successColor[2]);
-        }
-        
-        doc.text(formatDate(t.date), 25, y);
-        doc.text(t.type === 'udhar' ? 'Given' : 'Received', 55, y);
-        
-        // Truncate long description
-        let desc = t.note || '-';
-        if (desc.length > 20) desc = desc.substring(0, 18) + '...';
-        doc.text(desc, 85, y);
-        
-        doc.text(`₹${amount}`, 170, y, { align: 'right' });
-        
-        y += 8;
-      });
-      
-      // Summary
-      y += 10;
-      doc.setDrawColor(200, 200, 200);
-      doc.line(20, y, 190, y);
-      y += 10;
-      
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(0, 0, 0);
-      doc.text('Summary:', 20, y);
-      y += 8;
-      
-      doc.setFont('helvetica', 'normal');
-      doc.text(`Total Given:`, 20, y);
-      doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
-      doc.text(`₹${totalGiven}`, 100, y);
-      
-      y += 8;
-      doc.setTextColor(0, 0, 0);
-      doc.text(`Total Received:`, 20, y);
-      doc.setTextColor(successColor[0], successColor[1], successColor[2]);
-      doc.text(`₹${totalReceived}`, 100, y);
-      
-      y += 8;
-      doc.setTextColor(0, 0, 0);
-      doc.text(`Net Balance:`, 20, y);
-      doc.setTextColor(customer.balance >= 0 ? dangerColor[0] : successColor[0], 
-                      customer.balance >= 0 ? dangerColor[1] : successColor[1], 
-                      customer.balance >= 0 ? dangerColor[2] : successColor[2]);
-      doc.setFont('helvetica', 'bold');
-      doc.text(`₹${Math.abs(customer.balance)} ${customer.balance >= 0 ? '(To Receive)' : '(To Pay)'}`, 100, y);
-      
-      // Footer
-      const totalPages = doc.internal.getNumberOfPages();
-      for (let i = 1; i <= totalPages; i++) {
-        doc.setPage(i);
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        doc.text(`Generated on ${new Date().toLocaleDateString()} - Page ${i} of ${totalPages}`, 105, 290, { align: 'center' });
+    
+      // ==================== PDF EXPORT ====================
+function exportCustomerPDF() {
+  try {
+    const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
+    const customer = appState.customers.find(c => c.id === customerId);
+
+    if (!customer) throw new Error('Customer nahi mila');
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Colors
+    const primaryColor = [106, 27, 154]; // #6a1b9a
+    const successColor = [46, 196, 182]; // #2ec4b6
+    const dangerColor = [229, 57, 53]; // #e53935
+
+    const companyName = document.getElementById('companyName')?.value || 'Khata Mitra';
+
+    // Header
+    doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+    doc.rect(0, 0, 210, 35, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(20);
+    doc.setFont('helvetica', 'bold');
+    doc.text(companyName, 105, 15, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text('KHATA STATEMENT', 105, 25, { align: 'center' });
+
+    // Customer Info - FULL DETAILS
+    let y = 50;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Customer Details', 20, y);
+    y += 10;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Name: ${customer.name}`, 20, y);
+    doc.text(`Mobile: ${customer.phone || '-'}`, 110, y); y += 7;
+    doc.text(`Address: ${customer.address || '-'}`, 20, y);
+    doc.text(`Email: ${customer.email || '-'}`, 110, y); y += 7;
+    doc.text(`GST No: ${customer.gst || '-'}`, 20, y);
+    doc.text(`PAN No: ${customer.pan || '-'}`, 110, y); y += 7;
+    doc.text(`Vehicle: ${customer.vehicle || '-'}`, 20, y);
+    doc.text(`Bank: ${customer.bank || '-'}`, 110, y); y += 12;
+
+    // Transactions
+    const transactions = appState.transactions
+     .filter(t => t.customerId === customerId)
+     .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    let totalGiven = 0, totalReceived = 0;
+    transactions.forEach(t => {
+      if (t.type === 'udhar') totalGiven += Number(t.amount);
+      else totalReceived += Number(t.amount);
+    });
+
+    // Balance Box
+    const balanceY = y;
+    const balanceColor = customer.balance >= 0? dangerColor : successColor;
+    doc.setFillColor(balanceColor[0], balanceColor[1], balanceColor[2]);
+    doc.roundedRect(20, balanceY - 5, 170, 20, 3, 3, 'F');
+
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Current Balance: ₹${Math.abs(Number(customer.balance || 0)).toFixed(2)} ${customer.balance >= 0? '(To Receive)' : '(To Pay)'}`, 105, balanceY + 8, { align: 'center' });
+    y += 35;
+
+    // Summary
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Summary', 20, y); y += 8;
+
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Total Udhar Diya:`, 20, y);
+    doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
+    doc.text(`₹${totalGiven.toFixed(2)}`, 70, y);
+
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Total Jama Mila:`, 110, y);
+    doc.setTextColor(successColor[0], successColor[1], successColor[2]);
+    doc.text(`₹${totalReceived.toFixed(2)}`, 150, y);
+    y += 12;
+
+    // Transactions Table Header
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Transaction History', 20, y);
+    y += 10;
+
+    // Table Header
+    doc.setFillColor(240, 240, 240);
+    doc.rect(20, y - 5, 170, 10, 'F');
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Date', 22, y);
+    doc.text('Type', 45, y);
+    doc.text('Description', 75, y);
+    doc.text('Amount', 165, y, { align: 'right' });
+
+    y += 10;
+
+    // Table Rows
+    doc.setFont('helvetica', 'normal');
+
+    transactions.forEach((t) => {
+      if (y > 270) {
+        doc.addPage();
+        y = 30;
+        doc.setFillColor(240, 240, 240);
+        doc.rect(20, y - 5, 170, 10, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.text('Date', 22, y); doc.text('Type', 45, y);
+        doc.text('Description', 75, y); doc.text('Amount', 165, y, { align: 'right' });
+        y += 10; doc.setFont('helvetica', 'normal');
       }
-      
-      doc.save(`${customer.name.replace(/\s+/g, '_')}_Khata.pdf`);
-      showToast(currentLanguage === 'hi' ? 'PDF डाउनलोड हो रहा है' : 'PDF is downloading');
+
+      const amount = Number(t.amount);
+      if (t.type === 'udhar') {
+        doc.setTextColor(dangerColor[0], dangerColor[1], dangerColor[2]);
+      } else {
+        doc.setTextColor(successColor[0], successColor[1], successColor[2]);
+      }
+
+      doc.text(formatDate(t.date), 22, y);
+      doc.text(t.type === 'udhar'? 'Udhar' : 'Jama', 45, y);
+
+      // Truncate long description
+      let desc = t.note || '-';
+      if (desc.length > 18) desc = desc.substring(0, 16) + '...';
+      doc.text(desc, 75, y);
+
+      doc.text(`₹${amount.toFixed(2)}`, 165, y, { align: 'right' });
+      doc.setTextColor(0, 0, 0);
+      y += 8;
+    });
+
+    if(transactions.length === 0){
+      doc.text('Koi transaction nahi hai', 105, y, { align: 'center' });
     }
 
+    // Footer
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`${companyName} - Generated on ${new Date().toLocaleDateString('en-IN')} - Page ${i} of ${totalPages}`, 105, 290, { align: 'center' });
+    }
+
+    doc.save(`${customer.name.replace(/\s+/g, '_')}_Khata.pdf`);
+    showToast('PDF Download ho gaya', 'success');
+
+  } catch(err) {
+    console.error(err);
+    showErrorPopup('PDF Error', err.message);
+  }
+}
+  
     function printCustomerDetail() {
   try {
     const customerId = document.getElementById('customerDetailModal').getAttribute('data-customer-id');
