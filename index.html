@@ -2483,66 +2483,99 @@ function renderCustomerTransactions(filter = 'all') {
 
 function viewPayment(transactionId) {
   try {
-    // 1. DATA NIKALO
+    // 1. DATA
     const t = appState.transactions.find(x => x.id === transactionId);
     const customer = appState.customers.find(c => c.id === t?.customerId);
-
     if(!t ||!customer) throw new Error('Data nahi mila');
 
     const company = appState.company.name || 'KhataMitra';
+    const companyAddress = appState.company.address || '';
+    const companyPhone = appState.company.phone || '';
     let typeText = t.type === 'udhar'? 'उधार दिया' : 'जमा लिया';
+    let amountColor = t.type === 'udhar'? '#d32f2f' : '#2e7d32';
 
-    // 2. RECEIPT KA HTML BANAO - SIMPLE RAKHA
-    let receiptHTML = `
-      <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:10px;">
-        <h2 style="margin:0;">${company}</h2>
-        <p style="margin:0;">Payment Receipt</p>
-      </div>
-      <br>
-      <table style="width:100%; font-size:14px;">
-        <tr><td><b>Customer:</b></td><td>${customer.name}</td></tr>
-        <tr><td><b>Mobile:</b></td><td>${customer.phone || '-'}</td></tr>
-        <tr><td><b>Address:</b></td><td>${customer.address || '-'}</td></tr>
-        <tr><td><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
-        <tr><td><b>Type:</b></td><td>${typeText}</td></tr>
-        <tr><td colspan="2" style="text-align:center; border:1px dashed #000; padding:8px; font-size:16px; font-weight:bold;">
-          Amount: Rs ${Number(t.amount).toFixed(2)}
-        </td></tr>
-        <tr><td><b>Previous Balance:</b></td><td>Rs ${Number(t.previousBalance || 0).toFixed(2)}</td></tr>
-        <tr><td><b>Current Balance:</b></td><td>Rs ${Number(customer.balance).toFixed(2)}</td></tr>
-        <tr><td><b>Note:</b></td><td>${t.note || '-'}</td></tr>
-        <tr><td><b>Payment Mode:</b></td><td>${t.mode || '-'}</td></tr>
-      </table>
-      <div style="text-align:center; margin-top:20px; font-size:10px;">Powered by Khata Mitra Pro</div>
-    `;
-
-    // 3. FULL HTML BANAO - TERE openBillInBrowser WALE JESA
+    // 2. FULL HTML + CSS + SCRIPT
     let fullHTML = `
+    <!DOCTYPE html>
     <html>
     <head>
-        <title>${company} Receipt</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>${company} - Receipt</title>
         <style>
-            body{font-family:Arial; margin:10px; background:white; max-width:400px; margin:auto;}
-            table td{padding:4px;}
+            *{margin:0; padding:0; box-sizing:border-box;}
+            body{font-family:'Arial', sans-serif; background:#f5f5f5; padding:10px; color:#333;}
+           .receipt{max-width:420px; margin:10px auto; background:#fff; border:1px solid #ddd; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+           .header{background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:#fff; text-align:center; padding:20px 10px;}
+           .header h1{font-size:22px; margin-bottom:4px;}
+           .header p{font-size:12px; opacity:0.9;}
+           .title{background:#f0f0f0; text-align:center; padding:10px; font-weight:bold; font-size:16px; border-bottom:1px solid #ddd;}
+           .content{padding:15px;}
+           .row{display:flex; justify-content:space-between; margin:8px 0; font-size:14px; border-bottom:1px dotted #eee; padding-bottom:6px;}
+           .row:last-child{border:none;}
+           .label{font-weight:600; color:#555;}
+           .amount-box{text-align:center; margin:15px 0; padding:15px; border:2px dashed ${amountColor}; border-radius:6px; background:#fafafa;}
+           .amount-box.amt{font-size:24px; font-weight:bold; color:${amountColor};}
+           .amount-box.type{font-size:12px; color:#666; margin-top:4px;}
+           .footer{text-align:center; padding:15px; font-size:10px; color:#888; border-top:1px solid #eee;}
+           .print-btn{text-align:center; margin:20px 0;}
+           .print-btn button{padding:14px 30px; font-size:16px; background:#4CAF50; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);}
+           .print-btn button:active{background:#45a049;}
+            @media print {
+                body{background:#fff; padding:0;}
+               .receipt{box-shadow:none; border:none;}
+               .print-btn{display:none;}
+            }
         </style>
     </head>
     <body>
-        ${receiptHTML}
-        <div style="text-align:center; margin:20px;">
-            <button onclick="window.print()" style="padding:12px 24px; font-size:16px; background:green; color:white; border:none; border-radius:8px;">Print / Save PDF</button>
+        <div class="receipt">
+            <div class="header">
+                <h1>${company}</h1>
+                <p>${companyAddress}</p>
+                <p>${companyPhone}</p>
+            </div>
+            <div class="title">PAYMENT RECEIPT</div>
+            <div class="content">
+                <div class="row"><span class="label">Receipt No:</span> <span>#${t.id.substring(0,8)}</span></div>
+                <div class="row"><span class="label">Date:</span> <span>${formatDate(t.date)}</span></div>
+                <div class="row"><span class="label">Customer:</span> <span>${customer.name}</span></div>
+                <div class="row"><span class="label">Mobile:</span> <span>${customer.phone || '-'}</span></div>
+                <div class="row"><span class="label">Address:</span> <span>${customer.address || '-'}</span></div>
+
+                <div class="amount-box">
+                    <div class="amt">Rs ${Number(t.amount).toFixed(2)}</div>
+                    <div class="type">${typeText}</div>
+                </div>
+
+                <div class="row"><span class="label">Previous Balance:</span> <span>Rs ${Number(t.previousBalance || 0).toFixed(2)}</span></div>
+                <div class="row"><span class="label">Current Balance:</span> <span>Rs ${Number(customer.balance).toFixed(2)}</span></div>
+                <div class="row"><span class="label">Payment Mode:</span> <span>${t.mode || 'Cash'}</span></div>
+                <div class="row"><span class="label">Note:</span> <span>${t.note || '-'}</span></div>
+            </div>
+            <div class="footer">Thank You! Visit Again<br>Powered by Khata Mitra Pro</div>
         </div>
-        <script>window.onload = function(){ setTimeout(function(){window.print()}, 500); }<\/script>
+
+        <div class="print-btn">
+            <button onclick="window.print()">🖨️ Print / Save PDF</button>
+        </div>
+
+        <script>
+            window.onload = function(){
+                setTimeout(function(){
+                    window.print();
+                }, 600);
+            }
+        <\/script>
     </body>
     </html>`;
-    
-    // 4. BLOB BANAYA - AppCrater me yehi chalta hai
+
+    // 3. BLOB + OPEN
     let blob = new Blob([fullHTML], {type: 'text/html;charset=utf-8'});
     let url = URL.createObjectURL(blob);
-    
-    // 5. BAHAR CHROME ME KHOLEGA - _system IMPORTANT HAI
-    window.open(url, '_system');
+    window.open(url, '_system'); // AppCrater me _system se bahar khulega
+
+    showToast('Receipt khul rahi hai...', 'info');
 
   } catch(err) {
     console.error(err);
