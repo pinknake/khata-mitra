@@ -2325,20 +2325,57 @@ function filterCustomerTx(type) {
 
   function printPaymentReceipt() {
   let content = document.getElementById('paymentViewContent').innerHTML;
-  let w = window.open('', '', 'height=600,width=400');
-  w.document.write('<html><head><title>Payment Receipt</title></head><body>');
-  w.document.write(content);
-  w.document.write('</body></html>');
+  
+  // COMPANY LOGO/CSS BHI SAATH ME DALNA HAI
+  let printHTML = `
+    <html>
+    <head>
+      <title>Payment Receipt</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body { font-family: 'Poppins', sans-serif; margin:0; padding:20px; background:#fff; }
+        * { box-sizing: border-box; }
+        @media print {
+          body { padding: 0; }
+        }
+      </style>
+    </head>
+    <body onload="window.print();">
+      ${content}
+    </body>
+    </html>
+  `;
+
+  // NAYA TAB KHOL
+  let w = window.open('', '_blank');
+  if(!w){
+    showToast('Popup Blocked hai. Isko allow kar do', 'error');
+    return;
+  }
+  w.document.write(printHTML);
   w.document.close();
-  w.print();
 }
 
 function sharePaymentWhatsApp() {
   const txId = document.getElementById('paymentViewModal').getAttribute('data-tx-id');
   const t = appState.transactions.find(x => x.id === txId);
   const customer = appState.customers.find(c => c.id === t.customerId);
-  let msg = `*KhataMitra Receipt*\n\n${t.type === 'udhar' ? 'उधार दिया' : 'जमा लिया'}: ₹${t.amount}\nCustomer: ${customer.name}\nDate: ${formatDate(t.date)}\nNote: ${t.note || '-'}`;
-  window.open(`https://wa.me/91${customer.phone}?text=${encodeURIComponent(msg)}`);
+  
+  let phone = (customer.phone || '').replace(/\D/g,''); // sirf number rakho
+  if(phone.length === 10) phone = '91' + phone; // +91 add
+
+  let typeText = t.type === 'udhar' ? 'उधार दिया' : 'जमा लिया';
+  
+  let msg = `*${document.getElementById('companyName')?.value || 'KhataMitra'} Receipt*\n\n`;
+  msg += `*${typeText}:* ₹${Number(t.amount).toFixed(2)}\n`;
+  msg += `*Customer:* ${customer.name}\n`;
+  msg += `*Mobile:* ${customer.phone}\n`;
+  msg += `*Date:* ${formatDate(t.date)}\n`;
+  msg += `*Note:* ${t.note || '-'}\n`;
+  msg += `*Current Balance:* ₹${Number(customer.balance).toFixed(2)}\n\n`;
+  msg += `_Powered by Khata Mitra Pro_`;
+
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 function renderCustomerTransactions(filter = 'all') {
