@@ -2354,7 +2354,7 @@ function renderCustomerTransactions(filter = 'all') {
 
     // VARNA UDHAR/JAMA WALA CARD
     return `
-      <div class="transaction-item" onclick="openPaymentViewModal(t.id)" style="cursor:pointer;">
+      <div class="transaction-item" onclick="openPaymentViewModal('${t.id}')" style="cursor:pointer;">
         <div class="transaction-info">
           <div class="transaction-icon ${t.type === 'udhar'? 'icon-udhar' : 'icon-jama'}">
             <i class="fas ${t.type === 'udhar'? 'fa-arrow-up' : 'fa-arrow-down'}"></i>
@@ -2372,9 +2372,6 @@ function renderCustomerTransactions(filter = 'all') {
         </div>
       </div>
     `;
-  }).join('');
-}
-
 // 1. CONTENT BHARNE WALA
 function viewPayment(transactionId) {
   try {
