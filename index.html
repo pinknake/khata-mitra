@@ -2390,6 +2390,8 @@ function renderCustomerTransactions(filter = 'all') {
 function viewPayment(transactionId) {
   try {
     showToast('Receipt load ho rahi...', 'success');
+
+  showToast('Company: ' + (appState.settings?.companyName || 'Nahi Mila'), 'success');
     
     const t = appState.transactions.find(x => x.id === transactionId);
     const customer = appState.customers.find(c => c.id === t?.customerId);
