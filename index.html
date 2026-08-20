@@ -1389,30 +1389,19 @@
 
 
     <!-- ===== NEW: CUSTOMER BUSINESS DETAILS ===== -->
-    <div style="background:#f8f9fa; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #e9ecef;">
-      <h4 style="margin:0 0 12px 0; font-size:14px; color:#666;" data-hi="व्यापार विवरण" data-en="Business Details">व्यापार विवरण</h4>
-      
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px;">
-        <div><b data-hi="GST:" data-en="GST:">GST:</b> <span id="detailGST">-</span></div>
-        <div><b data-hi="PAN:" data-en="PAN:">PAN:</b> <span id="detailPAN">-</span></div>
-        <div><b data-hi="ईमेल:" data-en="Email:">ईमेल:</b> <span id="detailEmail">-</span></div>
-        <div><b data-hi="बैंक:" data-en="Bank:">बैंक:</b> <span id="detailBank">-</span></div>
-        <div><b data-hi="वाहन:" data-en="Vehicle:">वाहन:</b> <span id="detailVehicle">-</span></div>
-        <div class="form-group">
-  <label>Customer Email</label>
-  <input type="email" id="newCustomerEmail" class="form-control" placeholder="customer@gmail.com">
+<!-- ===== CUSTOMER BUSINESS DETAILS ===== -->
+<div style="background:#f8f9fa; padding:15px; border-radius:12px; margin-bottom:20px; border:1px solid #e9ecef;">
+  <h4 style="margin:0 0 12px 0; font-size:14px; color:#666;">व्यापार विवरण</h4>
+  
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:13px;">
+    <div><b>GST:</b> <span id="detailGST">-</span></div>
+    <div><b>PAN:</b> <span id="detailPAN">-</span></div>
+    <div><b>ईमेल:</b> <span id="detailEmail">-</span></div> <!-- INPUT HATA, SIRF SPAN -->
+    <div><b>बैंक:</b> <span id="detailBank">-</span></div>
+    <div><b>वाहन:</b> <span id="detailVehicle">-</span></div>
+    <div><b>Payment Mode:</b> <span id="detailPaymentMode">-</span></div> <!-- INPUT HATA -->
+  </div>
 </div>
-<div class="form-group">
-  <label>Preferred Payment Mode</label>
-  <select id="newCustomerPaymentMode" class="form-control">
-    <option value="cash">नकद Cash</option>
-    <option value="upi">UPI</option>
-    <option value="bank">Bank Transfer</option>
-  </select>
-</div>
-        <div><b>Payment Mode:</b> <span id="detailPaymentMode">-</span></div>
-      </div>
-    </div>
     <!-- ===== END ===== -->
 
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
@@ -2416,31 +2405,26 @@ function viewPayment(transactionId) {
     const t = appState.transactions.find(x => x.id === transactionId);
     const customer = appState.customers.find(c => c.id === t?.customerId);
 
-    if(!t) throw new Error(`Transaction nahi mila: ${transactionId}`);
-    if(!customer) throw new Error(`Customer nahi mila: ${t.customerId}`);
+    if(!t || !customer) throw new Error('Data nahi mila');
 
     let isUdhar = t.type === 'udhar';
-
-    // 🔥 SETTINGS PAGE SE DIRECT UTHAO
+    
+    // COMPANY SETTINGS SE
     let companyName = document.getElementById('companyName')?.value || 'Khata Mitra';
     let companyAddress = document.getElementById('companyAddress')?.value || '';
-    let companyMobile = document.getElementById('companyMobile')?.value || document.getElementById('companyPhone')?.value || '';
-    let companyGST = document.getElementById('companyGST')?.value || '';
+    let companyMobile = document.getElementById('companyMobile')?.value || '';
     let companyUPI = document.getElementById('companyUPI')?.value || '';
 
     document.getElementById('paymentViewContent').innerHTML = `
-      <div style="padding:20px; font-family: 'Arial', sans-serif; color:#333; max-width:400px; margin:auto; background:#fff; border:1px dashed #ccc;">
+      <div style="padding:20px; font-family: 'Poppins', sans-serif; color:#333; max-width:400px; margin:auto; background:#fff; border:1px dashed #ccc;">
         
-        <!-- HEADER - COMPANY BRANDING -->
         <div style="text-align:center; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:15px;">
           <h2 style="margin:5px 0; font-size:22px; color:var(--primary);">${companyName}</h2>
           <p style="margin:0; font-size:12px;">${companyAddress}</p>
           ${companyMobile ? `<p style="margin:0; font-size:12px;">Mob: ${companyMobile}</p>` : ''}
-          ${companyGST ? `<p style="margin:0; font-size:12px;">GST: ${companyGST}</p>` : ''}
-          <h3 style="margin:10px 0 0 0; font-size:16px; letter-spacing:1px;">${isUdhar ? 'UDHAAR RECEIPT' : 'PAYMENT RECEIPT'}</h3>
+          <h3 style="margin:10px 0 0 0; font-size:16px;">${isUdhar ? 'UDHAAR RECEIPT' : 'PAYMENT RECEIPT'}</h3>
         </div>
 
-        <!-- AMOUNT BOX -->
         <div style="background:${isUdhar ? '#ffea' : '#eaffea'}; padding:15px; border-radius:10px; text-align:center; margin-bottom:15px; border:1px solid ${isUdhar ? '#f44336' : '#4CAF50'};">
           <div style="font-size:12px;">${isUdhar ? 'UDHAAR DIYA' : 'PAYMENT MILA'}</div>
           <div style="font-size:32px; font-weight:700; color:${isUdhar ? '#f44336' : '#4CAF50'};">
@@ -2448,27 +2432,24 @@ function viewPayment(transactionId) {
           </div>
         </div>
 
-        <!-- CUSTOMER DETAIL -->
+        <!-- CUSTOMER DETAIL WITH NEW FIELDS -->
         <table style="width:100%; font-size:14px; margin-bottom:15px;">
           <tr><td style="padding:4px 0; width:120px;"><b>Customer:</b></td><td>${customer.name}</td></tr>
-          <tr><td style="padding:4px 0;"><b>Mobile:</b></td><td>${customer.phone || '-'}</td></tr>
-          <tr><td style="padding:4px 0;"><b>Address:</b></td><td>${customer.address || '-'}</td></tr>
-          <tr><td style="padding:4px 0;"><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
-          <tr><td style="padding:4px 0;"><b>Receipt No:</b></td><td>#${t.id.slice(-8).toUpperCase()}</td></tr>
-          <tr><td><b>Email:</b></td><td>${customer.email || '-'}</td></tr>
-<tr><td><b>GST:</b></td><td>${customer.gst || '-'}</td></tr>
-<tr><td><b>Vehicle:</b></td><td>${customer.vehicle || '-'}</td></tr>
-<tr><td><b>Pay Mode:</b></td><td>${customer.paymentMode === 'upi' ? 'UPI' : customer.paymentMode === 'bank' ? 'Bank' : 'Cash'}</td></tr>
-          ${t.note ? `<tr><td style="padding:4px 0;"><b>Note:</b></td><td>${t.note}</td></tr>` : ''}
+          <tr><td><b>Mobile:</b></td><td>${customer.phone || '-'}</td></tr>
+          <tr><td><b>Address:</b></td><td>${customer.address || '-'}</td></tr>
+          <tr><td><b>Email:</b></td><td>${customer.email || '-'}</td></tr> 
+          <tr><td><b>GST:</b></td><td>${customer.gst || '-'}</td></tr>
+          <tr><td><b>PAN:</b></td><td>${customer.pan || '-'}</td></tr>
+          <tr><td><b>Vehicle:</b></td><td>${customer.vehicle || '-'}</td></tr>
+          <tr><td><b>Bank:</b></td><td>${customer.bank || '-'}</td></tr>
+          <tr><td><b>Pay Mode:</b></td><td>${customer.paymentMode === 'upi' ? 'UPI' : customer.paymentMode === 'bank' ? 'Bank' : 'Cash'}</td></tr>
+          <tr><td><b>Date:</b></td><td>${formatDate(t.date)}</td></tr>
+          <tr><td><b>Receipt No:</b></td><td>#${t.id.slice(-8).toUpperCase()}</td></tr>
+          ${t.note ? `<tr><td><b>Note:</b></td><td>${t.note}</td></tr>` : ''}
         </table>
 
-        <!-- PAYMENT INFO -->
-        ${companyUPI ? `
-        <div style="border:1px dashed #999; padding:10px; border-radius:8px; text-align:center; margin:15px 0;">
-          <b>Pay via UPI:</b> ${companyUPI}
-        </div>` : ''}
+        ${companyUPI ? `<div style="border:1px dashed #999; padding:10px; border-radius:8px; text-align:center; margin:15px 0;"><b>Pay via UPI:</b> ${companyUPI}</div>` : ''}
 
-        <!-- CURRENT BALANCE -->
         <div style="border-top:1px dashed #999; padding-top:10px; margin-top:10px; font-size:14px;">
           <div style="display:flex; justify-content:space-between;">
             <span><b>Previous Balance:</b></span>
@@ -2480,23 +2461,17 @@ function viewPayment(transactionId) {
           </div>
         </div>
 
-        <!-- FOOTER -->
         <div style="text-align:center; margin-top:20px; padding-top:10px; border-top:1px dashed #999; font-size:11px;">
-          <p style="margin:5px 0;">Thank you! Visit Again</p>
-          <p style="margin:5px 0;">Powered by Khata Mitra Pro</p>
+          <p>Thank you! Visit Again</p>
+          <p>Powered by Khata Mitra Pro</p>
         </div>
-
       </div>
     `;
     
-    showToast('Receipt Ready ✅', 'success');
-    
   } catch(err) {
     showErrorPopup('Receipt Error', err.message);
-    showToast('Error: ' + err.message, 'error');
   }
 }
-
 
 // 2. KHOLNE WALA
 function openPaymentViewModal(transactionId) {
