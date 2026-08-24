@@ -12,10 +12,45 @@
   
   <!-- Chart.js for Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+  <!-- 👇 FIREBASE - NAYA ADDED - YE ZARURI HAI 👇 -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    // 👇 APNI FIREBASE CONFIG YAHAN PASTE KAR 👇
+    const firebaseConfig = {
+      apiKey: "AIzaSyXXXX-TERI-KEY",
+      authDomain: "khatamitra-xxxxx.firebaseapp.com",
+      projectId: "khatamitra-xxxxx",
+      storageBucket: "khatamitra-xxxxx.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "1:123456789:web:abcdef"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    window.fb_db = db;
+    window.fb_doc = doc;
+    window.fb_setDoc = setDoc;
+    window.fb_getDoc = getDoc;
+
+    signInAnonymously(auth).catch(e => console.log("Firebase auth error", e));
+
+    onAuthStateChanged(auth, (user) => {
+      if(user){
+        window.currentUserId = user.uid;
+        if(window.loadFromFirebase) window.loadFromFirebase();
+      }
+    });
+  </script>
+
+  <!-- Ads (tera wala) -->
   <script>(function(s){s.dataset.zone='11370318',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
    <style>
     * {
@@ -1682,13 +1717,13 @@ function openBillModal() {
     updateUI();
 }
   
-// Load data from localStorage
-function loadData() {
-  const saved = localStorage.getItem('khataMitraPro'); // PURANA WALA HI RAKHA
+// ==================== LOAD + SAVE - FIREBASE + LOCAL ====================
+async function loadData() {
+  // 1. Pehle local se fast load (app jaldi khule)
+  const saved = localStorage.getItem('khataMitraPro');
   if (saved) {
     try {
       let loadedData = JSON.parse(saved);
-      // Agar company nahi hai to bana do
       if(!loadedData.company) loadedData.company = { name: '', address: '', gst: '', pan: '', bank: '', upi: '' };
       appState = loadedData;
     } catch (e) { console.error('Error loading data', e); }
@@ -1697,13 +1732,46 @@ function loadData() {
   if (appState.customers.length === 0) { initDemoData(); }
   if (appState.settings.language) { setLanguage(appState.settings.language); }
   
-  loadSettings(); // SETTINGS LOAD
+  loadSettings();
   updateUI();
+
+  // 2. Fir Firebase se check (agar cloud me naya data hai to)
+  try {
+    if(window.currentUserId && window.fb_db){
+      const snap = await window.fb_getDoc(window.fb_doc(window.fb_db, "users", window.currentUserId));
+      if(snap.exists()){
+        let cloudData = snap.data();
+        // Agar cloud me data hai to wahi final hai
+        if(cloudData.customers){
+          appState = cloudData;
+          if(!appState.company) appState.company = { name: '', address: '', gst: '', pan: '', bank: '', upi: '' };
+          localStorage.setItem('khataMitraPro', JSON.stringify(appState));
+          updateUI();
+          console.log("☁️ Cloud se restore ho gaya");
+        }
+      }
+    }
+  } catch(e){ console.log("Cloud load error", e); }
 }
 
-// Save data to localStorage
-function saveData() {
-  localStorage.setItem('khataMitraPro', JSON.stringify(appState)); // PURANA WALA HI
+// Firebase ke liye alag function taaki head se call ho sake
+window.loadFromFirebase = loadData;
+
+// Save data to localStorage + Firebase
+async function saveData() {
+  try{
+    localStorage.setItem('khataMitraPro', JSON.stringify(appState));
+    
+    // Firebase me bhi save
+    if(window.currentUserId && window.fb_db){
+      await window.fb_setDoc(
+        window.fb_doc(window.fb_db, "users", window.currentUserId), 
+        { ...appState, lastUpdated: new Date().toISOString() }
+      );
+      let el = document.getElementById('backupStatus');
+      if(el) el.innerText = '☁️ Backup: ' + new Date().toLocaleTimeString();
+    }
+  } catch(e){ console.log("Save error", e); }
 }
 
 function initDemoData() {
@@ -1715,7 +1783,6 @@ function initDemoData() {
   ];
   saveData();
 }
-  
 // ==================== SETTINGS FUNCTIONS ====================
 function loadSettings() {
     document.getElementById('companyName').value = appState.company.name || '';
@@ -3161,121 +3228,7 @@ function autoBackupToFile() {
   localStorage.setItem('lastAutoBackup', new Date().toISOString());
   showToast(currentLanguage === 'hi'? 'Auto backup ho gaya' : 'Auto backup done');
 }
-    // ==================== INITIALIZATION ====================
-    document.addEventListener('DOMContentLoaded', () => {
-      loadData();
-      
-      // Set up event listeners
-      document.getElementById('reportMonth').addEventListener('change', updateReports);
-      document.getElementById('reportYear').addEventListener('change', updateReports);
-      
-      // Close modals when clicking outside
-      window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-          e.target.classList.remove('active');
-        }
-      });
-      
-      // Check for dark mode preference
-      if (appState.settings.darkMode) {
-        document.body.classList.add('dark-mode');
-        document.getElementById('darkModeToggle').classList.replace('fa-moon', 'fa-sun');
-      }
-      
-      // Add APK generation button
-      addAPKButton();
-      
-      // Register service worker for PWA
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => {
-          console.log('Service worker registration failed:', err);
-        });
-      }
-    });
-  </script>
 
-  <!-- jsPDF for PDF export -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  
-  <!-- Service Worker for PWA -->
-  <script>
-    // Simple service worker for offline support
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(err => {
-        console.log('Service worker registration failed');
-      });
-    }
-
-    // ===== FIREBASE LOGIN - APP CREATOR VERSION =====
-const provider = new firebase.auth.GoogleAuthProvider();
-let currentUser = null;
-
-// Page load hote hi check karega redirect se wapas aaya ya nahi
-firebase.auth().getRedirectResult().then((result) => {
-  if (result.user) {
-    currentUser = result.user;
-    showToast('Login ho gaya: ' + currentUser.displayName);
-    cloudRestore();
-    updateLoginButton();
-  }
-}).catch((error) => {
-  showToast('Login Error: ' + error.message, 'error');
-});
-
-firebase.auth().onAuthStateChanged(user => {
-  currentUser = user;
-  updateLoginButton();
-  if(user) cloudRestore(); // Login hai to data le aa
-});
-
-function updateLoginButton(){
-  const btn = document.getElementById('loginBtn');
-  if(currentUser){
-    btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${currentUser.displayName} - Logout`;
-    btn.onclick = googleLogout;
-    btn.className = "btn btn-outline";
-  } else {
-    btn.innerHTML = `<i class="fab fa-google"></i> Google se Login`;
-    btn.onclick = googleLogin;
-    btn.className = "btn btn-primary";
-  }
-}
-
-function googleLogin() { 
-  firebase.auth().signInWithRedirect(provider); // Yahi change hai
-}
-
-function googleLogout() { 
-  firebase.auth().signOut().then(()=>{ 
-    showToast('Logout ho gaya');
-    location.reload(); 
-  }); 
-}
-
-function cloudBackup() {
-  if(!currentUser) return showToast('Pehle login karo', 'error');
-  firebase.database().ref('users/' + currentUser.uid).set(appState);
-  showToast('Cloud backup ho gaya');
-}
-
-function cloudRestore() {
-  if(!currentUser) return;
-  firebase.database().ref('users/' + currentUser.uid).once('value').then(snapshot => {
-    if(snapshot.exists()) {
-      appState = snapshot.val();
-      saveData();
-      updateUI();
-      showToast('Data restore ho gaya');
-    }
-  });
-}
-
-// Har save ke baad auto backup
-const oldSaveData = saveData;
-saveData = function(){ 
-  oldSaveData(); 
-  if(currentUser && navigator.onLine) cloudBackup(); 
-}
 
 function downloadBillAsImage() {
     if(currentBillItems.length === 0) {
@@ -3537,5 +3490,21 @@ setTimeout(updateProUI, 500);
 
   </script>
 
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    // App start
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      document.getElementById('reportMonth')?.addEventListener('change', updateReports);
+      document.getElementById('reportYear')?.addEventListener('change', updateReports);
+      window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) e.target.classList.remove('active');
+      });
+      if (appState.settings.darkMode) {
+        document.body.classList.add('dark-mode');
+      }
+    });
+  </script>
 </body>
 </html>
