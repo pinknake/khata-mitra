@@ -11,25 +11,24 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-  <!-- FIREBASE COMPAT - GOOGLE LOGIN KE LIYE BEST -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<!-- FIREBASE COMPAT - GOOGLE LOGIN KE LIYE BEST -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-  <script>
-    // 👇 APNI CONFIG YAHAN DAAL - YE DEMO HAI
-    const firebaseConfig = {
-  apiKey: "AIzaSyBbSdkHFFpuWxl0DaXGLmTcAdD3tJv4cjc",
-  authDomain: "khata-mitra-pro.firebaseapp.com",
-  databaseURL: "https://khata-mitra-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "khata-mitra-pro",
-  storageBucket: "khata-mitra-pro.firebasestorage.app",
-  messagingSenderId: "976574519544",
-  appId: "1:976574519544:web:3727fe6a99d499fabd430d",
-  measurementId: "G-NFD0RC6D72"
-};
-    firebase.initializeApp(firebaseConfig);
-  </script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyBbSdkHFFpuWxl0DaXGLmTcAdD3tJv4cjc",
+    authDomain: "khata-mitra-pro.firebaseapp.com",
+    databaseURL: "https://khata-mitra-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "khata-mitra-pro",
+    storageBucket: "khata-mitra-pro.firebasestorage.app",
+    messagingSenderId: "976574519544",
+    appId: "1:976574519544:web:3727fe6a99d499fabd430d",
+    measurementId: "G-NFD0RC6D72"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
 
   <script>(function(s){s.dataset.zone='11370318',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
   <style>
@@ -1174,12 +1173,12 @@
   </button>
   
   
-<div class="chart-container" style="margin-top: 30px;">
+<div class="chart-container" style="margin-top: 30px; border: 1px solid #4285F4;">
   <h3>🔐 Google Cloud Backup</h3>
-  <button id="loginBtn" class="btn btn-primary" onclick="googleLogin()" style="width:100%; margin-bottom:10px;">
+  <button id="loginBtn" class="btn btn-primary" style="width:100%; margin-bottom:10px; background:#4285F4; color:white; border:none; padding:12px; border-radius:8px;">
     <i class="fab fa-google"></i> Google se Login
   </button>
-  <p style="font-size:13px; color:var(--gray);">Login ke baad data auto save hoga</p>
+  <p id="backupStatus" style="font-size:13px; color:var(--gray);">Login karo, data kabhi nahi udega</p>
 </div>
       
     <!-- FAB Button -->
