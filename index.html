@@ -3448,9 +3448,21 @@ setTimeout(updateProUI, 500);
   <div id="firebase-login-box"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  // GOOGLE LOGIN SYSTEM
+  // GOOGLE LOGIN - APPCRATER FIX
   const provider = new firebase.auth.GoogleAuthProvider();
   window.currentUser = null;
+
+  function googleLogin(){
+    // App me hai to bahar Chrome me kholo - andar nahi khulega
+    const isApp = /wv|WebView/i.test(navigator.userAgent);
+    if(isApp){
+      // Bahar browser me kholega
+      window.open(window.location.href, "_blank");
+      showToast('Bahar Chrome me khol ke login karo 🙏');
+      return;
+    }
+    firebase.auth().signInWithRedirect(provider);
+  }
 
   firebase.auth().getRedirectResult().then((result) => {
     if (result.user) {
@@ -3458,30 +3470,25 @@ setTimeout(updateProUI, 500);
       showToast('Login ho gaya: ' + result.user.displayName);
       cloudRestore();
     }
-  });
+  }).catch(e => console.log(e));
 
   firebase.auth().onAuthStateChanged(user => {
     window.currentUser = user;
-    updateLoginBox();
-    if(user) cloudRestore();
-  });
-
-  function updateLoginBox(){
-    const box = document.querySelector('.chart-container'); // tera wala box
-    let btn = document.getElementById('loginBtn');
-    let status = document.getElementById('backupStatus');
+    const btn = document.getElementById('loginBtn');
+    const status = document.getElementById('backupStatus');
     if(!btn) return;
-    if(window.currentUser){
-      btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${window.currentUser.displayName} - Logout`;
-      btn.onclick = () => firebase.auth().signOut().then(()=>{ location.reload(); });
-      btn.style.background = "#333";
-      if(status) status.innerText = "✅ Login hai - Data auto backup ho raha hai";
+    if(user){
+      btn.innerHTML = `<i class="fas fa-check"></i> ${user.displayName}`;
+      btn.style.background = "#34A853";
+      btn.onclick = () => firebase.auth().signOut().then(()=>location.reload());
+      if(status) status.innerText = "✅ Backup ON: " + user.email;
     } else {
       btn.innerHTML = `<i class="fab fa-google"></i> Google se Login`;
-      btn.onclick = () => firebase.auth().signInWithRedirect(provider);
+      btn.style.background = "#4285F4";
+      btn.onclick = googleLogin;
       if(status) status.innerText = "Login karo, data kabhi nahi udega";
     }
-  }
+  });
 
   function cloudRestore(){
     if(!window.currentUser) return;
@@ -3489,20 +3496,16 @@ setTimeout(updateProUI, 500);
       if(snap.exists()){
         let cloud = snap.val();
         if(cloud.customers && cloud.customers.length > 0){
-          // Agar cloud me data zyada naya hai
-          appState = cloud;
-          localStorage.setItem('khataMitraPro', JSON.stringify(appState));
-          updateUI();
-          showToast('☁️ Data restore ho gaya');
+          if(confirm("Cloud me data mila hai, wapas lana hai?")){
+            appState = cloud;
+            localStorage.setItem('khataMitraPro', JSON.stringify(appState));
+            updateUI();
+            showToast('☁️ Data wapas aa gaya');
+          }
         }
       }
     });
   }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    loadData();
-    updateLoginBox();
-  });
 </script>
 </body>
 </html>
