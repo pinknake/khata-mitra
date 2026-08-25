@@ -6,20 +6,18 @@
   <meta name="msvalidate.01" content="6A5216B40BA355ACBFACF5106BAFDD3F" />
   <title>Khata Mitra Pro 💰</title>
   
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Chart.js for Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-  <!-- 👇 FIREBASE - NAYA ADDED - YE ZARURI HAI 👇 -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  <!-- FIREBASE COMPAT - GOOGLE LOGIN KE LIYE BEST -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
+  <script>
+    // 👇 APNI CONFIG YAHAN DAAL - YE DEMO HAI
     const firebaseConfig = {
   apiKey: "AIzaSyBbSdkHFFpuWxl0DaXGLmTcAdD3tJv4cjc",
   authDomain: "khata-mitra-pro.firebaseapp.com",
@@ -30,30 +28,12 @@
   appId: "1:976574519544:web:3727fe6a99d499fabd430d",
   measurementId: "G-NFD0RC6D72"
 };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
-
-    window.fb_db = db;
-    window.fb_doc = doc;
-    window.fb_setDoc = setDoc;
-    window.fb_getDoc = getDoc;
-
-    signInAnonymously(auth).catch(e => console.log("Firebase auth error", e));
-
-    onAuthStateChanged(auth, (user) => {
-      if(user){
-        window.currentUserId = user.uid;
-        if(window.loadFromFirebase) window.loadFromFirebase();
-      }
-    });
+    firebase.initializeApp(firebaseConfig);
   </script>
 
-  <!-- Ads (tera wala) -->
   <script>(function(s){s.dataset.zone='11370318',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
-  
-   <style>
+  <style>
+
     * {
       margin: 0;
       padding: 0;
@@ -1193,16 +1173,10 @@
     <i class="fas fa-cloud-upload-alt"></i> Abhi Backup Karo
   </button>
   
-  <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
-    <p style="font-size:12px; font-weight:600;">Local File Backup (Bina Internet)</p>
-    <div style="display:flex; gap:10px; margin-top:8px;">
-      <button onclick="exportBackup()" class="btn btn-outline" style="flex:1; font-size:12px;"><i class="fas fa-download"></i> Export</button>
-      <label class="btn btn-outline" style="flex:1; font-size:12px; text-align:center; cursor:pointer;">
-        <i class="fas fa-upload"></i> Import
-        <input type="file" accept=".khatamitra,.json" onchange="importBackup(event)" style="display:none;">
-      </label>
-    </div>
-  </div>
+  <div class="chart-container" style="margin-top: 30px;">
+  <h3>🔐 Google Cloud Backup</h3>
+  <button id="loginBtn" class="btn btn-primary" style="width:100%;"><i class="fab fa-google"></i> Google se Login</button>
+  <p id="backupStatus" style="font-size:13px;">Login karo, data kabhi nahi udega</p>
 </div>
       
     <!-- FAB Button -->
@@ -3503,21 +3477,64 @@ setTimeout(updateProUI, 500);
 
   </script>
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <div id="firebase-login-box"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+  // GOOGLE LOGIN SYSTEM
+  const provider = new firebase.auth.GoogleAuthProvider();
+  window.currentUser = null;
 
-  <script>
-    // App start
-    document.addEventListener('DOMContentLoaded', () => {
-      loadData();
-      document.getElementById('reportMonth')?.addEventListener('change', updateReports);
-      document.getElementById('reportYear')?.addEventListener('change', updateReports);
-      window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) e.target.classList.remove('active');
-      });
-      if (appState.settings.darkMode) {
-        document.body.classList.add('dark-mode');
+  firebase.auth().getRedirectResult().then((result) => {
+    if (result.user) {
+      window.currentUser = result.user;
+      showToast('Login ho gaya: ' + result.user.displayName);
+      cloudRestore();
+    }
+  });
+
+  firebase.auth().onAuthStateChanged(user => {
+    window.currentUser = user;
+    updateLoginBox();
+    if(user) cloudRestore();
+  });
+
+  function updateLoginBox(){
+    const box = document.querySelector('.chart-container'); // tera wala box
+    let btn = document.getElementById('loginBtn');
+    let status = document.getElementById('backupStatus');
+    if(!btn) return;
+    if(window.currentUser){
+      btn.innerHTML = `<i class="fas fa-sign-out-alt"></i> ${window.currentUser.displayName} - Logout`;
+      btn.onclick = () => firebase.auth().signOut().then(()=>{ location.reload(); });
+      btn.style.background = "#333";
+      if(status) status.innerText = "✅ Login hai - Data auto backup ho raha hai";
+    } else {
+      btn.innerHTML = `<i class="fab fa-google"></i> Google se Login`;
+      btn.onclick = () => firebase.auth().signInWithRedirect(provider);
+      if(status) status.innerText = "Login karo, data kabhi nahi udega";
+    }
+  }
+
+  function cloudRestore(){
+    if(!window.currentUser) return;
+    firebase.database().ref('users/' + window.currentUser.uid).once('value').then(snap => {
+      if(snap.exists()){
+        let cloud = snap.val();
+        if(cloud.customers && cloud.customers.length > 0){
+          // Agar cloud me data zyada naya hai
+          appState = cloud;
+          localStorage.setItem('khataMitraPro', JSON.stringify(appState));
+          updateUI();
+          showToast('☁️ Data restore ho gaya');
+        }
       }
     });
-  </script>
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadData();
+    updateLoginBox();
+  });
+</script>
 </body>
 </html>
