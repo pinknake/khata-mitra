@@ -12,24 +12,10 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <!-- FIREBASE COMPAT - GOOGLE LOGIN KE LIYE BEST -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBbSdkHFFpuWxl0DaXGLmTcAdD3tJv4cjc",
-    authDomain: "khata-mitra-pro.firebaseapp.com",
-    databaseURL: "https://khata-mitra-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "khata-mitra-pro",
-    storageBucket: "khata-mitra-pro.firebasestorage.app",
-    messagingSenderId: "976574519544",
-    appId: "1:976574519544:web:3727fe6a99d499fabd430d",
-    measurementId: "G-NFD0RC6D72"
-  };
-  firebase.initializeApp(firebaseConfig);
-</script>
-
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  
   <script>(function(s){s.dataset.zone='11370318',s.src='https://n6wxm.com/vignette.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
   <style>
 
@@ -1136,12 +1122,12 @@
 
 </div>
   
-    <div class="chart-container" style="margin-top: 25px; border: 2px solid #4285F4; background: white; padding: 15px; border-radius: 12px;">
-  <h3 style="margin:0 0 10px 0;">🔐 Google Cloud Backup</h3>
-  <button id="loginBtn" onclick="googleLogin()" style="width:100%; background:#4285F4; color:white; padding:12px; border-radius:8px; border:none; font-size:16px; font-weight:bold; cursor:pointer;">
+    <div class="chart-container" style="margin-top: 30px;">
+  <h3>🔐 Google Cloud Backup</h3>
+  <button id="loginBtn" class="btn btn-primary" onclick="googleLogin()" style="width:100%; margin-bottom:10px;">
     G Google se Login
   </button>
-  <p id="backupStatus" style="font-size:13px; color:#666; margin-top:8px; text-align:center;">Login karo, data kabhi nahi udega</p>
+  <p style="font-size:13px; color:var(--gray);">Login ke baad data auto save hoga</p>
 </div>
       
     <!-- FAB Button -->
@@ -3405,48 +3391,67 @@ function adminDeactivatePro() {
 
 setTimeout(updateProUI, 500);
 
+        </script>
 
-  // GOOGLE LOGIN - FINAL
-  const provider = new firebase.auth.GoogleAuthProvider();
-  window.currentUser = null;
+<!-- ===== GOOGLE LOGIN FINAL - WORKING ===== -->
+<script>
+// ===== FIREBASE CONFIG =====
+const firebaseConfig = {
+  apiKey: "AIzaSyBbSdkHFFpuWxl0DaXGLmTcAdD3tJv4cjc",
+  authDomain: "khata-mitra-pro.firebaseapp.com",
+  databaseURL: "https://khata-mitra-pro-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "khata-mitra-pro"
+};
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
-  function googleLogin(){
-    firebase.auth().signInWithRedirect(provider);
+const provider = new firebase.auth.GoogleAuthProvider();
+let currentUser = null;
+
+firebase.auth().getRedirectResult().then((result) => {
+  if (result && result.user) {
+    currentUser = result.user;
+    showToast('Login ho gaya: ' + currentUser.displayName);
+    cloudRestore();
+    updateLoginButton();
   }
+}).catch((error) => {
+  console.log(error);
+  showToast('Login Error: ' + error.message, 'error');
+});
 
-  firebase.auth().onAuthStateChanged(user => {
-    window.currentUser = user;
-    const btn = document.getElementById('loginBtn');
-    const status = document.getElementById('backupStatus');
-    if(!btn) return;
-    if(user){
-      btn.innerHTML = `✅ ${user.displayName}`;
-      btn.style.background = "#34A853";
-      btn.onclick = () => firebase.auth().signOut().then(()=>location.reload());
-      if(status) status.innerText = "✅ Backup ON: " + user.email;
-    } else {
-      btn.innerHTML = `G Google se Login`;
-      btn.style.background = "#4285F4";
-      btn.onclick = googleLogin;
-      if(status) status.innerText = "Login karo, data kabhi nahi udega";
-    }
-  });
+firebase.auth().onAuthStateChanged(user => {
+  currentUser = user;
+  window.currentUser = user;
+  updateLoginButton();
+  if(user) cloudRestore();
+});
 
-  function cloudRestore(){
-    if(!window.currentUser) return;
-    firebase.database().ref('users/' + window.currentUser.uid).once('value').then(snap => {
-      if(snap.exists() && snap.val().customers){
-        if(confirm("Cloud me data mila hai, wapas lana hai?")){
-          appState = snap.val();
-          localStorage.setItem('khataMitraPro', JSON.stringify(appState));
-          location.reload();
-        }
-      }
-    });
+function updateLoginButton(){
+  const btn = document.getElementById('loginBtn');
+  if(!btn) return;
+  if(currentUser){
+    btn.innerHTML = `✅ ${currentUser.displayName} - Logout`;
+    btn.onclick = googleLogout;
+  } else {
+    btn.innerHTML = `G Google se Login`;
+    btn.onclick = googleLogin;
   }
-  firebase.auth().getRedirectResult().then((result) => {
-    if (result && result.user) cloudRestore();
-  });
+}
+
+function googleLogin() { 
+  firebase.auth().signInWithRedirect(provider);
+}
+
+function googleLogout() { 
+  firebase.auth().signOut().then(()=>{ 
+    showToast('Logout ho gaya');
+    location.reload(); 
+  }); 
+}
 </script>
+
+
 </body>
 </html>
