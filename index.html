@@ -1133,36 +1133,6 @@
       <div style="font-size: 24px; font-weight: 700;" id="monthlyJama">₹0</div>
     </div>
   </div>
-
-  <!-- ✅ DATA BACKUP SECTION - CHART KE NICHE -->
-  <div class="chart-container" style="margin-top: 30px;">
-    <h3 style="margin-bottom: 15px;" data-hi="🔐 Data Backup" data-en="🔐 Data Backup">🔐 Data Backup</h3>
-    <p style="font-size: 13px; color: var(--gray); margin-bottom: 15px;"
-       data-hi="अपना data सुरक्षित रखने के लिए backup लें। App delete होने पर भी data वापस ला सकते हैं।"
-       data-en="Take backup to keep your data safe. You can restore even if app is deleted.">
-       अपना data सुरक्षित रखने के लिए backup लें।
-    </p>
-
-    <div style="display: grid; gap: 10px;">
-      <button class="btn btn-primary" onclick="exportBackup()">
-        <i class="fas fa-download"></i> <span data-hi="Backup Export करें" data-en="Export Backup">Backup Export करें</span>
-      </button>
-
-      <!-- App Creator Fix: label use kiya -->
-      <label class="btn btn-outline" for="importFile" style="cursor:pointer; text-align:center;">
-        <i class="fas fa-upload"></i> <span data-hi="Backup Import करें" data-en="Import Backup">Backup Import करें</span>
-      </label>
-      <input type="file" id="importFile" style="display:none" accept=".khatamitra,.json" onchange="importBackup(event)">
-
-      <button class="btn btn-outline" onclick="autoBackupToFile()">
-        <i class="fas fa-sync"></i> <span data-hi="Auto Backup On" data-en="Auto Backup On">Auto Backup On</span>
-      </button>
-    </div>
-  </div>  
-</div>
-        
-
-  
   
 <div class="chart-container" style="margin-top: 30px; border: 1px solid #4285F4;">
   <h3>🔐 Google Cloud Backup</h3>
@@ -3433,30 +3403,15 @@ function adminDeactivatePro() {
 
 setTimeout(updateProUI, 500);
 
-
-  // GOOGLE LOGIN - APPCRATER FIX
+</script>
+    <script>
+  // GOOGLE LOGIN - FINAL
   const provider = new firebase.auth.GoogleAuthProvider();
   window.currentUser = null;
 
   function googleLogin(){
-    // App me hai to bahar Chrome me kholo - andar nahi khulega
-    const isApp = /wv|WebView/i.test(navigator.userAgent);
-    if(isApp){
-      // Bahar browser me kholega
-      window.open(window.location.href, "_blank");
-      showToast('Bahar Chrome me khol ke login karo 🙏');
-      return;
-    }
     firebase.auth().signInWithRedirect(provider);
   }
-
-  firebase.auth().getRedirectResult().then((result) => {
-    if (result.user) {
-      window.currentUser = result.user;
-      showToast('Login ho gaya: ' + result.user.displayName);
-      cloudRestore();
-    }
-  }).catch(e => console.log(e));
 
   firebase.auth().onAuthStateChanged(user => {
     window.currentUser = user;
@@ -3464,12 +3419,12 @@ setTimeout(updateProUI, 500);
     const status = document.getElementById('backupStatus');
     if(!btn) return;
     if(user){
-      btn.innerHTML = `<i class="fas fa-check"></i> ${user.displayName}`;
+      btn.innerHTML = `✅ ${user.displayName}`;
       btn.style.background = "#34A853";
       btn.onclick = () => firebase.auth().signOut().then(()=>location.reload());
       if(status) status.innerText = "✅ Backup ON: " + user.email;
     } else {
-      btn.innerHTML = `<i class="fab fa-google"></i> Google se Login`;
+      btn.innerHTML = `G Google se Login`;
       btn.style.background = "#4285F4";
       btn.onclick = googleLogin;
       if(status) status.innerText = "Login karo, data kabhi nahi udega";
@@ -3479,19 +3434,18 @@ setTimeout(updateProUI, 500);
   function cloudRestore(){
     if(!window.currentUser) return;
     firebase.database().ref('users/' + window.currentUser.uid).once('value').then(snap => {
-      if(snap.exists()){
-        let cloud = snap.val();
-        if(cloud.customers && cloud.customers.length > 0){
-          if(confirm("Cloud me data mila hai, wapas lana hai?")){
-            appState = cloud;
-            localStorage.setItem('khataMitraPro', JSON.stringify(appState));
-            updateUI();
-            showToast('☁️ Data wapas aa gaya');
-          }
+      if(snap.exists() && snap.val().customers){
+        if(confirm("Cloud me data mila hai, wapas lana hai?")){
+          appState = snap.val();
+          localStorage.setItem('khataMitraPro', JSON.stringify(appState));
+          location.reload();
         }
       }
     });
   }
+  firebase.auth().getRedirectResult().then((result) => {
+    if (result && result.user) cloudRestore();
+  });
 </script>
 </body>
 </html>
