@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html><head>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyB5l0bKkM6JX9p...",
+    authDomain: "khata-mitra-pro.firebaseapp.com",
+    databaseURL: "https://khata-mitra-pro-default-rtdb.firebaseio.com",
+    projectId: "khata-mitra-pro",
+    appId: "1:xxx"
+  };
+  firebase.initializeApp(firebaseConfig);
+</script>
+</head><body style="padding:20px;">
+  <h2>Test Google Login</h2>
+  <button id="loginBtn" onclick="googleLogin()" style="padding:15px; background:blue; color:white;">Google Login Test</button>
+  <p id="status"></p>
+<script>
+  const provider = new firebase.auth.GoogleAuthProvider();
+  function googleLogin(){ 
+    document.getElementById('status').innerText = "Opening Google...";
+    firebase.auth().signInWithRedirect(provider); 
+  }
+  firebase.auth().onAuthStateChanged(u=>{
+    if(u) document.getElementById('status').innerText = "✅ Login Ho Gaya: " + u.email;
+  });
+  firebase.auth().getRedirectResult().then(r=>{
+    if(r && r.user) alert("Welcome " + r.user.displayName);
+  }).catch(e=>{ alert(e.message); document.getElementById('status').innerText = e.message; });
+</script>
+</body>
+</html>
